@@ -9,10 +9,12 @@ import {
   type AtlasEntity,
   type AtlasReleaseManifest,
   type ElectricityDataset,
+  type HistoricalContextIndex,
+  type HistoricalPopulationDataset,
   type PopulationDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/world-bank-mvp-2026-09-20-r1');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-20-r2');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -23,6 +25,8 @@ const manifest = readJson<AtlasReleaseManifest & {
 }>('manifest.json');
 const population = readJson<PopulationDataset>('population.json');
 const electricity = readJson<ElectricityDataset>('electricity.json');
+const historicalPopulation = readJson<HistoricalPopulationDataset>('historical-population.json');
+const historicalContext = readJson<HistoricalContextIndex>('historical-context.json');
 const entities = readJson<{ entities: AtlasEntity[] }>('entities.json').entities;
 const sourceRegistry = JSON.parse(
   readFileSync(resolve('data/registry/sources.json'), 'utf8'),
@@ -49,14 +53,71 @@ describe('genuine-data MVP release', () => {
       'population_total',
       'access_to_electricity',
     ]);
+    expect(manifest.metrics[0].available_years[0]).toBe(-9999);
+    expect(manifest.metrics[0].available_years).toContain(1950);
+    expect(manifest.metrics[0].available_years).not.toContain(1951);
     expect(population.years).toEqual(Array.from({ length: 66 }, (_, index) => 1960 + index));
     expect(electricity.years).toEqual(Array.from({ length: 35 }, (_, index) => 1990 + index));
     expect(() => assertSupportedYear(manifest.metrics[1], 2025)).toThrow(RangeError);
   });
 
+  it('publishes exact deep-time world estimates without silently choosing within source ranges', () => {
+    expect(historicalPopulation.observations).toHaveLength(39);
+    const earliest = historicalPopulation.observations[0];
+    expect(earliest).toMatchObject({
+      year: -9999,
+      source_year_label: '10000 BCE',
+      lower: 1_000_000,
+      upper: 10_000_000,
+      status: 'source_disagreement_range',
+      statistical_support: 'world',
+    });
+    expect(historicalPopulation.observations.some((observation) => observation.year === -8999)).toBe(false);
+    expect(historicalPopulation.observations.every((observation) => observation.lower > 0)).toBe(true);
+    expect(
+      historicalPopulation.observations.every(
+        (observation) => observation.upper === null || observation.upper >= observation.lower,
+      ),
+    ).toBe(true);
+  });
+
+  it('publishes changing Cliopatria polity snapshots independently of population', () => {
+    expect(historicalContext.snapshots).toHaveLength(36);
+    expect(historicalContext.snapshots[0]).toMatchObject({ atlas_year: -3399, source_year: -3400 });
+    expect(historicalContext.snapshots.at(-1)).toMatchObject({ atlas_year: 2024, source_year: 2024 });
+    expect(historicalContext.snapshots.every((snapshot) => snapshot.source_year !== 0)).toBe(true);
+    expect(historicalContext.snapshots.every((snapshot) => snapshot.feature_count > 0)).toBe(true);
+    for (let index = 1; index < historicalContext.snapshots.length; index += 1) {
+      expect(historicalContext.snapshots[index].atlas_year).toBeGreaterThan(
+        historicalContext.snapshots[index - 1].atlas_year,
+      );
+    }
+
+    const ancient = readJson<{ excluded_feature_types: string[]; features: Array<{ properties: { name: string } }> }>(
+      historicalContext.snapshots.find((snapshot) => snapshot.source_year === -1000)?.file ?? '',
+    );
+    const medieval = readJson<{ excluded_feature_types: string[]; features: Array<{ properties: { name: string } }> }>(
+      historicalContext.snapshots.find((snapshot) => snapshot.source_year === 1000)?.file ?? '',
+    );
+    expect(ancient.excluded_feature_types).toEqual(['RELATION']);
+    expect(medieval.excluded_feature_types).toEqual(['RELATION']);
+    expect(new Set(ancient.features.map((feature) => feature.properties.name))).not.toEqual(
+      new Set(medieval.features.map((feature) => feature.properties.name)),
+    );
+    const transformation = manifest.transformations.find(
+      (candidate) => candidate.id === 'cliopatria-display-snapshots-v1',
+    );
+    expect(transformation?.parameters.archive_member).toBe('cliopatria_polities_only.geojson');
+    expect(transformation?.parameters.archive_member_sha256).toMatch(/^[a-f0-9]{64}$/);
+  });
+
   it('keeps published release sources and the wider research registry inspectable', () => {
     expect(manifest.source_releases.map((source) => source.id)).toContain('world-bank-wdi-2026-07-13');
     expect(manifest.source_releases.map((source) => source.id)).toContain('natural-earth-v5.1.2');
+    expect(manifest.source_releases.map((source) => source.id)).toContain('cliopatria-v0.2.0');
+    expect(manifest.source_releases.map((source) => source.id)).toContain(
+      'us-census-historical-world-population-2026-09-20',
+    );
     expect(manifest.citations.every((citation) => citation.url.startsWith('https://'))).toBe(true);
     expect(new Set(sourceRegistry.sources.map((source) => source.id)).size).toBe(
       sourceRegistry.sources.length,

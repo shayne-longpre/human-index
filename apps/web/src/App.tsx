@@ -1,5 +1,6 @@
 import {
   aggregatePrevalence,
+  formatAstronomicalYear,
   validatePublishedMetrics,
   type MvpMetricId,
   type PublishedMetric,
@@ -8,6 +9,8 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DataTable } from './components/DataTable';
 import { Inspector } from './components/Inspector';
+import { HistoricalInspector } from './components/HistoricalInspector';
+import { HistoricalPopulationTable } from './components/HistoricalPopulationTable';
 import { Legend } from './components/Legend';
 import { MapView } from './components/MapView';
 import { PopulationBar } from './components/PopulationBar';
@@ -15,9 +18,14 @@ import { PopulationTimeline } from './components/PopulationTimeline';
 import { SourcesPage } from './components/SourcesPage';
 import {
   downloadUrl,
+  historicalPopulationDownloadUrl,
+  loadHistoricalSnapshot,
   loadMetricData,
   loadReleaseBase,
   manifestUrl,
+  resolveHistoricalSnapshot,
+  type HistoricalFeatureCollection,
+  type HistoricalProperties,
   type MetricDataset,
   type ReleaseBase,
 } from './data';
@@ -81,6 +89,10 @@ export function App() {
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [tableOpen, setTableOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [historicalEnabled, setHistoricalEnabled] = useState(true);
+  const [historicalSnapshot, setHistoricalSnapshot] = useState<HistoricalFeatureCollection | null>(null);
+  const [historicalLoading, setHistoricalLoading] = useState(false);
+  const [selectedHistorical, setSelectedHistorical] = useState<HistoricalProperties | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [metricError, setMetricError] = useState<string | null>(null);
 
@@ -94,12 +106,21 @@ export function App() {
         const requestedMetric = loaded.manifest.metrics.find(
           (candidate) => candidate.id === parameters.get('metric'),
         );
-        const requestedYear = Number(parameters.get('year'));
+        const initialMetric = requestedMetric
+          ?? loaded.manifest.metrics.find((candidate) => candidate.id === loaded.manifest.default_view.metric_id)
+          ?? loaded.manifest.metrics[0];
+        const requestedYearParameter = parameters.get('year');
+        const requestedYear = requestedYearParameter === null ? Number.NaN : Number(requestedYearParameter);
         const requestedPlace = parameters.get('place');
+        const releaseYears = loaded.manifest.metrics.flatMap((candidate) => candidate.available_years);
+        const releaseStartYear = Math.min(...releaseYears);
+        const releaseEndYear = Math.max(...releaseYears);
         setRelease(loaded);
-        setMetricId(requestedMetric?.id ?? loaded.manifest.default_view.metric_id);
+        setMetricId(initialMetric.id);
         setYear(
-          Number.isInteger(requestedYear) && loaded.population.years.includes(requestedYear)
+          Number.isInteger(requestedYear)
+            && requestedYear >= releaseStartYear
+            && requestedYear <= releaseEndYear
             ? requestedYear
             : loaded.manifest.default_view.year,
         );
@@ -144,6 +165,33 @@ export function App() {
     return () => { active = false; };
   }, [metricDatasets, metricId, release]);
 
+  const historicalReference = useMemo(
+    () => release ? resolveHistoricalSnapshot(release.historicalContext, year) : null,
+    [release, year],
+  );
+
+  useEffect(() => {
+    setSelectedHistorical(null);
+    if (!historicalEnabled || !historicalReference) {
+      setHistoricalSnapshot(null);
+      setHistoricalLoading(false);
+      return;
+    }
+    let active = true;
+    setHistoricalLoading(true);
+    loadHistoricalSnapshot(historicalReference)
+      .then((snapshot) => {
+        if (active) setHistoricalSnapshot(snapshot);
+      })
+      .catch((cause: unknown) => {
+        if (active) setMetricError(cause instanceof Error ? cause.message : 'Could not load historical context');
+      })
+      .finally(() => {
+        if (active) setHistoricalLoading(false);
+      });
+    return () => { active = false; };
+  }, [historicalEnabled, historicalReference]);
+
   const metric = useMemo(
     () => release?.manifest.metrics.find((candidate) => candidate.id === metricId) ?? null,
     [metricId, release],
@@ -175,10 +223,20 @@ export function App() {
     })));
   }, [currentDataset, metricId, rows, supported]);
 
-  const select = useCallback((code: string) => setSelectedCode(code), []);
-  const allYears = release?.population.years ?? [1960, 2025];
+  const select = useCallback((code: string) => {
+    setSelectedHistorical(null);
+    setSelectedCode(code);
+  }, []);
+  const selectHistorical = useCallback((properties: HistoricalProperties) => {
+    setSelectedCode(null);
+    setSelectedHistorical(properties);
+  }, []);
+  const allYears = metric?.available_years ?? [1960, 2025];
   const firstYear = allYears[0];
   const lastYear = allYears[allYears.length - 1];
+  const timelineIndex = allYears.reduce((nearestIndex, candidate, index) =>
+    Math.abs(candidate - year) < Math.abs(allYears[nearestIndex] - year) ? index : nearestIndex,
+  0);
 
   useEffect(() => {
     if (!playing || !metric) return;
@@ -214,8 +272,13 @@ export function App() {
   const nearestYear = metric.available_years.reduce((nearest, candidate) =>
     Math.abs(candidate - year) < Math.abs(nearest - year) ? candidate : nearest,
   );
-  const download = downloadUrl(metric.id, release.manifest);
+  const deepTimePopulation = metric.id === 'population_total' && year < 1960;
+  const download = deepTimePopulation
+    ? historicalPopulationDownloadUrl(release.manifest)
+    : downloadUrl(metric.id, release.manifest);
   const atlasUrl = `?metric=${metric.id}&year=${year}${selectedCode ? `&place=${selectedCode}` : ''}`;
+  const dateMagnitude = year <= 0 ? 1 - year : year;
+  const dateEra = year <= 0 ? 'BCE' : 'CE';
 
   return (
     <div className="app-shell">
@@ -239,7 +302,7 @@ export function App() {
             <h1>Where people lived.<br />What the evidence can tell us.</h1>
           </div>
           <p>
-            Explore annual population and electricity-access evidence. Missing observations stay
+            Explore population through deep time and annual electricity-access evidence. Missing observations stay
             visible, time is never filled silently, and every value keeps its statistical support.
           </p>
         </section>
@@ -261,13 +324,27 @@ export function App() {
                 >
                   <span className="metric-dot" aria-hidden="true" />
                   {candidate.label}
-                  <small>{candidate.available_years[0]}–{candidate.available_years.at(-1)}</small>
+                  <small>{formatAstronomicalYear(candidate.available_years[0])}–{formatAstronomicalYear(candidate.available_years.at(-1) ?? candidate.available_years[0])}</small>
                 </button>
               ))}
             </div>
-            <div className="release-badge">
-              <span className="release-dot" aria-hidden="true" />
-              Genuine source data
+            <div className="context-controls">
+              <button
+                type="button"
+                className={historicalEnabled ? 'context-toggle context-toggle-active' : 'context-toggle'}
+                aria-pressed={historicalEnabled}
+                onClick={() => {
+                  setHistoricalEnabled((enabled) => !enabled);
+                  setSelectedHistorical(null);
+                }}
+              >
+                <span className="release-dot" aria-hidden="true" />
+                Historical borders & names
+              </button>
+              <div className="release-badge">
+                <span className="release-dot" aria-hidden="true" />
+                Genuine source data
+              </div>
             </div>
           </div>
 
@@ -278,31 +355,52 @@ export function App() {
             year={year}
             valueByCode={valueByCode}
             loading={!currentDataset}
-            caption={view.mapCaption}
-            caution={view.mapCaution}
+            historicalSnapshot={historicalSnapshot}
+            historicalLoading={historicalLoading}
+            historicalEnabled={historicalEnabled}
+            selectedHistoricalId={selectedHistorical?.source_feature_id ?? null}
+            caption={deepTimePopulation ? 'Global population estimate only' : view.mapCaption}
+            caution={deepTimePopulation ? 'No historical population is assigned to these polities.' : view.mapCaution}
             selectedCode={selectedCode}
             onSelect={select}
+            onHistoricalSelect={selectHistorical}
           />
-          <Legend metric={metric} />
+          <Legend metric={metric} unavailable={deepTimePopulation} />
 
-          <div className="date-display" aria-label={`Effective date ${year} CE`}>
-            <span>Effective date</span>
-            <strong>{year}</strong>
-            <em>CE</em>
+          <div className="date-display" aria-label={`Requested date ${formatAstronomicalYear(year)}`}>
+            <span>Requested date</span>
+            <strong>{dateMagnitude}</strong>
+            <em>{dateEra}</em>
           </div>
 
+          {historicalEnabled ? (
+            <div className="historical-status" role="status">
+              <span>Political context</span>
+              <strong>
+                {historicalReference
+                  ? `${formatAstronomicalYear(historicalReference.atlas_year)} · ${historicalReference.feature_count} polities`
+                  : 'No Cliopatria coverage'}
+              </strong>
+            </div>
+          ) : null}
+
           <Inspector
-            row={selectedRow}
+            row={deepTimePopulation ? null : selectedRow}
             metric={metric}
             manifest={release.manifest}
             onClose={() => setSelectedCode(null)}
+          />
+          <HistoricalInspector
+            feature={selectedHistorical}
+            snapshotYear={historicalSnapshot?.atlas_year ?? null}
+            onClose={() => setSelectedHistorical(null)}
           />
         </section>
 
         <section className="time-panel" aria-labelledby="time-title">
           <div className="time-heading">
             <div>
-              <span className="eyebrow">Exact annual observations only</span>
+              <span className="eyebrow">Exact source-supported dates only</span>
               <h2 id="time-title">Time</h2>
             </div>
             <div className="year-controls">
@@ -310,41 +408,57 @@ export function App() {
                 {playing ? 'Pause' : 'Play'}
               </button>
               <label className="year-entry">
-                <span>Requested year</span>
-                <input
-                  type="number"
-                  min={firstYear}
-                  max={lastYear}
-                  value={year}
-                  onChange={(event) => setYear(Number(event.target.value))}
-                />
+                <span>Requested date</span>
+                <span className="era-entry">
+                  <input
+                    type="number"
+                    min="1"
+                    value={dateMagnitude}
+                    onChange={(event) => {
+                      const magnitude = Math.max(1, Math.round(Number(event.target.value)));
+                      setYear(dateEra === 'BCE' ? 1 - magnitude : magnitude);
+                    }}
+                    aria-label="Requested year number"
+                  />
+                  <select
+                    value={dateEra}
+                    onChange={(event) => setYear(event.target.value === 'BCE' ? 1 - dateMagnitude : dateMagnitude)}
+                    aria-label="Requested era"
+                  >
+                    <option>BCE</option>
+                    <option>CE</option>
+                  </select>
+                </span>
               </label>
             </div>
           </div>
           <input
             className="timeline-range"
             type="range"
-            min={firstYear}
-            max={lastYear}
+            min="0"
+            max={allYears.length - 1}
             step="1"
-            value={year}
+            value={timelineIndex}
             onChange={(event) => {
               setPlaying(false);
-              setYear(Number(event.target.value));
+              setYear(allYears[Number(event.target.value)]);
             }}
-            aria-label={`Year, ${year}`}
+            aria-label={`Date, ${formatAstronomicalYear(year)}`}
           />
           <div className="timeline-labels" aria-hidden="true">
-            <span>{firstYear}</span><strong>{year}</strong><span>{lastYear}</span>
+            <span>{formatAstronomicalYear(firstYear)}</span>
+            <strong>{formatAstronomicalYear(year)}</strong>
+            <span>{formatAstronomicalYear(lastYear)}</span>
           </div>
           <p>
-            {metric.label} publishes {metric.available_years[0]}–{metric.available_years.at(-1)}.
-            {' '}No interpolation, extrapolation, or carry-forward is applied.
+            {metric.label} publishes {metric.available_years.length} exact source-supported dates from{' '}
+            {formatAstronomicalYear(metric.available_years[0])} to {formatAstronomicalYear(metric.available_years.at(-1) ?? lastYear)}.
+            {' '}The slider moves only among those dates; no interpolation or carry-forward is applied.
           </p>
           {!supported ? (
             <div className="unsupported-year" role="status">
-              <span>{metric.label} has no published observation series for {year}.</span>
-              <button type="button" onClick={() => setYear(nearestYear)}>Show {nearestYear}</button>
+              <span>{metric.label} has no published observation for {formatAstronomicalYear(year)}.</span>
+              <button type="button" onClick={() => setYear(nearestYear)}>Show {formatAstronomicalYear(nearestYear)}</button>
             </div>
           ) : null}
         </section>
@@ -352,6 +466,8 @@ export function App() {
         {metric.id === 'population_total' ? (
           <PopulationTimeline
             summaries={release.population.summaries}
+            historical={release.historicalPopulation}
+            historicalDownload={historicalPopulationDownloadUrl(release.manifest)}
             year={year}
             entityCount={release.entities.length}
           />
@@ -374,11 +490,15 @@ export function App() {
             <h2 id="method-title">{metric.safe_summary}</h2>
           </div>
           <p>
-            {metric.definition} Values are shown at their World Bank country or territory support.
+            {metric.definition} {deepTimePopulation
+              ? 'Historical values use world support only; political geometry is a separate context layer.'
+              : 'Modern values are shown at their World Bank country or territory support.'}
             {' '}This view must not be interpreted as {metric.prohibited_interpretations.join(', ')}.
           </p>
           <div className="method-actions">
-            <a className="primary-action" href={download} download>Download full series · CSV</a>
+            <a className="primary-action" href={download} download>
+              Download {deepTimePopulation ? 'historical world estimates' : 'full series'} · CSV
+            </a>
             <button type="button" className="secondary-action" onClick={() => setTableOpen((open) => !open)}>
               {tableOpen ? 'Hide evidence table' : 'Open evidence table'}
             </button>
@@ -396,7 +516,14 @@ export function App() {
           </div>
         </section>
 
-        {tableOpen ? <DataTable rows={rows} metric={metric} onSelect={select} /> : null}
+        {tableOpen ? (
+          deepTimePopulation ? (
+            <HistoricalPopulationTable
+              observation={release.historicalPopulation.observations.find((observation) => observation.year === year) ?? null}
+              historicalSnapshot={historicalSnapshot}
+            />
+          ) : <DataTable rows={rows} metric={metric} onSelect={select} />
+        ) : null}
       </main>
       )}
 

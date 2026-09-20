@@ -24,6 +24,11 @@ export interface PublishedMetric {
   data_file: string;
   download_file: string;
   population_universe_id: string;
+  population_universe_periods?: Array<{
+    start_year: number;
+    end_year: number;
+    population_universe_id: string;
+  }>;
   support_type: string;
   display_scale: {
     transform: 'linear' | 'log1p' | 'categorical';
@@ -97,6 +102,24 @@ export interface AtlasReleaseManifest {
     feature_count: number;
     crosswalks: Record<string, unknown>;
   };
+  deep_time_population: {
+    data_file: string;
+    download_file: string;
+    source_release_id: string;
+    statistical_support: 'world';
+    available_years: number[];
+    coverage: string;
+    interpretation: string;
+  };
+  historical_context: {
+    index_file: string;
+    source_release_id: string;
+    coverage: string;
+    purpose: 'display_only_not_population_accounting';
+    snapshot_count: number;
+    selection_policy: string;
+    excluded_feature_types: string[];
+  };
   source_releases: PublishedSourceRelease[];
   alternative_sources: AlternativeSource[];
   transformations: PublishedTransformation[];
@@ -129,6 +152,43 @@ export interface PopulationDataset {
   years: number[];
   observations: PopulationObservation[];
   summaries: PopulationSummary[];
+}
+
+export interface HistoricalPopulationObservation {
+  year: number;
+  source_year_label: string;
+  lower: number;
+  upper: number | null;
+  status: 'point_estimate' | 'source_disagreement_range';
+  source_method: 'historical_estimate_compilation';
+  statistical_support: 'world';
+  estimates: Record<string, { lower: number; upper?: number }>;
+  original_record_locator: string;
+}
+
+export interface HistoricalPopulationDataset {
+  schema_version: string;
+  metric_id: 'population_total';
+  statistical_support: 'world';
+  source_release_id: string;
+  temporal_policy: 'exact_only';
+  observations: HistoricalPopulationObservation[];
+}
+
+export interface HistoricalContextSnapshotReference {
+  atlas_year: number;
+  source_year: number;
+  file: string;
+  feature_count: number;
+}
+
+export interface HistoricalContextIndex {
+  schema_version: string;
+  source_release_id: string;
+  feature_kind: 'political_context_not_statistical_support';
+  selection_policy: string;
+  source_profile: Record<string, unknown>;
+  snapshots: HistoricalContextSnapshotReference[];
 }
 
 export interface ElectricityObservation {

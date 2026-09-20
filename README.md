@@ -11,28 +11,35 @@ This is not a leaderboard of civilizations, a single “progress” score, or a 
 
 **A working first genuine-data development release now exists.**
 
-The application now presents two complete genuine-data dimensions across 217
-nonaggregate World Bank country/territory series:
+The application now presents three genuine-data paths in one timeline:
 
-- annual population totals for 1960–2025; and
+- U.S. Census Bureau world-population estimate ranges at 39 published dates from
+  10,000 BCE through 1950 CE;
+- annual World Bank population totals for 217 nonaggregate country/territory
+  series from 1960–2025; and
 - annual electricity access for every observed source year from 1990–2024,
   summarized with matching annual population weights.
 
-A pinned Natural Earth 1:110m layer places 170 statistical supports on the map;
-unplaced population remains in summaries and the table. Time controls use exact
-observations only. Source responses, published artifacts, hashes, coverage, and
-limitations are recorded in the release manifest and
+A pinned Natural Earth 1:110m layer places 170 modern statistical supports on
+the map. A separately pinned Cliopatria v0.2.0 layer supplies 36 display-only
+historical political snapshots from 3400 BCE through 2024 CE; dragging time
+changes its source-valid borders and names. Historical polygons never receive or
+contribute population totals. Deep-time population remains a global source range,
+and unplaced modern population remains in summaries and the table. Time controls
+use exact observations only. Source responses, published artifacts, hashes,
+coverage, and limitations are recorded in the release manifest and
 `data/registry/source-lock.json`.
 
 The application also includes a dedicated **Sources** page covering both the
 inputs published in the current release and the wider research registry. Atlas
 state is shareable through `metric`, `year`, and `place` URL parameters.
 
-The population series is the pragmatic modern MVP source because it is licensed
-for redistribution and shares the electricity series' statistical geography. UN
-World Population Prospects 2024 is documented as the more detailed direct
-population expansion source. It is not silently merged into this release. HYDE
-3.5 remains blocked for deep-time gridded population pending authorized archive
+The early population view preserves the Census table's disagreement range and
+underlying named estimates; it is not a confidence interval or a gridded
+reconstruction. World Bank population remains the pragmatic modern source because
+it shares the electricity series' statistical geography. UN World Population
+Prospects 2024 is documented as the more detailed modern expansion source. HYDE
+3.5 remains blocked for gridded deep-time population pending authorized archive
 access and artifact-term verification.
 
 ## Run the application

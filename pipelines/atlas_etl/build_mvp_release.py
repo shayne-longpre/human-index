@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import io
 import json
+import zipfile
 from pathlib import Path
-from typing import Any
+from typing import Any, BinaryIO
 
 from .core import InputArtifact, ValidationError, artifact_record, write_json
 from .geography import (
@@ -24,11 +26,24 @@ from .sources.world_bank import (
     WORLD_REFERENCE_CODE,
     WorldBankAdapter,
 )
+from .sources.cliopatria import (
+    SNAPSHOT_SOURCE_YEARS,
+    SOURCE_ID as CLIOPATRIA_SOURCE_ID,
+    SOURCE_LICENSE_URL as CLIOPATRIA_LICENSE_URL,
+    SOURCE_URL as CLIOPATRIA_URL,
+    CliopatriaAdapter,
+)
+from .sources.us_census_population import (
+    SOURCE_ID as HISTORICAL_POPULATION_SOURCE_ID,
+    SOURCE_URL as HISTORICAL_POPULATION_URL,
+    UsCensusHistoricalPopulationAdapter,
+)
 
 
 RETRIEVED_ON = "2026-09-20"
-RELEASE_ID = "world-bank-mvp-2026-09-20-r1"
+RELEASE_ID = "atlas-mvp-2026-09-20-r2"
 UNIVERSE_ID = "world-bank-nonaggregate-economies-v1"
+CLIOPATRIA_GEOMETRY_MEMBER = "cliopatria_polities_only.geojson"
 
 
 def _csv_bytes(rows: list[dict[str, Any]], fields: list[str]) -> bytes:
@@ -38,6 +53,13 @@ def _csv_bytes(rows: list[dict[str, Any]], fields: list[str]) -> bytes:
     for row in rows:
         writer.writerow({field: row[field] for field in fields})
     return output.getvalue().encode("utf-8")
+
+
+def _stream_sha256(handle: BinaryIO) -> str:
+    digest = hashlib.sha256()
+    while chunk := handle.read(1024 * 1024):
+        digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _metric_definition(metric_id: str, years: list[int], data_file: str, download: str) -> dict[str, Any]:
@@ -52,19 +74,33 @@ def _metric_definition(metric_id: str, years: list[int], data_file: str, downloa
     if metric_id == "population_total":
         return {
             **shared,
+            "population_universe_id": "date-specific-population-universe-v1",
+            "population_universe_periods": [
+                {
+                    "start_year": years[0],
+                    "end_year": 1950,
+                    "population_universe_id": "us-census-historical-world-v1",
+                },
+                {
+                    "start_year": 1960,
+                    "end_year": 2025,
+                    "population_universe_id": UNIVERSE_ID,
+                },
+            ],
             "id": metric_id,
             "label": "Population",
             "taxonomy_ids": ["population_and_settlement"],
-            "indicator": POPULATION_INDICATOR,
+            "indicator": f"U.S. Census historical comparison / World Bank {POPULATION_INDICATOR}",
             "aggregation_kind": "population_total",
             "unit": "people",
-            "definition": "Resident population total for the statistical territory and year.",
+            "support_type": "date_specific_world_or_country_territory",
+            "definition": "Global historical population estimate or range through 1950; resident territorial population total from 1960 onward.",
             "display_scale": {
                 "transform": "log1p",
                 "fixed_domain": [10_000, 2_000_000_000],
                 "scale_version": "population-country-total-v1",
             },
-            "safe_summary": "Population represented by the declared World Bank statistical universe.",
+            "safe_summary": "Published population evidence at its date-specific world or territorial support.",
             "prohibited_interpretations": [
                 "local population density",
                 "gridded settlement reconstruction",
@@ -127,16 +163,54 @@ def build(args: argparse.Namespace) -> None:
             "2026-09-19",
             "public-domain",
         ),
+        InputArtifact(
+            "us_census_historical_world_population",
+            args.historical_population,
+            HISTORICAL_POPULATION_URL,
+            RETRIEVED_ON,
+            "U.S. government public data; underlying estimates attributed in source table",
+        ),
+        InputArtifact(
+            "cliopatria_v0_2_0_archive",
+            args.cliopatria_archive,
+            CLIOPATRIA_URL,
+            RETRIEVED_ON,
+            "CC-BY-4.0",
+        ),
+        InputArtifact(
+            "cliopatria_v0_2_0_license",
+            args.cliopatria_license,
+            CLIOPATRIA_LICENSE_URL,
+            RETRIEVED_ON,
+            "CC-BY-4.0",
+        ),
     ]
     for artifact in inputs:
         if not artifact.path.is_file():
             raise ValidationError(f"Missing input artifact: {artifact.path}")
+    if not args.cliopatria_geometry.is_file():
+        raise ValidationError(f"Missing extracted Cliopatria geometry: {args.cliopatria_geometry}")
+    with args.cliopatria_geometry.open("rb") as handle:
+        cliopatria_geometry_sha256 = _stream_sha256(handle)
+    with zipfile.ZipFile(args.cliopatria_archive) as archive:
+        if CLIOPATRIA_GEOMETRY_MEMBER not in archive.namelist():
+            raise ValidationError(
+                f"Cliopatria archive lacks {CLIOPATRIA_GEOMETRY_MEMBER}"
+            )
+        with archive.open(CLIOPATRIA_GEOMETRY_MEMBER) as handle:
+            cliopatria_archive_member_sha256 = _stream_sha256(handle)
+    if cliopatria_geometry_sha256 != cliopatria_archive_member_sha256:
+        raise ValidationError("Extracted Cliopatria geometry does not match the pinned archive member")
 
     adapter = WorldBankAdapter(
         population=args.population,
         electricity=args.electricity,
         countries=args.countries,
     )
+    historical_population_adapter = UsCensusHistoricalPopulationAdapter(
+        args.historical_population
+    )
+    cliopatria_adapter = CliopatriaAdapter(args.cliopatria_geometry)
     codes = adapter.nonaggregate_codes()
     metadata = adapter.entities()
     entity_names = {code: metadata[code]["name"] for code in codes}
@@ -277,6 +351,9 @@ def build(args: argparse.Namespace) -> None:
     geometry_path = args.output / "countries.geojson"
     population_csv_path = args.output / "population.csv"
     electricity_csv_path = args.output / "electricity.csv"
+    historical_population_path = args.output / "historical-population.json"
+    historical_population_csv_path = args.output / "historical-population.csv"
+    historical_context_index_path = args.output / "historical-context.json"
 
     write_json(entities_path, {"schema_version": "0.2.0", "entities": entities})
     write_json(
@@ -322,16 +399,105 @@ def build(args: argparse.Namespace) -> None:
         )
     )
 
-    artifacts = {
-        path.name: artifact_record(path)
-        for path in (
+    historical_population_observations = historical_population_adapter.observations()
+    write_json(
+        historical_population_path,
+        {
+            "schema_version": "0.3.0",
+            "metric_id": "population_total",
+            "statistical_support": "world",
+            "source_release_id": HISTORICAL_POPULATION_SOURCE_ID,
+            "temporal_policy": "exact_only",
+            "observations": historical_population_observations,
+        },
+    )
+    historical_population_csv_path.write_bytes(
+        _csv_bytes(
+            [
+                {
+                    "year": observation["year"],
+                    "source_year_label": observation["source_year_label"],
+                    "lower": observation["lower"],
+                    "upper": observation["upper"],
+                    "status": observation["status"],
+                    "statistical_support": observation["statistical_support"],
+                    "original_record_locator": observation["original_record_locator"],
+                }
+                for observation in historical_population_observations
+            ],
+            [
+                "year",
+                "source_year_label",
+                "lower",
+                "upper",
+                "status",
+                "statistical_support",
+                "original_record_locator",
+            ],
+        )
+    )
+
+    history_directory = args.output / "history"
+    history_directory.mkdir(parents=True, exist_ok=True)
+    historical_snapshots: list[dict[str, Any]] = []
+    historical_snapshot_paths: list[Path] = []
+    for source_year in SNAPSHOT_SOURCE_YEARS:
+        snapshot = cliopatria_adapter.snapshot(source_year)
+        era = "bce" if source_year < 0 else "ce"
+        filename = f"cliopatria-{abs(source_year)}-{era}.geojson"
+        snapshot_path = history_directory / filename
+        write_json(snapshot_path, snapshot)
+        historical_snapshot_paths.append(snapshot_path)
+        historical_snapshots.append(
+            {
+                "atlas_year": snapshot["atlas_year"],
+                "source_year": source_year,
+                "file": f"history/{filename}",
+                "feature_count": snapshot["feature_count"],
+            }
+        )
+    write_json(
+        historical_context_index_path,
+        {
+            "schema_version": "0.3.0",
+            "source_release_id": CLIOPATRIA_SOURCE_ID,
+            "feature_kind": "political_context_not_statistical_support",
+            "selection_policy": "latest published snapshot not after requested date",
+            "source_profile": cliopatria_adapter.profile(),
+            "snapshots": historical_snapshots,
+        },
+    )
+
+    artifact_paths = [
             entities_path,
             population_path,
             electricity_path,
             geometry_path,
             population_csv_path,
             electricity_csv_path,
-        )
+            historical_population_path,
+            historical_population_csv_path,
+            historical_context_index_path,
+            *historical_snapshot_paths,
+    ]
+
+    def artifact_key(path: Path) -> str:
+        return path.relative_to(args.output).as_posix()
+
+    artifacts = {
+        artifact_key(path): artifact_record(path)
+        for path in artifact_paths
+    }
+    modern_artifacts = {
+        artifact_key(path): artifacts[artifact_key(path)]
+        for path in [
+            entities_path,
+            population_path,
+            electricity_path,
+            geometry_path,
+            population_csv_path,
+            electricity_csv_path,
+        ]
     }
     write_json(
         args.lockfile,
@@ -343,8 +509,12 @@ def build(args: argparse.Namespace) -> None:
     )
 
     residuals = [summary["reference_residual"] for summary in population_summaries]
+    historical_years = [
+        observation["year"] for observation in historical_population_observations
+    ]
+    population_metric_years = sorted(set(historical_years + population_years))
     manifest = {
-        "schema_version": "0.2.0",
+        "schema_version": "0.3.0",
         "release_id": RELEASE_ID,
         "status": "genuine_data_development_release",
         "published_on": RETRIEVED_ON,
@@ -361,7 +531,10 @@ def build(args: argparse.Namespace) -> None:
         ],
         "metrics": [
             _metric_definition(
-                "population_total", population_years, "population.json", "population.csv"
+                "population_total",
+                population_metric_years,
+                "population.json",
+                "population.csv",
             ),
             _metric_definition(
                 "access_to_electricity",
@@ -386,7 +559,23 @@ def build(args: argparse.Namespace) -> None:
                     "The nonnegative residual is preserved and not assigned to an inferred territory.",
                     "The World Bank country API does not encode parent/dependency relations; the release does not claim a fully reconciled world partition.",
                 ],
-            }
+            },
+            {
+                "id": "us-census-historical-world-v1",
+                "label": "U.S. Census historical world-population comparison",
+                "entity_count": 1,
+                "inclusion_rule": "published summary row for the world at an exact table date",
+                "excluded_aggregate_count": 0,
+                "reference_aggregate": "not_applicable",
+                "review_status": "source_disagreement_ranges_preserved",
+                "reference_residual_range": [0, 0],
+                "scope_label": "historical global estimate",
+                "notes": [
+                    "The support is the world as a whole, not historical or modern territories.",
+                    "Lower and upper values are disagreement among published sources, not confidence intervals.",
+                    "No interpolation or population-by-polity allocation is published.",
+                ],
+            },
         ],
         "display_geometry": {
             "source": "Natural Earth admin 0 countries",
@@ -395,6 +584,24 @@ def build(args: argparse.Namespace) -> None:
             "purpose": "display_only_not_population_accounting",
             "feature_count": len(placed_codes),
             "crosswalks": DISPLAY_CROSSWALKS,
+        },
+        "deep_time_population": {
+            "data_file": historical_population_path.name,
+            "download_file": historical_population_csv_path.name,
+            "source_release_id": HISTORICAL_POPULATION_SOURCE_ID,
+            "statistical_support": "world",
+            "available_years": historical_years,
+            "coverage": "10000 BCE to 1950 CE at published comparison-table dates",
+            "interpretation": "historical estimate or cross-source range; not assigned to polities or modern territories",
+        },
+        "historical_context": {
+            "index_file": historical_context_index_path.name,
+            "source_release_id": CLIOPATRIA_SOURCE_ID,
+            "coverage": "3400 BCE to 2024 CE",
+            "purpose": "display_only_not_population_accounting",
+            "snapshot_count": len(historical_snapshots),
+            "selection_policy": "latest published snapshot not after requested date",
+            "excluded_feature_types": ["RELATION"],
         },
         "source_releases": [
             {
@@ -410,6 +617,24 @@ def build(args: argparse.Namespace) -> None:
                 "publisher": "Natural Earth",
                 "retrieved_on": "2026-09-19",
                 "license": "Public domain",
+            },
+            {
+                "id": HISTORICAL_POPULATION_SOURCE_ID,
+                "publisher": "U.S. Census Bureau",
+                "retrieved_on": RETRIEVED_ON,
+                "license": "U.S. government public data; underlying estimates attributed",
+                "profile": historical_population_adapter.profile(),
+            },
+            {
+                "id": CLIOPATRIA_SOURCE_ID,
+                "publisher": "Seshat Global History Databank",
+                "retrieved_on": RETRIEVED_ON,
+                "license": "CC BY 4.0",
+                "profile": {
+                    **cliopatria_adapter.profile(),
+                    "published_snapshot_count": len(historical_snapshots),
+                    "relations_excluded_from_release": True,
+                },
             },
         ],
         "alternative_sources": [
@@ -433,21 +658,66 @@ def build(args: argparse.Namespace) -> None:
             {
                 "id": "world-bank-mvp-normalize-v1",
                 "version": "1.0.0",
-                "input_artifact_ids": [artifact.id for artifact in inputs],
+                "input_artifact_ids": [artifact.id for artifact in inputs[:4]],
                 "parameters": {
                     "universe_id": UNIVERSE_ID,
                     "population_years": [1960, 2025],
                     "electricity_years": [1990, 2024],
                     "no_interpolation": True,
                 },
-                "output_artifacts": artifacts,
+                "output_artifacts": modern_artifacts,
                 "validation": {
                     "population_summaries": len(population_summaries),
                     "electricity_summaries": len(electricity_summaries),
                     "prevalence_mass_conservation": "passed_all_years",
                     "world_reference_residual_nonnegative": "passed_all_years",
                 },
-            }
+            },
+            {
+                "id": "us-census-historical-population-parse-v1",
+                "version": "1.0.0",
+                "input_artifact_ids": ["us_census_historical_world_population"],
+                "parameters": {
+                    "unit_conversion": "millions_to_people",
+                    "date_conversion": "BCE/CE labels to astronomical years",
+                    "no_interpolation": True,
+                    "source_disagreement_ranges_preserved": True,
+                },
+                "output_artifacts": {
+                    artifact_key(historical_population_path): artifacts[artifact_key(historical_population_path)],
+                    artifact_key(historical_population_csv_path): artifacts[artifact_key(historical_population_csv_path)],
+                },
+                "validation": historical_population_adapter.profile(),
+            },
+            {
+                "id": "cliopatria-display-snapshots-v1",
+                "version": "1.0.0",
+                "input_artifact_ids": [
+                    "cliopatria_v0_2_0_archive",
+                    "cliopatria_v0_2_0_license",
+                ],
+                "parameters": {
+                    "feature_types": ["POLITY"],
+                    "excluded_feature_types": ["RELATION"],
+                    "archive_member": CLIOPATRIA_GEOMETRY_MEMBER,
+                    "archive_member_sha256": cliopatria_archive_member_sha256,
+                    "snapshot_source_years": SNAPSHOT_SOURCE_YEARS,
+                    "simplification_tolerance_degrees": 0.08,
+                    "population_assignment": "none",
+                    "source_year_zero": "quarantined_not_sampled",
+                },
+                "output_artifacts": {
+                    artifact_key(path): artifacts[artifact_key(path)]
+                    for path in [historical_context_index_path, *historical_snapshot_paths]
+                },
+                "validation": {
+                    **cliopatria_adapter.profile(),
+                    "published_snapshots": len(historical_snapshots),
+                    "all_snapshots_nonempty": all(
+                        snapshot["feature_count"] > 0 for snapshot in historical_snapshots
+                    ),
+                },
+            },
         ],
         "artifacts": artifacts,
         "citations": [
@@ -466,12 +736,25 @@ def build(args: argparse.Namespace) -> None:
                 "url": "https://github.com/nvkelso/natural-earth-vector/releases/tag/v5.1.2",
                 "license": "Public domain",
             },
+            {
+                "label": "U.S. Census Bureau, Historical Estimates of World Population",
+                "url": HISTORICAL_POPULATION_URL,
+                "license": "U.S. government public data; underlying estimates attributed",
+            },
+            {
+                "label": "Cliopatria v0.2.0",
+                "url": "https://github.com/Seshat-Global-History-Databank/cliopatria/tree/v0.2.0",
+                "license": "CC BY 4.0",
+            },
         ],
         "limitations": [
             "Population color represents a territorial total, not local density or a gridded settlement reconstruction.",
             "Electricity values are national or territorial estimates, not local household observations.",
             "The covered universe is reconciled to WLD with an explicit residual but lacks source-coded parent/dependency relations.",
             "The 1:110m display geometry omits some small territories; their population remains in summaries.",
+            "Pre-1960 historical population is a global estimate or source-disagreement range and is not spatially allocated.",
+            "Cliopatria polygons and labels are contestable historical context, simplified for display, and never used as population supports.",
+            "Only selected Cliopatria snapshot years are published; the effective boundary date is shown separately from the requested date.",
         ],
     }
     write_json(args.output / "manifest.json", manifest)
@@ -482,7 +765,9 @@ def build(args: argparse.Namespace) -> None:
                 "entities": len(codes),
                 "map_features": len(placed_codes),
                 "population_years": [population_years[0], population_years[-1]],
+                "historical_population_dates": len(historical_population_observations),
                 "electricity_years": [electricity_years[0], electricity_years[-1]],
+                "historical_context_snapshots": len(historical_snapshots),
                 "artifacts_bytes": sum(record["bytes"] for record in artifacts.values()),
             },
             indent=2,
@@ -496,6 +781,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--electricity", type=Path, required=True)
     parser.add_argument("--countries", type=Path, required=True)
     parser.add_argument("--geometry", type=Path, required=True)
+    parser.add_argument("--historical-population", type=Path, required=True)
+    parser.add_argument("--cliopatria-archive", type=Path, required=True)
+    parser.add_argument("--cliopatria-geometry", type=Path, required=True)
+    parser.add_argument("--cliopatria-license", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--lockfile", type=Path, required=True)
     return parser.parse_args()

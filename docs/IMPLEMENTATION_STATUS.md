@@ -4,15 +4,21 @@ Updated: 2026-09-20
 
 ## MVP release
 
-The runnable MVP publishes World Bank population totals for every year from 1960
-through 2025 and electricity access for every observed year from 1990 through
-2024. Both use the same 217-entity nonaggregate metadata universe. The UI has a
-metric switcher, exact-year timeline and playback, choropleth, metric-specific
-population summary, place inspector, accessible table, and full-series CSVs.
-Metric, year, and selected place are retained in the URL. A dedicated Sources
-page separates published release inputs from candidate and blocked research
-sources. The electricity dataset is prefetched; while any selected metric loads,
-the map shows an explicit loading state rather than an all-unknown gray frame.
+The runnable MVP publishes U.S. Census Bureau world-population estimate ranges at
+39 dates from 10,000 BCE through 1950 CE, World Bank population totals for every
+year from 1960 through 2025, and electricity access for every observed year from
+1990 through 2024. Modern statistics use the same 217-entity nonaggregate
+metadata universe. Deep-time population has world support only and is never
+assigned to a historical polity.
+
+The UI has a metric switcher, exact-source-date timeline and playback,
+choropleth, metric-specific population summary, modern and historical inspectors,
+accessible tables, and full-series CSVs. A toggleable Cliopatria v0.2.0 context
+layer switches among 36 genuine source snapshots spanning 3400 BCE–2024 CE, so
+political geometry and labels change as the date changes. `RELATION` features are
+excluded. Metric, year, and selected modern place are retained in the URL. A
+dedicated Sources page separates published release inputs
+from candidate and blocked research sources.
 
 The statistical universe is the set of World Bank API entities whose country
 metadata does not mark the entity as an aggregate and that have a 2024 population
@@ -33,18 +39,22 @@ population that cannot be placed in the coarse geometry remain explicit.
   2024 forward.
 - Natural Earth vector release v5.1.2 is the pinned display geometry. Its
   1:110m country layer is intentionally too coarse to show every small territory.
-- Cliopatria v0.2.0 release metadata was acquired successfully from Zenodo. Its
-  GeoJSON archive is approximately 44 MB in the pinned Git repository and the
-  Zenodo source archive is approximately 297 MB; no small official feature sample
-  was identified during this first pass. Full geometry acquisition is deferred to
-  an explicit command and will not be part of the default fixture build.
+- The U.S. Census Bureau historical world-population table was acquired and
+  parsed at all 39 published dates. Its lower and upper summaries are preserved
+  as disagreement among cited estimates, not statistical confidence bounds. A
+  missing upper entry denotes a point estimate according to the table note.
+- The pinned Cliopatria v0.2.0 archive contains 13,765 features: 13,380 `POLITY`
+  and 385 `RELATION` records. The release publishes 36 lazily loaded, simplified
+  `POLITY`-only snapshots; no geometry contributes to numerical accounting.
+  Source year-zero endpoints are quarantined and no published snapshot samples
+  them.
 - UN World Population Prospects 2024 is documented as a more detailed direct
   expansion source, but it is not merged pending artifact, scenario, and territory
   audits.
 - The HYDE 3.5 archive landing page remains protected by its provider's anti-bot
   access gate. No archive, artifact license, variable schema, or sample was
-  acquired. The historical population module therefore remains visibly blocked;
-  no substitute or synthetic population surface will be presented as data.
+  acquired. Gridded historical population therefore remains visibly blocked; the
+  Census global series is not presented as a substitute population surface.
 
 Exact input URLs, hashes, byte counts, output hashes, exclusions, and crosswalks
 are recorded by the fixture builder in `data/registry/source-lock.json` and the
@@ -52,8 +62,8 @@ published view manifest.
 
 ## Implemented architecture
 
-- Narrow source adapters parse source-native artifacts; the World Bank adapter is
-  the first implementation.
+- Narrow source adapters parse source-native artifacts; World Bank, U.S. Census,
+  and Cliopatria each have their own adapter.
 - The release builder owns statistical-universe validation, summaries, lineage,
   and artifact hashes.
 - Display geometry is built separately and contributes no numerical totals.
@@ -63,14 +73,12 @@ published view manifest.
   code and year. Metric presentation is a small configuration layer rather than
   duplicated application screens.
 
-The next expansion should add a new source adapter and metric definition only
-after its source release, universe, temporal policy, and aggregation meaning are
-audited. No service or generalized plugin infrastructure is needed yet.
-
-For the next map capability, the bounded implementation target is a small,
-genuine-data Cliopatria fixture rendered as a toggleable, display-only historical
-context layer. The full source and annotation sequence is specified in
-`DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.
+The next expansion should add a source only after its release, universe, temporal
+policy, and aggregation meaning are audited. The immediate population gap is a
+licensed gridded historical reconstruction; the immediate geography gap is
+reviewing overlapping or nested Cliopatria features and adding source-specific
+precision/dispute metadata. The full source and annotation sequence is specified
+in `DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.
 
 ## Renderer spike note
 

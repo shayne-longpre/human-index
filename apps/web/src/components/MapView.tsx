@@ -1,5 +1,6 @@
+import type { Layer } from '@deck.gl/core';
 import { MapboxOverlay } from '@deck.gl/mapbox';
-import { GeoJsonLayer } from '@deck.gl/layers';
+import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
 import {
   Map as MapLibreMap,
   NavigationControl,
@@ -8,7 +9,12 @@ import {
 } from 'maplibre-gl';
 import { useEffect, useRef, useState } from 'react';
 import type { MvpMetricId } from '@atlas/contracts';
-import type { CountryFeatureCollection, CountryProperties } from '../data';
+import type {
+  CountryFeatureCollection,
+  CountryProperties,
+  HistoricalFeatureCollection,
+  HistoricalProperties,
+} from '../data';
 import { metricColor } from '../metricViews';
 
 interface MapViewProps {
@@ -18,10 +24,15 @@ interface MapViewProps {
   year: number;
   valueByCode: ReadonlyMap<string, number | null>;
   loading: boolean;
+  historicalSnapshot: HistoricalFeatureCollection | null;
+  historicalLoading: boolean;
+  historicalEnabled: boolean;
+  selectedHistoricalId: string | null;
   caption: string;
   caution: string;
   selectedCode: string | null;
   onSelect: (code: string) => void;
+  onHistoricalSelect: (properties: HistoricalProperties) => void;
 }
 
 const style: StyleSpecification = {
@@ -43,16 +54,22 @@ export function MapView({
   year,
   valueByCode,
   loading,
+  historicalSnapshot,
+  historicalLoading,
+  historicalEnabled,
+  selectedHistoricalId,
   caption,
   caution,
   selectedCode,
   onSelect,
+  onHistoricalSelect,
 }: MapViewProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const overlayRef = useRef<MapboxOverlay | null>(null);
   const [fallback, setFallback] = useState(false);
   const knownValueCount = Array.from(valueByCode.values()).filter((value) => value !== null).length;
+  const territorialValuesAvailable = knownValueCount > 0;
 
   useEffect(() => {
     if (!elementRef.current || mapRef.current) return;
@@ -99,22 +116,27 @@ export function MapView({
   useEffect(() => {
     const overlay = overlayRef.current;
     if (!overlay) return;
-    overlay.setProps({
-      layers: [
+    const layers: Layer[] = [
         new GeoJsonLayer<CountryProperties>({
           id: `atlas-${metricId}-${year}-${knownValueCount}`,
           data: geometry,
           filled: true,
           stroked: true,
-          pickable: true,
+          pickable: territorialValuesAvailable,
           autoHighlight: true,
           highlightColor: [255, 246, 220, 90],
           lineWidthUnits: 'pixels',
           getLineWidth: (feature) => (feature.properties.code === selectedCode ? 2.3 : 0.55),
           getLineColor: (feature) =>
-            feature.properties.code === selectedCode ? [255, 244, 211, 255] : [8, 22, 19, 180],
+            feature.properties.code === selectedCode
+              ? [255, 244, 211, 255]
+              : territorialValuesAvailable
+                ? [8, 22, 19, 180]
+                : [39, 65, 56, 0],
           getFillColor: (feature) =>
-            metricColor(metricId, valueByCode.get(feature.properties.code) ?? null),
+            territorialValuesAvailable
+              ? metricColor(metricId, valueByCode.get(feature.properties.code) ?? null)
+              : [13, 36, 29, 255],
           onClick: ({ object }) => {
             if (object?.properties?.code) onSelect(object.properties.code);
           },
@@ -124,9 +146,89 @@ export function MapView({
             getLineColor: [selectedCode],
           },
         }),
-      ],
-    });
-  }, [geometry, knownValueCount, metricId, onSelect, selectedCode, valueByCode, year]);
+    ];
+
+    if (historicalEnabled && historicalSnapshot) {
+      const labeled = historicalSnapshot.features
+        .map((feature) => feature.properties)
+        .filter((properties) => properties.show_label);
+      layers.push(
+        new GeoJsonLayer<HistoricalProperties>({
+          id: `historical-polities-${historicalSnapshot.atlas_year}`,
+          data: historicalSnapshot,
+          filled: true,
+          stroked: true,
+          pickable: true,
+          autoHighlight: true,
+          highlightColor: [255, 239, 189, 75],
+          lineWidthUnits: 'pixels',
+          getLineWidth: (feature) =>
+            feature.properties.source_feature_id === selectedHistoricalId ? 2.4 : 0.9,
+          getLineColor: (feature) =>
+            feature.properties.source_feature_id === selectedHistoricalId
+              ? [255, 243, 204, 255]
+              : [236, 204, 125, 205],
+          getFillColor: (feature) => {
+            const seed = Array.from(feature.properties.name).reduce(
+              (sum, character) => sum + character.charCodeAt(0),
+              0,
+            );
+            const colors: Array<[number, number, number]> = [
+              [62, 111, 91],
+              [132, 125, 72],
+              [92, 116, 112],
+              [129, 91, 69],
+            ];
+            const color = colors[seed % colors.length];
+            return [color[0], color[1], color[2], territorialValuesAvailable ? 30 : 90];
+          },
+          onClick: ({ object }) => {
+            if (object?.properties) onHistoricalSelect(object.properties);
+          },
+          updateTriggers: {
+            getLineWidth: [selectedHistoricalId],
+            getLineColor: [selectedHistoricalId],
+          },
+        }),
+        new TextLayer<HistoricalProperties>({
+          id: `historical-labels-${historicalSnapshot.atlas_year}`,
+          data: labeled,
+          pickable: true,
+          getPosition: (properties) => properties.label_position,
+          getText: (properties) => properties.name,
+          getSize: (properties) => Math.max(10, Math.min(17, 9 + Math.log10(properties.area_km2))),
+          getColor: [241, 235, 218, 235],
+          getTextAnchor: 'middle',
+          getAlignmentBaseline: 'center',
+          maxWidth: 135,
+          wordBreak: 'break-word',
+          lineHeight: 1,
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: 600,
+          outlineWidth: 3,
+          outlineColor: [7, 20, 17, 230],
+          onClick: ({ object }) => {
+            if (object) onHistoricalSelect(object);
+          },
+        }),
+      );
+    }
+
+    overlay.setProps({ layers });
+  }, [
+    geometry,
+    historicalEnabled,
+    historicalSnapshot,
+    knownValueCount,
+    metricId,
+    onHistoricalSelect,
+    onSelect,
+    selectedCode,
+    selectedHistoricalId,
+    territorialValuesAvailable,
+    valueByCode,
+    year,
+  ]);
 
   return (
     <div className="map-shell">
@@ -134,7 +236,7 @@ export function MapView({
         ref={elementRef}
         className="map-canvas"
         role="img"
-        aria-label={`World map colored by ${year} ${metricLabel.toLocaleLowerCase()}`}
+        aria-label={`World map for ${year} ${metricLabel.toLocaleLowerCase()}${historicalEnabled && historicalSnapshot ? ` with ${historicalSnapshot.feature_count} Cliopatria polity features` : ''}`}
       />
       {fallback ? (
         <div className="map-fallback" role="status">
@@ -142,10 +244,10 @@ export function MapView({
           <p>The complete data remain available in the accessible table below.</p>
         </div>
       ) : null}
-      {loading ? (
+      {loading || historicalLoading ? (
         <div className="map-loading" role="status">
           <span className="loading-mark" aria-hidden="true" />
-          Loading {metricLabel.toLocaleLowerCase()} observations…
+          Loading {loading ? metricLabel.toLocaleLowerCase() : 'historical boundary'} evidence…
         </div>
       ) : null}
       <div className="map-caption">
@@ -153,7 +255,9 @@ export function MapView({
         <strong>{caption}</strong>
         <span>{caution}</span>
       </div>
-      <div className="map-attribution">Geometry © Natural Earth · public domain</div>
+      <div className="map-attribution">
+        Geometry © Natural Earth · historical context © Cliopatria CC BY 4.0
+      </div>
     </div>
   );
 }

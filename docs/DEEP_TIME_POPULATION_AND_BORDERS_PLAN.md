@@ -2,6 +2,23 @@
 
 Updated: 2026-09-20
 
+## Implemented in release r2
+
+- All 39 dates in the U.S. Census Bureau historical world-population comparison
+  table are published from 10,000 BCE through 1950 CE. Summary bounds are shown
+  as source disagreement, and the named estimates are retained.
+- Thirty-six Cliopatria v0.2.0 `POLITY` snapshots are published from 3400 BCE
+  through 2024 CE. The UI switches real source geometry and valid names at the
+  effective snapshot date and exposes the feature metadata in an inspector and
+  accessible table.
+- These layers are deliberately independent. The population is world-supported;
+  the political polygons are display context. Toggling or selecting a polity
+  cannot change a population total.
+
+The unresolved part of the original plan is spatially resolved historical
+population. HYDE remains blocked pending authorized archive access and exact
+artifact-term verification.
+
 ## Product outcome
 
 The Atlas timeline should eventually span from the earliest published population
@@ -25,6 +42,7 @@ the series.
 
 | Source | Useful span | What Atlas can publish | What it cannot establish |
 |---|---:|---|---|
+| U.S. Census historical comparison table | 10,000 BCE–1950 CE | Published global estimate ranges and named source estimates at 39 dates | Spatial distribution, polity totals, annual continuity, or statistical confidence |
 | HYDE 3.5 candidate | 10,000 BCE–2025 CE | Five-arc-minute modeled population surface and source-supported global/regional totals at its actual published time steps | Direct local observation, annual continuity, or statistical confidence unless the artifact provides it |
 | Seshat | Selected ancient and historical polities | Dated polity-population ranges, polity territory, and largest-settlement ranges with evidence/status tags | A global nonoverlapping population partition |
 | Reba, Reitsma & Seto historical urbanization | 3700 BCE–2000 CE | Dated city locations and population estimates as an urban layer | Rural population or total humanity |
@@ -32,11 +50,13 @@ the series.
 | UN WPP 2024 | 1950–2100 | Detailed direct modern estimates and explicitly labeled projections, including age/sex dimensions after audit | Deep history or an automatic continuation of another release |
 | World Bank WDI | 1960–2025 | The current annual territorial totals and compatible metric weights | Gridded density or pre-1960 history |
 
-The first deep-time implementation should use one pinned HYDE release as the
-population backbone if its exact archive and redistribution terms pass review.
-Seshat and the historical-city dataset should appear as independent corroborating
-layers, not calibration targets. UN WPP should replace neither HYDE nor World Bank
-silently; any source transition is visible in the timeline and export.
+The first deep-time implementation uses the Census comparison table as an honest
+global-only bridge while HYDE is inaccessible. One pinned HYDE release should
+become the spatial population backbone only if its exact archive and
+redistribution terms pass review. Seshat and the historical-city dataset should
+appear as independent corroborating layers, not calibration targets. UN WPP
+should replace neither HYDE nor World Bank silently; any source transition is
+visible in the timeline and export.
 
 ## Historical geometry source stack
 
@@ -182,13 +202,15 @@ nodata is distinct from zero; the UI states that the surface is reconstructed.
 
 ## Immediate next release
 
-The next shippable increment should be **Cliopatria as a toggleable,
-display-only historical context layer** with a handful of audited genuine-data
-dates. It delivers the visible “borders and names change as I drag time” behavior
-without waiting for HYDE access or making unsupported population assignments.
+The Cliopatria renderer and temporal-contract spike now passes. The next bounded
+increment should be an evidence-quality pass on a small region: profile overlap
+and nesting, validate geometry, expose disputed/approximate boundaries where the
+source supports that distinction, and compare recent snapshots with CShapes.
 
-Only after that renderer and temporal-contract spike passes should the project
-commit to a full HYDE ingestion or an annotation platform.
+In parallel, seek authorized HYDE access and confirm its exact terms, variables,
+time steps, masks, scenarios, and conservation behavior. Do not build an
+annotation platform until a 5–10-date, evidence-rich regional pilot demonstrates
+that source-native data cannot cover the need.
 
 ## Primary references
 

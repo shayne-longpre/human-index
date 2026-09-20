@@ -1,4 +1,4 @@
-import type { AtlasReleaseManifest } from '@atlas/contracts';
+import { formatAstronomicalYear, type AtlasReleaseManifest } from '@atlas/contracts';
 import sourceRegistry from '../../../../data/registry/sources.json';
 import { releaseRoot } from '../data';
 
@@ -26,8 +26,14 @@ function humanize(value: string): string {
   return value.replaceAll('_', ' ');
 }
 
+function releaseRole(id: string): string {
+  if (id.startsWith('world-bank')) return 'Modern population and electricity observations';
+  if (id.startsWith('us-census')) return 'Deep-time global population estimates and source ranges';
+  if (id.startsWith('cliopatria')) return 'Historical political context geometry and names';
+  return 'Modern display geometry only';
+}
+
 export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
-  const universe = manifest.population_universes[0];
   return (
     <main id="main-content" className="sources-page">
       <header className="sources-hero">
@@ -64,7 +70,7 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
               <dl>
                 <div><dt>Retrieved</dt><dd>{source.retrieved_on}</dd></div>
                 {source.source_update ? <div><dt>Source update</dt><dd>{source.source_update}</dd></div> : null}
-                <div><dt>Atlas role</dt><dd>{source.id.startsWith('world-bank') ? 'Population and electricity observations' : 'Display geometry only'}</dd></div>
+                <div><dt>Atlas role</dt><dd>{releaseRole(source.id)}</dd></div>
               </dl>
             </article>
           ))}
@@ -86,7 +92,7 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
               </div>
               <dl>
                 <div><dt>Indicator</dt><dd>{metric.indicator}</dd></div>
-                <div><dt>Observed years</dt><dd>{metric.available_years[0]}–{metric.available_years.at(-1)}</dd></div>
+                <div><dt>Observed years</dt><dd>{formatAstronomicalYear(metric.available_years[0])}–{formatAstronomicalYear(metric.available_years.at(-1) ?? metric.available_years[0])}</dd></div>
                 <div><dt>Unit</dt><dd>{metric.unit}</dd></div>
                 <div><dt>Temporal policy</dt><dd>{humanize(metric.temporal_policy)}</dd></div>
               </dl>
@@ -142,9 +148,14 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
           <h2 id="source-method-title">What is counted—and what is not.</h2>
         </div>
         <div>
-          <h3>{universe.label}</h3>
-          <p>{universe.entity_count} supports. {universe.inclusion_rule}. Scope label: {universe.scope_label}.</p>
-          <ul>{universe.notes.map((note) => <li key={note}>{note}</li>)}</ul>
+          <h3>Population universes</h3>
+          {manifest.population_universes.map((universe) => (
+            <div className="universe-summary" key={universe.id}>
+              <strong>{universe.label}</strong>
+              <p>{universe.entity_count} support{universe.entity_count === 1 ? '' : 's'}. {universe.inclusion_rule}. Scope label: {universe.scope_label}.</p>
+              <ul>{universe.notes.map((note) => <li key={note}>{note}</li>)}</ul>
+            </div>
+          ))}
         </div>
         <div>
           <h3>Known limitations</h3>

@@ -1,6 +1,9 @@
 # Source dossier
 
-**Checked: September 19, 2026.** This is a documentation-level audit. Unless explicitly stated otherwise, archives and observation rows have not been downloaded or validated. “Checked license” means the cited publisher page states that license; implementation must save the terms applying to the exact acquired artifact.
+**Checked: September 20, 2026.** This dossier mixes implemented release inputs
+with documentation-level candidates. Each section states its acquisition status.
+“Checked license” means the cited publisher page states that license;
+implementation must save the terms applying to the exact acquired artifact.
 
 ## S1 — Cliopatria: historical political geometry
 
@@ -9,10 +12,21 @@
 - License: **CC BY 4.0**, confirmed in the pinned repository license.
 - Important change: this release adds `RELATION` records for supra-polity composites. They must not become extra demographic units. `POLITY` does not itself guarantee a mutually exclusive partition.
 - Intended use: optional historical context overlay; not the default statistical geography for modern indicator joins.
+- Acquisition result (2026-09-20): the exact tagged archive and license were
+  acquired and hashed. The archive contains 13,765 records: 13,380 `POLITY` and
+  385 `RELATION`. Release r2 publishes 36 lazily loaded, simplified `POLITY`-only
+  snapshots. Six source year-zero endpoints are quarantined; no snapshot samples
+  source year zero. Borders remain contestable context, not a population
+  partition.
 
 References: [release and DOI](https://zenodo.org/records/20274630), [pinned README](https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/README.md), [pinned license](https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/LICENSE.md).
 
-Acquire the data file from the pinned release/tag rather than assuming the whole repository archive is needed. Audit duplicates, invalid geometry, overlaps by date/type, missing identifiers, and the source's handling of year zero. A Wikidata match is evidence for a crosswalk, not proof that two statistical populations are identical.
+The acquired archive SHA-256 is
+`d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370`;
+the pinned license SHA-256 is
+`62ca7e92dee4ebe402372d5e64f87845de445a6c0e5d76fddb68b3e33739d1a6`.
+A Wikidata match is evidence for a crosswalk, not proof that two statistical
+populations are identical.
 
 ## S2 — HYDE: deep-time population and land use
 
@@ -170,6 +184,25 @@ ontology of political belonging, and it does not solve ancient geometry.
   uncertain or unlocated states.
 - Status: select and pin a versioned export, then profile temporal and spatial
   certainty. Pleiades is a place gazetteer, not a polity-border source.
+
+## S17 — U.S. Census Bureau historical world-population estimates
+
+- [Official historical estimates table](https://www.census.gov/data/tables/time-series/demo/international-programs/historical-est-worldpop.html),
+  acquired 2026-09-20 and content-hashed.
+- Published span: 39 source dates from 10,000 BCE through 1950 CE. The table
+  collates named published estimates and provides summary lower/upper values in
+  millions.
+- Atlas role: global population support only. The lower/upper summaries are
+  preserved as source-disagreement ranges, not statistical confidence intervals;
+  the table's blank upper value denotes a point estimate.
+- The observations are never allocated to Cliopatria polygons, and the named
+  underlying estimates remain available in the release artifact for inspection.
+- Acquired HTML SHA-256:
+  `1036e2d7cd6b6cd1715a25844fc154856a20d9a600d7675fac6a0913983bbd99`.
+
+This provides a defensible first global timeline while HYDE access remains
+blocked. It does not provide a raster, country/polity totals, annual continuity,
+or statistical uncertainty.
 
 ## Deferred rather than forgotten
 

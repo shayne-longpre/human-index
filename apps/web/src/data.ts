@@ -2,6 +2,9 @@ import type {
   AtlasEntity,
   AtlasReleaseManifest,
   ElectricityDataset,
+  HistoricalContextIndex,
+  HistoricalContextSnapshotReference,
+  HistoricalPopulationDataset,
   MvpMetricId,
   PopulationDataset,
 } from '@atlas/contracts';
@@ -13,6 +16,32 @@ export interface CountryProperties {
 }
 
 export type CountryFeatureCollection = FeatureCollection<Geometry, CountryProperties>;
+export interface HistoricalProperties {
+  name: string;
+  feature_kind: 'polity';
+  source_feature_id: string;
+  source_release_id: string;
+  source_from_year: number;
+  source_to_year: number;
+  area_km2: number;
+  wikipedia: string | null;
+  wikidata: string | null;
+  seshat_id: string | null;
+  evidence_status: 'published_contestable_reconstruction';
+  precision_class: string;
+  label_position: [number, number];
+  show_label: boolean;
+}
+
+export type HistoricalFeatureCollection = FeatureCollection<Geometry, HistoricalProperties> & {
+  source_release_id: string;
+  source_year: number;
+  atlas_year: number;
+  feature_count: number;
+  excluded_feature_types: string[];
+  dating_status: string;
+  geometry_method: string;
+};
 export type MetricDataset = PopulationDataset | ElectricityDataset;
 
 export interface ReleaseBase {
@@ -20,9 +49,11 @@ export interface ReleaseBase {
   geometry: CountryFeatureCollection;
   manifest: AtlasReleaseManifest;
   population: PopulationDataset;
+  historicalPopulation: HistoricalPopulationDataset;
+  historicalContext: HistoricalContextIndex;
 }
 
-export const releaseRoot = '/atlas/releases/world-bank-mvp-2026-09-20-r1';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-20-r2';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {
@@ -34,13 +65,22 @@ async function getJson<T>(url: string): Promise<T> {
 }
 
 export async function loadReleaseBase(): Promise<ReleaseBase> {
-  const [entityPayload, geometry, manifest, population] = await Promise.all([
+  const manifest = await getJson<AtlasReleaseManifest>(`${releaseRoot}/manifest.json`);
+  const [entityPayload, geometry, population, historicalPopulation, historicalContext] = await Promise.all([
     getJson<{ entities: AtlasEntity[] }>(`${releaseRoot}/entities.json`),
     getJson<CountryFeatureCollection>(`${releaseRoot}/countries.geojson`),
-    getJson<AtlasReleaseManifest>(`${releaseRoot}/manifest.json`),
     getJson<PopulationDataset>(`${releaseRoot}/population.json`),
+    getJson<HistoricalPopulationDataset>(`${releaseRoot}/${manifest.deep_time_population.data_file}`),
+    getJson<HistoricalContextIndex>(`${releaseRoot}/${manifest.historical_context.index_file}`),
   ]);
-  return { entities: entityPayload.entities, geometry, manifest, population };
+  return {
+    entities: entityPayload.entities,
+    geometry,
+    manifest,
+    population,
+    historicalPopulation,
+    historicalContext,
+  };
 }
 
 const metricCache = new Map<MvpMetricId, Promise<MetricDataset>>();
@@ -65,4 +105,37 @@ export function downloadUrl(metricId: MvpMetricId, manifest: AtlasReleaseManifes
   const metric = manifest.metrics.find((candidate) => candidate.id === metricId);
   if (!metric) throw new Error(`Release does not define ${metricId}`);
   return `${releaseRoot}/${metric.download_file}`;
+}
+
+export function historicalPopulationDownloadUrl(manifest: AtlasReleaseManifest): string {
+  return `${releaseRoot}/${manifest.deep_time_population.download_file}`;
+}
+
+export function resolveHistoricalSnapshot(
+  index: HistoricalContextIndex,
+  year: number,
+): HistoricalContextSnapshotReference | null {
+  let resolved: HistoricalContextSnapshotReference | null = null;
+  for (const snapshot of index.snapshots) {
+    if (snapshot.atlas_year > year) break;
+    resolved = snapshot;
+  }
+  return resolved;
+}
+
+const historicalSnapshotCache = new Map<string, Promise<HistoricalFeatureCollection>>();
+
+export function loadHistoricalSnapshot(
+  reference: HistoricalContextSnapshotReference,
+): Promise<HistoricalFeatureCollection> {
+  const existing = historicalSnapshotCache.get(reference.file);
+  if (existing) return existing;
+  const pending = getJson<HistoricalFeatureCollection>(`${releaseRoot}/${reference.file}`).catch(
+    (error: unknown) => {
+      historicalSnapshotCache.delete(reference.file);
+      throw error;
+    },
+  );
+  historicalSnapshotCache.set(reference.file, pending);
+  return pending;
 }

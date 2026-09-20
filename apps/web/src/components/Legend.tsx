@@ -3,10 +3,19 @@ import { metricViews } from '../metricViews';
 
 interface LegendProps {
   metric: PublishedMetric;
+  unavailable?: boolean;
 }
 
-export function Legend({ metric }: LegendProps) {
+export function Legend({ metric, unavailable = false }: LegendProps) {
   const view = metricViews[metric.id];
+  if (unavailable) {
+    return (
+      <div className="legend legend-unavailable" aria-label="No spatial population allocation for this date">
+        <div className="legend-heading"><span>Population</span><span>global only</span></div>
+        <p>No territorial population colors are shown. Historical borders are independent context.</p>
+      </div>
+    );
+  }
   return (
     <div className="legend" aria-label={view.legendAria}>
       <div className="legend-heading">

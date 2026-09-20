@@ -16,18 +16,14 @@
         "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/README.md",
         "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/LICENSE.md"
       ],
-      "blockers": [
-        "acquire_pinned_data",
-        "audit_year_convention",
-        "profile_geometry_and_overlaps"
-      ],
-      "notes": "RELATION excluded from exclusive demographic assignment; POLITY still needs overlap review.",
-      "checked_at": "2026-09-19",
-      "verification_level": "documentation_only",
-      "downloaded": false,
-      "artifact_sha256": null,
-      "terms_snapshot_sha256": null,
-      "release_ready": false
+      "blockers": [],
+      "notes": "Pinned v0.2.0 archive acquired and profiled: 13,765 rows, including 13,380 POLITY and 385 RELATION records. Release r2 publishes 36 simplified POLITY-only context snapshots. RELATION is excluded and no feature contributes to population accounting. Six source year-zero endpoints remain quarantined; no snapshot samples source year zero.",
+      "checked_at": "2026-09-20",
+      "verification_level": "artifact_acquired_profiled_and_fixture_published",
+      "downloaded": true,
+      "artifact_sha256": "d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370",
+      "terms_snapshot_sha256": "62ca7e92dee4ebe402372d5e64f87845de445a6c0e5d76fddb68b3e33739d1a6",
+      "release_ready": true
     },
     {
       "id": "hyde",
@@ -367,6 +363,27 @@
       "artifact_sha256": null,
       "terms_snapshot_sha256": null,
       "release_ready": false
+    },
+    {
+      "id": "us_census_historical_world_population",
+      "dossier": "S17",
+      "role": "deep_time_global_population_estimate_ranges",
+      "candidate_release": "retrieved_2026_09_20",
+      "coverage_start": "10000 BCE",
+      "coverage_end": "1950 CE",
+      "license": "U.S. government public data; underlying estimates attributed",
+      "license_status": "government_table_acquired_with_source_bibliography",
+      "urls": [
+        "https://www.census.gov/data/tables/time-series/demo/international-programs/historical-est-worldpop.html"
+      ],
+      "blockers": [],
+      "notes": "Release r2 publishes all 39 table dates. Summary lower/upper values are preserved as source-disagreement ranges, not confidence intervals. Values have world support only and are never assigned to Cliopatria polities.",
+      "checked_at": "2026-09-20",
+      "verification_level": "artifact_acquired_profiled_and_published",
+      "downloaded": true,
+      "artifact_sha256": "1036e2d7cd6b6cd1715a25844fc154856a20d9a600d7675fac6a0913983bbd99",
+      "terms_snapshot_sha256": null,
+      "release_ready": true
     },
     {
       "id": "natural_earth",
