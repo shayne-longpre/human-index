@@ -24,6 +24,9 @@ const manifest = readJson<AtlasReleaseManifest & {
 const population = readJson<PopulationDataset>('population.json');
 const electricity = readJson<ElectricityDataset>('electricity.json');
 const entities = readJson<{ entities: AtlasEntity[] }>('entities.json').entities;
+const sourceRegistry = JSON.parse(
+  readFileSync(resolve('data/registry/sources.json'), 'utf8'),
+) as { sources: Array<{ id: string; urls: string[]; blockers: string[]; release_ready: boolean }> };
 
 const populationByYear = new Map<number, typeof population.observations>();
 for (const observation of population.observations) {
@@ -49,6 +52,21 @@ describe('genuine-data MVP release', () => {
     expect(population.years).toEqual(Array.from({ length: 66 }, (_, index) => 1960 + index));
     expect(electricity.years).toEqual(Array.from({ length: 35 }, (_, index) => 1990 + index));
     expect(() => assertSupportedYear(manifest.metrics[1], 2025)).toThrow(RangeError);
+  });
+
+  it('keeps published release sources and the wider research registry inspectable', () => {
+    expect(manifest.source_releases.map((source) => source.id)).toContain('world-bank-wdi-2026-07-13');
+    expect(manifest.source_releases.map((source) => source.id)).toContain('natural-earth-v5.1.2');
+    expect(manifest.citations.every((citation) => citation.url.startsWith('https://'))).toBe(true);
+    expect(new Set(sourceRegistry.sources.map((source) => source.id)).size).toBe(
+      sourceRegistry.sources.length,
+    );
+    expect(sourceRegistry.sources.every((source) => source.urls.length > 0)).toBe(true);
+    expect(
+      sourceRegistry.sources
+        .filter((source) => !source.release_ready)
+        .every((source) => source.blockers.length > 0),
+    ).toBe(true);
   });
 
   it('reproduces every annual population summary and keeps residuals explicit', () => {

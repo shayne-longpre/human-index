@@ -24,6 +24,10 @@ observations only. Source responses, published artifacts, hashes, coverage, and
 limitations are recorded in the release manifest and
 `data/registry/source-lock.json`.
 
+The application also includes a dedicated **Sources** page covering both the
+inputs published in the current release and the wider research registry. Atlas
+state is shareable through `metric`, `year`, and `place` URL parameters.
+
 The population series is the pragmatic modern MVP source because it is licensed
 for redistribution and shares the electricity series' statistical geography. UN
 World Population Prospects 2024 is documented as the more detailed direct
@@ -52,6 +56,8 @@ pnpm data:build
 See `docs/BUILD_REPORT.md` for verified implementation and test status,
 `docs/MVP_SOURCE_SELECTION.md` for the source decision, and `CODEX_PROMPT.md`
 plus `AGENTS.md` for the product and scientific contracts.
+The proposed deep-time population and historical-boundary sequence is in
+`docs/DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.
 
 ## Research brief
 

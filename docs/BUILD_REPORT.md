@@ -14,7 +14,9 @@ genuine-data paths:
 The UI supports metric switching, exact-year selection and playback, a MapLibre
 and deck.gl choropleth, a place inspector with original record locators, metric-
 appropriate summaries, a searchable 217-row table fallback, and downloadable
-full-series CSV files. Missing observations and unsupported years remain visible.
+full-series CSV files. A dedicated Sources page exposes published inputs and the
+wider research registry. Metric, year, and place state are shareable in the URL.
+Missing observations and unsupported years remain visible.
 
 This remains a development release. It is not a claim of deep historical
 population coverage, local population density, household location, or a fully
@@ -77,16 +79,18 @@ in-app browser 390 × 844 responsive check
 Results:
 
 - Strict TypeScript: pass.
-- Vitest: 2 files, 15 tests, all pass.
+- Vitest: 2 files, 16 tests, all pass.
 - Published release artifact checksums: pass for all six artifacts.
 - Population summaries: 66/66 recomputed; all reference residuals nonnegative.
 - Electricity summaries: 35/35 recomputed; all conserve population mass.
 - Electricity CSV: all 7,595 observation rows include their exact population
   denominator value and both original record locators.
-- Production build: pass. Main JavaScript chunk 2,209.63 kB uncompressed /
-  617.81 kB gzip; CSS 99.56 kB uncompressed / 14.62 kB gzip.
+- Production build: pass. Main JavaScript chunk 2,228.18 kB uncompressed /
+  622.78 kB gzip; CSS 104.01 kB uncompressed / 15.45 kB gzip.
 - Desktop app: population and electricity views, unsupported-year state, table,
-  inspector, and original record locators verified; no console warnings/errors.
+  inspector, original record locators, shareable state, and the 15-entry Sources
+  page verified. The 2024 electricity map rendered 215 known-entity values with
+  the intended gold-to-green scale rather than the gray unknown color.
 - Mobile 390 × 844: visually inspected; body and document scroll width both 390
   px; no buttons outside the viewport; no console warnings/errors.
 
@@ -104,4 +108,6 @@ layers.
 UN World Population Prospects 2024 is the next detailed population-source
 candidate; it is documented but not ingested until its exact artifact terms,
 estimate/projection scenarios, and geography crosswalks are audited. HYDE remains
-blocked for gridded deep-time population. See `MVP_SOURCE_SELECTION.md`.
+blocked for gridded deep-time population. Cliopatria is the next bounded geometry
+spike: a small, audited, display-only temporal context layer. See
+`MVP_SOURCE_SELECTION.md` and `DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.

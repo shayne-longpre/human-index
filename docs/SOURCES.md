@@ -129,6 +129,48 @@ Period life expectancy is a synthetic life-table measure, not an observed distri
   country/area definitions and parent/dependency relations; and create explicit
   crosswalks rather than concatenating it with the current release.
 
+## S13 — CShapes 2.0: dated modern state geometry
+
+- [Official release and documentation](https://icr.ethz.ch/data/cshapes/).
+- Documented coverage: independent-state and dependent-territory boundaries and
+  capitals from 1886–2019 globally, with European coverage from 1816.
+- Two alternative international-system universes are supplied: Gleditsch–Ward
+  and Correlates of War. Atlas must select and label one rather than merge them.
+- Status: candidate comparison layer. Pin the exact artifact and license, then
+  audit dependent territories and undefined or disputed boundary handling.
+
+CShapes can validate recent historical transitions but is not a universal
+ontology of political belonging, and it does not solve ancient geometry.
+
+## S14 — Reba historical urban population
+
+- [Data descriptor and artifact entry point](https://doi.org/10.1038/sdata.2016.34).
+- Documented span: city locations and historical population estimates from 3700
+  BCE–2000 CE.
+- Intended use: an independently sourced city/urban-population point layer, not
+  rural population, a global population denominator, or a polity total.
+- Status: exact data artifact and underlying Chandler/Modelski source rights must
+  be pinned and audited before redistribution.
+
+## S15 — World Historical Gazetteer
+
+- [Public datasets](https://whgazetteer.org/public_data/) and
+  [API/source documentation](https://docs.whgazetteer.org/content/technical/apis.html).
+- Intended use: temporal place-name assertions, source identifiers, geometry
+  variants, and cross-source reconciliation.
+- Status: candidate only. WHG combines sources with different licenses, so every
+  selected input requires its own terms and artifact record. It is not itself a
+  single global political-boundary release.
+
+## S16 — Pleiades
+
+- [Official dataset downloads](https://pleiades.stoa.org/downloads), licensed CC
+  BY 3.0 by the publisher.
+- Intended use: ancient place names, locations, bibliographic links, and explicit
+  uncertain or unlocated states.
+- Status: select and pin a versioned export, then profile temporal and spatial
+  certainty. Pleiades is a place gazetteer, not a polity-border source.
+
 ## Deferred rather than forgotten
 
 CHAT, WorldPop/GHSL, historical wages, education, homicide, D-PLACE, and archaeological regional datasets may be useful later. They are not preapproved integrations in this brief. Each must pass its own release, access, definition, scope, and licensing audit. Adding names to a source list is not the same as establishing a compatible data pipeline.

@@ -267,6 +267,108 @@
       "release_ready": false
     },
     {
+      "id": "cshapes_2_0",
+      "dossier": "S13",
+      "role": "modern_historical_state_geometry",
+      "candidate_release": "2.0",
+      "coverage_start": "1886 CE globally; 1816 CE for Europe",
+      "coverage_end": "2019 CE",
+      "license": null,
+      "license_status": "exact_download_terms_require_audit",
+      "urls": [
+        "https://icr.ethz.ch/data/cshapes/",
+        "https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf"
+      ],
+      "blockers": [
+        "pin_artifact_and_license",
+        "select_gleditsch_ward_or_correlates_of_war_universe",
+        "audit_dependent_territories_and_undefined_borders"
+      ],
+      "notes": "Strong modern historical-boundary complement to Cliopatria; includes dated state and dependent-territory geometry but uses an international-system coding universe, not a universal map of human political belonging.",
+      "checked_at": "2026-09-20",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "reba_historical_urban_population",
+      "dossier": "S14",
+      "role": "historical_city_population_points",
+      "candidate_release": "2016 data descriptor artifact",
+      "coverage_start": "3700 BCE",
+      "coverage_end": "2000 CE",
+      "license": null,
+      "license_status": "paper_cc_by_4_metadata_cc0_exact_data_artifact_to_pin",
+      "urls": [
+        "https://doi.org/10.1038/sdata.2016.34"
+      ],
+      "blockers": [
+        "acquire_exact_data_artifact",
+        "audit_underlying_chandler_and_modelski_source_rights",
+        "profile_city_identity_dates_and_population_uncertainty"
+      ],
+      "notes": "Useful for an urban-settlement layer from 3700 BCE, not a complete population surface or a denominator for all humanity.",
+      "checked_at": "2026-09-20",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "world_historical_gazetteer",
+      "dossier": "S15",
+      "role": "temporal_place_names_and_crosswalks",
+      "candidate_release": "per_dataset_snapshot_required",
+      "coverage_start": null,
+      "coverage_end": null,
+      "license": null,
+      "license_status": "mixed_per_source_plus_whg_cc_by_nc_4_overlay",
+      "urls": [
+        "https://whgazetteer.org/public_data/",
+        "https://docs.whgazetteer.org/content/technical/apis.html"
+      ],
+      "blockers": [
+        "select_individual_source_datasets",
+        "audit_each_source_license",
+        "pin_temporal_name_and_geometry_records"
+      ],
+      "notes": "Useful for historically scoped names, place identifiers, and reconciliation. It aggregates many licenses and is not a single globally reusable border dataset.",
+      "checked_at": "2026-09-20",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "pleiades",
+      "dossier": "S16",
+      "role": "ancient_place_names_and_locations",
+      "candidate_release": "versioned_dataset_export_to_select",
+      "coverage_start": null,
+      "coverage_end": null,
+      "license": "CC-BY-3.0",
+      "license_status": "publisher_dataset_terms_checked",
+      "urls": [
+        "https://pleiades.stoa.org/downloads"
+      ],
+      "blockers": [
+        "pin_dataset_export",
+        "profile_temporal_and_location_certainty",
+        "define_label_priority_and_crosswalks"
+      ],
+      "notes": "Authoritative open ancient-place gazetteer for names and locations, including explicitly unlocated places. It is not a polity-border source.",
+      "checked_at": "2026-09-20",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
       "id": "natural_earth",
       "dossier": "S10",
       "role": "basemap",

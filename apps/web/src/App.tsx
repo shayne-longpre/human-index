@@ -12,6 +12,7 @@ import { Legend } from './components/Legend';
 import { MapView } from './components/MapView';
 import { PopulationBar } from './components/PopulationBar';
 import { PopulationTimeline } from './components/PopulationTimeline';
+import { SourcesPage } from './components/SourcesPage';
 import {
   downloadUrl,
   loadMetricData,
@@ -70,6 +71,9 @@ function buildRows(
 }
 
 export function App() {
+  const [page] = useState<'atlas' | 'sources'>(() =>
+    new URLSearchParams(window.location.search).get('page') === 'sources' ? 'sources' : 'atlas',
+  );
   const [release, setRelease] = useState<ReleaseBase | null>(null);
   const [metricDatasets, setMetricDatasets] = useState<Partial<Record<MvpMetricId, MetricDataset>>>({});
   const [metricId, setMetricId] = useState<MvpMetricId>('population_total');
@@ -86,16 +90,45 @@ export function App() {
       .then((loaded) => {
         if (!active) return;
         validatePublishedMetrics(loaded.manifest.metrics);
+        const parameters = new URLSearchParams(window.location.search);
+        const requestedMetric = loaded.manifest.metrics.find(
+          (candidate) => candidate.id === parameters.get('metric'),
+        );
+        const requestedYear = Number(parameters.get('year'));
+        const requestedPlace = parameters.get('place');
         setRelease(loaded);
-        setMetricId(loaded.manifest.default_view.metric_id);
-        setYear(loaded.manifest.default_view.year);
+        setMetricId(requestedMetric?.id ?? loaded.manifest.default_view.metric_id);
+        setYear(
+          Number.isInteger(requestedYear) && loaded.population.years.includes(requestedYear)
+            ? requestedYear
+            : loaded.manifest.default_view.year,
+        );
+        setSelectedCode(
+          requestedPlace && loaded.entities.some((entity) => entity.code === requestedPlace)
+            ? requestedPlace
+            : null,
+        );
         setMetricDatasets({ population_total: loaded.population });
+        void loadMetricData('access_to_electricity', loaded.manifest).then((dataset) => {
+          if (active) {
+            setMetricDatasets((current) => ({ ...current, access_to_electricity: dataset }));
+          }
+        }).catch(() => undefined);
       })
       .catch((cause: unknown) => {
         if (active) setError(cause instanceof Error ? cause.message : 'The release could not be loaded');
       });
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    if (!release || page !== 'atlas') return;
+    const parameters = new URLSearchParams();
+    parameters.set('metric', metricId);
+    parameters.set('year', String(year));
+    if (selectedCode) parameters.set('place', selectedCode);
+    window.history.replaceState(null, '', `${window.location.pathname}?${parameters.toString()}`);
+  }, [metricId, page, release, selectedCode, year]);
 
   useEffect(() => {
     if (!release || metricDatasets[metricId]) return;
@@ -182,20 +215,23 @@ export function App() {
     Math.abs(candidate - year) < Math.abs(nearest - year) ? candidate : nearest,
   );
   const download = downloadUrl(metric.id, release.manifest);
+  const atlasUrl = `?metric=${metric.id}&year=${year}${selectedCode ? `&place=${selectedCode}` : ''}`;
 
   return (
     <div className="app-shell">
       <header className="site-header">
-        <a className="wordmark" href="#main-content" aria-label="Atlas of Humanity home">
+        <a className="wordmark" href={atlasUrl} aria-label="Atlas of Humanity home">
           <span className="wordmark-mark" aria-hidden="true">A</span>
           <span>Atlas of Humanity</span>
         </a>
-        <nav aria-label="Release links">
-          <a href="#sources">Sources</a>
-          <a href={download} download>Download data</a>
+        <nav className="site-tabs" aria-label="Primary navigation">
+          <a href={atlasUrl} aria-current={page === 'atlas' ? 'page' : undefined}>Atlas</a>
+          <a href="?page=sources" aria-current={page === 'sources' ? 'page' : undefined}>Sources</a>
+          {page === 'atlas' ? <a href={download} download>Download data</a> : null}
         </nav>
       </header>
 
+      {page === 'sources' ? <SourcesPage manifest={release.manifest} /> : (
       <main id="main-content">
         <section className="hero-copy">
           <div>
@@ -241,6 +277,7 @@ export function App() {
             metricLabel={metric.label}
             year={year}
             valueByCode={valueByCode}
+            loading={!currentDataset}
             caption={view.mapCaption}
             caution={view.mapCaution}
             selectedCode={selectedCode}
@@ -361,6 +398,7 @@ export function App() {
 
         {tableOpen ? <DataTable rows={rows} metric={metric} onSelect={select} /> : null}
       </main>
+      )}
 
       <footer>
         <span>Atlas release {release.manifest.release_id}</span>

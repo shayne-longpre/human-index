@@ -17,6 +17,7 @@ interface MapViewProps {
   metricLabel: string;
   year: number;
   valueByCode: ReadonlyMap<string, number | null>;
+  loading: boolean;
   caption: string;
   caution: string;
   selectedCode: string | null;
@@ -41,6 +42,7 @@ export function MapView({
   metricLabel,
   year,
   valueByCode,
+  loading,
   caption,
   caution,
   selectedCode,
@@ -50,6 +52,7 @@ export function MapView({
   const mapRef = useRef<MapLibreMap | null>(null);
   const overlayRef = useRef<MapboxOverlay | null>(null);
   const [fallback, setFallback] = useState(false);
+  const knownValueCount = Array.from(valueByCode.values()).filter((value) => value !== null).length;
 
   useEffect(() => {
     if (!elementRef.current || mapRef.current) return;
@@ -99,7 +102,7 @@ export function MapView({
     overlay.setProps({
       layers: [
         new GeoJsonLayer<CountryProperties>({
-          id: `atlas-${metricId}-${year}`,
+          id: `atlas-${metricId}-${year}-${knownValueCount}`,
           data: geometry,
           filled: true,
           stroked: true,
@@ -123,7 +126,7 @@ export function MapView({
         }),
       ],
     });
-  }, [geometry, metricId, onSelect, selectedCode, valueByCode, year]);
+  }, [geometry, knownValueCount, metricId, onSelect, selectedCode, valueByCode, year]);
 
   return (
     <div className="map-shell">
@@ -137,6 +140,12 @@ export function MapView({
         <div className="map-fallback" role="status">
           <span>Map rendering is unavailable.</span>
           <p>The complete data remain available in the accessible table below.</p>
+        </div>
+      ) : null}
+      {loading ? (
+        <div className="map-loading" role="status">
+          <span className="loading-mark" aria-hidden="true" />
+          Loading {metricLabel.toLocaleLowerCase()} observations…
         </div>
       ) : null}
       <div className="map-caption">

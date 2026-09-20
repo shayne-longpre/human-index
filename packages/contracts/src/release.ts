@@ -48,14 +48,59 @@ export interface PopulationUniverse {
   notes: string[];
 }
 
+export interface PublishedSourceRelease {
+  id: string;
+  publisher: string;
+  retrieved_on: string;
+  license: string;
+  source_update?: string;
+  profile?: Record<string, unknown>;
+}
+
+export interface AlternativeSource {
+  id: string;
+  role: string;
+  status: string;
+  url: string;
+  coverage?: string;
+  reason_deferred: string;
+}
+
+export interface PublishedTaxonomy {
+  id: string;
+  families: Array<{ id: string; label: string }>;
+}
+
+export interface PublishedTransformation {
+  id: string;
+  version: string;
+  input_artifact_ids: string[];
+  parameters: Record<string, unknown>;
+  validation: Record<string, unknown>;
+  output_artifacts: Record<string, { bytes: number; sha256: string }>;
+}
+
 export interface AtlasReleaseManifest {
   schema_version: string;
   release_id: string;
   status: string;
   published_on: string;
   default_view: { metric_id: MvpMetricId; year: number };
+  taxonomies: PublishedTaxonomy[];
   metrics: PublishedMetric[];
   population_universes: PopulationUniverse[];
+  display_geometry: {
+    source: string;
+    version: string;
+    scale: string;
+    purpose: string;
+    feature_count: number;
+    crosswalks: Record<string, unknown>;
+  };
+  source_releases: PublishedSourceRelease[];
+  alternative_sources: AlternativeSource[];
+  transformations: PublishedTransformation[];
+  artifacts: Record<string, { bytes: number; sha256: string }>;
   citations: Array<{ label: string; url: string; license: string }>;
   limitations: string[];
 }

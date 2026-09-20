@@ -9,6 +9,10 @@ through 2025 and electricity access for every observed year from 1990 through
 2024. Both use the same 217-entity nonaggregate metadata universe. The UI has a
 metric switcher, exact-year timeline and playback, choropleth, metric-specific
 population summary, place inspector, accessible table, and full-series CSVs.
+Metric, year, and selected place are retained in the URL. A dedicated Sources
+page separates published release inputs from candidate and blocked research
+sources. The electricity dataset is prefetched; while any selected metric loads,
+the map shows an explicit loading state rather than an all-unknown gray frame.
 
 The statistical universe is the set of World Bank API entities whose country
 metadata does not mark the entity as an aggregate and that have a 2024 population
@@ -62,6 +66,11 @@ published view manifest.
 The next expansion should add a new source adapter and metric definition only
 after its source release, universe, temporal policy, and aggregation meaning are
 audited. No service or generalized plugin infrastructure is needed yet.
+
+For the next map capability, the bounded implementation target is a small,
+genuine-data Cliopatria fixture rendered as a toggleable, display-only historical
+context layer. The full source and annotation sequence is specified in
+`DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.
 
 ## Renderer spike note
 
