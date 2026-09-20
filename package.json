@@ -1,0 +1,38 @@
+{
+  "name": "atlas-of-humanity",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "vite --config apps/web/vite.config.ts",
+    "build": "tsc --noEmit && vite build --config apps/web/vite.config.ts",
+    "data:acquire": "python3 -m pipelines.atlas_etl.acquire_initial_sources --output data/raw",
+    "data:build": "python3 -m pipelines.atlas_etl.build_mvp_release --electricity data/raw/world_bank/2026-09-20/electricity.json --population data/raw/world_bank/2026-09-20/population.json --countries data/raw/world_bank/2026-09-20/countries.json --geometry data/raw/natural_earth/v5.1.2/ne_110m_admin_0_countries.geojson --output apps/web/public/atlas/releases/world-bank-mvp-2026-09-20-r1 --lockfile data/registry/source-lock.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@deck.gl/core": "9.4.0",
+    "@deck.gl/layers": "9.4.0",
+    "@deck.gl/mapbox": "9.4.0",
+    "@loaders.gl/core": "4.4.5",
+    "maplibre-gl": "6.10.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/geojson": "7946.0.16",
+    "@types/node": "22.10.5",
+    "@types/react": "19.0.8",
+    "@types/react-dom": "19.0.3",
+    "@vitejs/plugin-react": "4.3.4",
+    "typescript": "5.7.3",
+    "vite": "6.1.0",
+    "vitest": "3.0.5"
+  }
+}

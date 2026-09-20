@@ -1,0 +1,21 @@
+node_modules/
+.pnpm-store/
+dist/
+.vite/
+coverage/
+playwright-report/
+test-results/
+
+# Acquired source artifacts and reproducible intermediates stay local.
+data/raw/
+data/derived/
+
+# Python caches and local environments.
+__pycache__/
+*.py[cod]
+.venv/
+.python-version
+
+# OS/editor files.
+.DS_Store
+*.swp

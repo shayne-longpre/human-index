@@ -1,0 +1,142 @@
+{
+  "status": "synthetic_test_inputs_only_not_historical_data",
+  "schema_version": "0.1.0",
+  "date_convention": {
+    "source": "signed_historical_years_without_zero",
+    "internal": "astronomical_years",
+    "conversions": [
+      {
+        "source": -2,
+        "internal": -1,
+        "display": "2 BCE"
+      },
+      {
+        "source": -1,
+        "internal": 0,
+        "display": "1 BCE"
+      },
+      {
+        "source": 1,
+        "internal": 1,
+        "display": "1 CE"
+      }
+    ],
+    "inclusive_interval": {
+      "source_start": -1,
+      "source_end": 1,
+      "internal_start": 0,
+      "internal_end_exclusive": 2,
+      "duration_years": 2
+    },
+    "unexpected_source_zero": "quarantine_until_convention_verified"
+  },
+  "prevalence": {
+    "units": [
+      {
+        "id": "synthetic-a",
+        "population": 100,
+        "rate": 0.5
+      },
+      {
+        "id": "synthetic-b",
+        "population": 200,
+        "rate": 0.25
+      },
+      {
+        "id": "synthetic-c",
+        "population": 300,
+        "rate": null
+      }
+    ],
+    "expected": {
+      "population": 600,
+      "with": 100,
+      "without": 200,
+      "unknown": 300,
+      "coverage_fraction": 0.5,
+      "with_fraction_full_universe": 0.16666666666666666,
+      "with_fraction_known": 0.3333333333333333
+    }
+  },
+  "context_distribution": {
+    "units": [
+      {
+        "id": "synthetic-a",
+        "population": 100,
+        "territorial_mean": 10
+      },
+      {
+        "id": "synthetic-b",
+        "population": 200,
+        "territorial_mean": 30
+      },
+      {
+        "id": "synthetic-c",
+        "population": 300,
+        "territorial_mean": null
+      }
+    ],
+    "bins": [
+      {
+        "min_inclusive": 0,
+        "max_exclusive": 20
+      },
+      {
+        "min_inclusive": 20,
+        "max_exclusive": 40
+      }
+    ],
+    "expected": {
+      "bin_populations": [
+        100,
+        200
+      ],
+      "unknown": 300,
+      "forbidden_label": "distribution of individual incomes"
+    }
+  },
+  "overlap_case": {
+    "records": [
+      {
+        "id": "synthetic-member-a",
+        "type": "POLITY",
+        "population": 100
+      },
+      {
+        "id": "synthetic-member-b",
+        "type": "POLITY",
+        "population": 200
+      },
+      {
+        "id": "synthetic-alliance",
+        "type": "RELATION",
+        "population": 300
+      }
+    ],
+    "expected_exclusive_total": 300,
+    "forbidden_naive_total": 600,
+    "additional_requirement": "POLITY overlaps still require review"
+  },
+  "calibration": {
+    "raw_cell_counts": [
+      10,
+      20,
+      30
+    ],
+    "target_statistical_population": 120,
+    "expected_calibrated_cell_counts": [
+      20,
+      40,
+      60
+    ],
+    "expected_raw_preserved_total": 60
+  },
+  "zero_spatial_denominator": {
+    "raw_cell_counts": [
+      0,
+      0
+    ],
+    "target_statistical_population": 100,
+    "expected": "unplaced_population_100_no_division_no_invented_location"
+  }
+}

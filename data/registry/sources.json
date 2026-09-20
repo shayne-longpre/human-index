@@ -1,0 +1,291 @@
+{
+  "schema_version": "0.2.0",
+  "status": "research_registry_not_ingestion_lockfile",
+  "sources": [
+    {
+      "id": "cliopatria",
+      "dossier": "S1",
+      "role": "historical_context_geometry",
+      "candidate_release": "v0.2.0",
+      "coverage_start": "3400 BCE",
+      "coverage_end": "2024 CE",
+      "license": "CC-BY-4.0",
+      "license_status": "publisher_and_pinned_license_checked",
+      "urls": [
+        "https://zenodo.org/records/20274630",
+        "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/README.md",
+        "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/LICENSE.md"
+      ],
+      "blockers": [
+        "acquire_pinned_data",
+        "audit_year_convention",
+        "profile_geometry_and_overlaps"
+      ],
+      "notes": "RELATION excluded from exclusive demographic assignment; POLITY still needs overlap review.",
+      "checked_at": "2026-09-19",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "hyde",
+      "dossier": "S2",
+      "role": "population_grid",
+      "candidate_release": "3.5",
+      "coverage_start": "10000 BCE",
+      "coverage_end": "2025 CE",
+      "license": null,
+      "license_status": "artifact_terms_unverified",
+      "urls": [
+        "https://landuse.sites.uu.nl/datasets/",
+        "https://public.yoda.uu.nl/geo/UU01/F45D44.html"
+      ],
+      "blockers": [
+        "authorized_archive_access",
+        "verify_artifact_license",
+        "verify_population_variables_units_years_masks_scenarios"
+      ],
+      "notes": "Provider-listed range/resolution; not proof of all-variable coverage or direct local observations.",
+      "checked_at": "2026-09-19",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "un_wpp_2024",
+      "dossier": "S12",
+      "role": "detailed_population_estimates_and_projections",
+      "candidate_release": "2024",
+      "coverage_start": "1950 CE",
+      "coverage_end": "2100 CE",
+      "license": null,
+      "license_status": "exact_bulk_artifact_terms_require_audit",
+      "urls": [
+        "https://population.un.org/wpp/",
+        "https://www.un.org/development/desa/pd/content/World-Population-Prospects-2024"
+      ],
+      "blockers": [
+        "pin_bulk_artifact_and_terms",
+        "separate_estimates_projections_and_scenarios",
+        "audit_territories_and_crosswalks"
+      ],
+      "notes": "Preferred detailed direct population expansion source; documented but intentionally not merged into the World Bank MVP.",
+      "checked_at": "2026-09-20",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "world_bank_electricity",
+      "dossier": "S3",
+      "role": "person_prevalence",
+      "candidate_release": "retrieval_snapshot_required",
+      "coverage_start": "1960 CE for population; 1990 CE for electricity",
+      "coverage_end": "2025 CE for population; 2024 CE for electricity",
+      "license": "CC-BY-4.0",
+      "license_status": "indicator_page_checked",
+      "urls": [
+        "https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS",
+        "https://datahelpdesk.worldbank.org/knowledgebase/articles/898581-api-basic-call-structures"
+      ],
+      "indicators": [
+        "EG.ELC.ACCS.ZS",
+        "SP.POP.TOTL"
+      ],
+      "blockers": [
+        "review_parent_and_dependent_territory_partition"
+      ],
+      "notes": "API rows and metadata acquired/profiled for the full MVP windows. The app publishes annual population for 1960-2025 and electricity for actual observation years 1990-2024. Aggregates are excluded; WLD is reference-only and the residual is explicit. Do not imply local density or household identification. See data/registry/source-lock.json.",
+      "checked_at": "2026-09-20",
+      "verification_level": "artifact_acquired_and_profiled",
+      "downloaded": true,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "maddison",
+      "dossier": "S4",
+      "role": "context_distribution",
+      "candidate_release": "2023",
+      "coverage_start": null,
+      "coverage_end": "2022 CE",
+      "license": "CC-BY-4.0",
+      "license_status": "release_page_checked",
+      "urls": [
+        "https://www.rug.nl/ggdc/historicaldevelopment/maddison/releases/maddison-project-database-2023?lang=en",
+        "https://doi.org/10.34894/INZBF2"
+      ],
+      "blockers": [
+        "acquire_workbook",
+        "read_source_sheet",
+        "verify_units_ppp_and_territories"
+      ],
+      "notes": "Graphical use requires original source-sheet citations; not individual income.",
+      "checked_at": "2026-09-19",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "seshat",
+      "dossier": "S5",
+      "role": "historical_context_facts",
+      "candidate_release": "authorized_public_release_to_select",
+      "coverage_start": null,
+      "coverage_end": null,
+      "license": "CC-BY-SA-4.0",
+      "license_status": "current_public_data_terms_checked",
+      "urls": [
+        "https://seshat-db.com/terms/current/",
+        "https://seshat-db.com/sc/scvars/",
+        "https://seshat-db.com/downloads_page/"
+      ],
+      "blockers": [
+        "authorized_access_and_consent",
+        "pin_public_snapshot",
+        "verify_populated_variables",
+        "review_entity_time_links"
+      ],
+      "notes": "Research sample; preserve native status values; no automatic global extrapolation.",
+      "checked_at": "2026-09-19",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "vdem",
+      "dossier": "S6",
+      "role": "institutional_source_reference",
+      "candidate_release": "16",
+      "coverage_start": null,
+      "coverage_end": null,
+      "license": "CC-BY-SA-4.0",
+      "license_status": "dataset_page_checked",
+      "urls": [
+        "https://www.v-dem.net/data/the-v-dem-dataset/",
+        "https://www.v-dem.net/about/historical-v-dem/"
+      ],
+      "blockers": [
+        "acquire_codebook_and_release",
+        "select_descriptive_variables",
+        "verify_denominators_and_country_units"
+      ],
+      "notes": "No cross-release splicing; external composite indexes linked rather than used for Atlas verdicts.",
+      "checked_at": "2026-09-19",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "clio_infra",
+      "dossier": "S7",
+      "role": "historical_context_series",
+      "candidate_release": "per_indicator_snapshot_required",
+      "coverage_start": null,
+      "coverage_end": null,
+      "license": null,
+      "license_status": "artifact_terms_unverified",
+      "urls": [
+        "https://clio-infra.eu/",
+        "https://clio-infra.eu/Indicators/LifeExpectancyatBirthTotal.html"
+      ],
+      "blockers": [
+        "verify_per_artifact_terms",
+        "acquire_series_and_quality_codes",
+        "audit_2012_boundary_support"
+      ],
+      "notes": "An early catalog date is not dense or global coverage.",
+      "checked_at": "2026-09-19",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "ucdp",
+      "dossier": "S8",
+      "role": "events",
+      "candidate_release": "26.1",
+      "coverage_start": null,
+      "coverage_end": "2025 CE",
+      "license": "CC-BY-4.0",
+      "license_status": "download_center_checked",
+      "urls": [
+        "https://ucdp.uu.se/downloads/"
+      ],
+      "blockers": [
+        "select_specific_product",
+        "acquire_codebook",
+        "verify_temporal_spatial_and_event_coverage"
+      ],
+      "notes": "No automatic exposure prevalence; final and candidate data must remain distinct.",
+      "checked_at": "2026-09-19",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "owid_life_expectancy",
+      "dossier": "S9",
+      "role": "context_distribution",
+      "candidate_release": "retrieval_snapshot_required",
+      "coverage_start": null,
+      "coverage_end": null,
+      "license": null,
+      "license_status": "underlying_source_terms_require_audit",
+      "urls": [
+        "https://ourworldindata.org/grapher/life-expectancy",
+        "https://ourworldindata.org/grapher/life-expectancy.metadata.json?v=1&csvType=full&useColumnShortNames=false"
+      ],
+      "blockers": [
+        "fetch_data_and_metadata_together",
+        "verify_underlying_terms",
+        "profile_geography_and_years"
+      ],
+      "notes": "Do not confuse processed data rights with visualization software rights.",
+      "checked_at": "2026-09-19",
+      "verification_level": "documentation_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "natural_earth",
+      "dossier": "S10",
+      "role": "basemap",
+      "candidate_release": "specific_artifact_to_pin",
+      "coverage_start": null,
+      "coverage_end": null,
+      "license": "public-domain",
+      "license_status": "publisher_terms_checked",
+      "urls": [
+        "https://www.naturalearthdata.com/about/terms-of-use/"
+      ],
+      "blockers": [],
+      "notes": "v5.1.2 1:110m admin-0 GeoJSON acquired for display only; checksum is pinned in data/registry/source-lock.json. Modern coastline remains an explicit approximation in deep-time mode.",
+      "checked_at": "2026-09-19",
+      "verification_level": "artifact_acquired_and_profiled",
+      "downloaded": true,
+      "artifact_sha256": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f",
+      "terms_snapshot_sha256": null,
+      "release_ready": true
+    }
+  ]
+}

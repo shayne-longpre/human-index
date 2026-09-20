@@ -1,0 +1,218 @@
+code,name,region,income_group,year,population,electricity_access_percent,electricity_status,map_status
+ABW,Aruba,Latin America & Caribbean ,High income,2024,107995,100,known,unplaced
+AFG,Afghanistan,"Middle East, North Africa, Afghanistan & Pakistan",Low income,2024,42647492,87.8,known,placed
+AGO,Angola,Sub-Saharan Africa ,Lower middle income,2024,37885849,55.5,known,placed
+ALB,Albania,Europe & Central Asia,Upper middle income,2024,2377128,100,known,placed
+AND,Andorra,Europe & Central Asia,High income,2024,81938,100,known,unplaced
+ARE,United Arab Emirates,"Middle East, North Africa, Afghanistan & Pakistan",High income,2024,10986400,100,known,placed
+ARG,Argentina,Latin America & Caribbean ,Upper middle income,2024,45696159,98.4,known,placed
+ARM,Armenia,Europe & Central Asia,Upper middle income,2024,3033500,100,known,placed
+ASM,American Samoa,East Asia & Pacific,High income,2024,46765,,unknown,unplaced
+ATG,Antigua and Barbuda,Latin America & Caribbean ,High income,2024,93772,100,known,unplaced
+AUS,Australia,East Asia & Pacific,High income,2024,27194286,100,known,placed
+AUT,Austria,Europe & Central Asia,High income,2024,9177982,100,known,placed
+AZE,Azerbaijan,Europe & Central Asia,Upper middle income,2024,10202830,100,known,placed
+BDI,Burundi,Sub-Saharan Africa ,Low income,2024,14047786,20.1,known,placed
+BEL,Belgium,Europe & Central Asia,High income,2024,11858610,100,known,placed
+BEN,Benin,Sub-Saharan Africa ,Lower middle income,2024,14462724,59,known,placed
+BFA,Burkina Faso,Sub-Saharan Africa ,Low income,2024,23548781,34,known,placed
+BGD,Bangladesh,South Asia,Lower middle income,2024,173562364,99.5,known,placed
+BGR,Bulgaria,Europe & Central Asia,High income,2024,6441421,100,known,placed
+BHR,Bahrain,"Middle East, North Africa, Afghanistan & Pakistan",High income,2024,1588670,100,known,unplaced
+BHS,"Bahamas, The",Latin America & Caribbean ,High income,2024,401283,100,known,placed
+BIH,Bosnia and Herzegovina,Europe & Central Asia,Upper middle income,2024,3164253,100,known,placed
+BLR,Belarus,Europe & Central Asia,Upper middle income,2024,9132629,100,known,placed
+BLZ,Belize,Latin America & Caribbean ,Upper middle income,2024,417072,99.6,known,placed
+BMU,Bermuda,North America,High income,2024,64636,100,known,unplaced
+BOL,Bolivia,Latin America & Caribbean ,Lower middle income,2024,12413315,96.6,known,placed
+BRA,Brazil,Latin America & Caribbean ,Upper middle income,2024,211998573,99.8,known,placed
+BRB,Barbados,Latin America & Caribbean ,High income,2024,282467,100,known,unplaced
+BRN,Brunei Darussalam,East Asia & Pacific,High income,2024,462721,100,known,placed
+BTN,Bhutan,South Asia,Lower middle income,2024,791524,100,known,placed
+BWA,Botswana,Sub-Saharan Africa ,Upper middle income,2024,2521139,80.2,known,placed
+CAF,Central African Republic,Sub-Saharan Africa ,Low income,2024,5330690,18.2,known,placed
+CAN,Canada,North America,High income,2024,41262329,100,known,placed
+CHE,Switzerland,Europe & Central Asia,High income,2024,9005582,100,known,placed
+CHI,Channel Islands,Europe & Central Asia,High income,2024,168126,100,known,unplaced
+CHL,Chile,Latin America & Caribbean ,High income,2024,19764771,99,known,placed
+CHN,China,East Asia & Pacific,Upper middle income,2024,1408975000,100,known,placed
+CIV,Cote d'Ivoire,Sub-Saharan Africa ,Lower middle income,2024,31934230,72.9,known,placed
+CMR,Cameroon,Sub-Saharan Africa ,Lower middle income,2024,29123744,72,known,placed
+COD,"Congo, Dem. Rep.",Sub-Saharan Africa ,Low income,2024,109276265,22.5,known,placed
+COG,"Congo, Rep.",Sub-Saharan Africa ,Lower middle income,2024,6332961,53,known,placed
+COL,Colombia,Latin America & Caribbean ,Upper middle income,2024,52886363,98.9,known,placed
+COM,Comoros,Sub-Saharan Africa ,Lower middle income,2024,866628,91.7,known,unplaced
+CPV,Cabo Verde,Sub-Saharan Africa ,Upper middle income,2024,524877,98.4,known,unplaced
+CRI,Costa Rica,Latin America & Caribbean ,High income,2024,5129910,99.8,known,placed
+CUB,Cuba,Latin America & Caribbean ,Upper middle income,2024,10979783,100,known,placed
+CUW,Curacao,Latin America & Caribbean ,High income,2024,155967,100,known,unplaced
+CYM,Cayman Islands,Latin America & Caribbean ,High income,2024,74457,100,known,unplaced
+CYP,Cyprus,Europe & Central Asia,High income,2024,1358282,100,known,placed
+CZE,Czechia,Europe & Central Asia,High income,2024,10905028,100,known,placed
+DEU,Germany,Europe & Central Asia,High income,2024,83516593,100,known,placed
+DJI,Djibouti,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,2024,1168722,69.2,known,placed
+DMA,Dominica,Latin America & Caribbean ,Upper middle income,2024,66205,100,known,unplaced
+DNK,Denmark,Europe & Central Asia,High income,2024,5976992,100,known,placed
+DOM,Dominican Republic,Latin America & Caribbean ,Upper middle income,2024,11427557,99.5,known,placed
+DZA,Algeria,"Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,2024,46814308,100,known,placed
+ECU,Ecuador,Latin America & Caribbean ,Upper middle income,2024,18135478,98.5,known,placed
+EGY,"Egypt, Arab Rep.","Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,2024,116538258,100,known,placed
+ERI,Eritrea,Sub-Saharan Africa ,Low income,2024,3535603,55.3,known,placed
+ESP,Spain,Europe & Central Asia,High income,2024,48848840,100,known,placed
+EST,Estonia,Europe & Central Asia,High income,2024,1372341,100,known,placed
+ETH,Ethiopia,Sub-Saharan Africa ,Low income,2024,132059767,56.6,known,placed
+FIN,Finland,Europe & Central Asia,High income,2024,5619911,100,known,placed
+FJI,Fiji,East Asia & Pacific,Upper middle income,2024,928784,95.9,known,placed
+FRA,France,Europe & Central Asia,High income,2024,68551653,100,known,placed
+FRO,Faroe Islands,Europe & Central Asia,High income,2024,54640,100,known,unplaced
+FSM,"Micronesia, Fed. Sts.",East Asia & Pacific,Upper middle income,2024,113160,88.9,known,unplaced
+GAB,Gabon,Sub-Saharan Africa ,Upper middle income,2024,2538952,95.1,known,placed
+GBR,United Kingdom,Europe & Central Asia,High income,2024,69281000,100,known,placed
+GEO,Georgia,Europe & Central Asia,Upper middle income,2024,3812518,100,known,placed
+GHA,Ghana,Sub-Saharan Africa ,Lower middle income,2024,34427414,91.9,known,placed
+GIB,Gibraltar,Europe & Central Asia,High income,2024,39329,100,known,unplaced
+GIN,Guinea,Sub-Saharan Africa ,Lower middle income,2024,14754785,53.8,known,placed
+GMB,"Gambia, The",Sub-Saharan Africa ,Low income,2024,2759988,69,known,placed
+GNB,Guinea-Bissau,Sub-Saharan Africa ,Low income,2024,2201352,43.7,known,placed
+GNQ,Equatorial Guinea,Sub-Saharan Africa ,Upper middle income,2024,1892516,65.1,known,placed
+GRC,Greece,Europe & Central Asia,High income,2024,10405134,100,known,placed
+GRD,Grenada,Latin America & Caribbean ,Upper middle income,2024,117207,95.6,known,unplaced
+GRL,Greenland,Europe & Central Asia,High income,2024,56836,100,known,placed
+GTM,Guatemala,Latin America & Caribbean ,Upper middle income,2024,18406359,90.9,known,placed
+GUM,Guam,East Asia & Pacific,High income,2024,167777,100,known,unplaced
+GUY,Guyana,Latin America & Caribbean ,High income,2024,831087,93,known,placed
+HKG,"Hong Kong SAR, China",East Asia & Pacific,High income,2024,7524100,100,known,unplaced
+HND,Honduras,Latin America & Caribbean ,Lower middle income,2024,10825703,95.5,known,placed
+HRV,Croatia,Europe & Central Asia,High income,2024,3866200,100,known,placed
+HTI,Haiti,Latin America & Caribbean ,Lower middle income,2024,11772557,53.9,known,placed
+HUN,Hungary,Europe & Central Asia,High income,2024,9562065,100,known,placed
+IDN,Indonesia,East Asia & Pacific,Upper middle income,2024,283487931,99.9,known,placed
+IMN,Isle of Man,Europe & Central Asia,High income,2024,84160,100,known,unplaced
+IND,India,South Asia,Lower middle income,2024,1450935791,99.9,known,placed
+IRL,Ireland,Europe & Central Asia,High income,2024,5395790,100,known,placed
+IRN,"Iran, Islamic Rep.","Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,2024,91567738,100,known,placed
+IRQ,Iraq,"Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,2024,46042015,100,known,placed
+ISL,Iceland,Europe & Central Asia,High income,2024,386506,100,known,placed
+ISR,Israel,"Middle East, North Africa, Afghanistan & Pakistan",High income,2024,10002200,100,known,placed
+ITA,Italy,Europe & Central Asia,High income,2024,58952704,100,known,placed
+JAM,Jamaica,Latin America & Caribbean ,Upper middle income,2024,2839175,97.7,known,placed
+JOR,Jordan,"Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,2024,11552876,100,known,placed
+JPN,Japan,East Asia & Pacific,High income,2024,123975371,100,known,placed
+KAZ,Kazakhstan,Europe & Central Asia,Upper middle income,2024,20592571,100,known,placed
+KEN,Kenya,Sub-Saharan Africa ,Lower middle income,2024,56432944,77,known,placed
+KGZ,Kyrgyz Republic,Europe & Central Asia,Lower middle income,2024,7221868,100,known,placed
+KHM,Cambodia,East Asia & Pacific,Lower middle income,2024,17638801,99.2,known,placed
+KIR,Kiribati,East Asia & Pacific,Lower middle income,2024,134518,97.7,known,unplaced
+KNA,St. Kitts and Nevis,Latin America & Caribbean ,High income,2024,46843,100,known,unplaced
+KOR,"Korea, Rep.",East Asia & Pacific,High income,2024,51751065,100,known,placed
+KWT,Kuwait,"Middle East, North Africa, Afghanistan & Pakistan",High income,2024,4897263,100,known,placed
+LAO,Lao PDR,East Asia & Pacific,Lower middle income,2024,7769819,96.5,known,placed
+LBN,Lebanon,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,2024,5805962,100,known,placed
+LBR,Liberia,Sub-Saharan Africa ,Low income,2024,5612817,34.9,known,placed
+LBY,Libya,"Middle East, North Africa, Afghanistan & Pakistan",Upper middle income,2024,7381023,77.4,known,placed
+LCA,St. Lucia,Latin America & Caribbean ,Upper middle income,2024,179744,100,known,unplaced
+LIE,Liechtenstein,Europe & Central Asia,High income,2024,40450,100,known,unplaced
+LKA,Sri Lanka,South Asia,Upper middle income,2024,21916000,100,known,placed
+LSO,Lesotho,Sub-Saharan Africa ,Lower middle income,2024,2337423,60.6,known,placed
+LTU,Lithuania,Europe & Central Asia,High income,2024,2888278,100,known,placed
+LUX,Luxembourg,Europe & Central Asia,High income,2024,677012,100,known,placed
+LVA,Latvia,Europe & Central Asia,High income,2024,1866124,100,known,placed
+MAC,"Macao SAR, China",East Asia & Pacific,High income,2024,687000,100,known,unplaced
+MAF,St. Martin (French part),Latin America & Caribbean ,High income,2024,26129,100,known,unplaced
+MAR,Morocco,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,2024,38081173,100,known,placed
+MCO,Monaco,Europe & Central Asia,High income,2024,38631,100,known,unplaced
+MDA,Moldova,Europe & Central Asia,Upper middle income,2024,2402306,100,known,placed
+MDG,Madagascar,Sub-Saharan Africa ,Low income,2024,31964956,42.5,known,placed
+MDV,Maldives,South Asia,Upper middle income,2024,527799,100,known,unplaced
+MEX,Mexico,Latin America & Caribbean ,Upper middle income,2024,130861007,99.8,known,placed
+MHL,Marshall Islands,East Asia & Pacific,Upper middle income,2024,37548,97.2,known,unplaced
+MKD,North Macedonia,Europe & Central Asia,Upper middle income,2024,1824359,100,known,placed
+MLI,Mali,Sub-Saharan Africa ,Low income,2024,24478595,49.5,known,placed
+MLT,Malta,"Middle East, North Africa, Afghanistan & Pakistan",High income,2024,568847,100,known,unplaced
+MMR,Myanmar,East Asia & Pacific,Lower middle income,2024,54500091,80.4,known,placed
+MNE,Montenegro,Europe & Central Asia,Upper middle income,2024,623525,100,known,placed
+MNG,Mongolia,East Asia & Pacific,Upper middle income,2024,3524788,99.1,known,placed
+MNP,Northern Mariana Islands,East Asia & Pacific,High income,2024,44278,100,known,unplaced
+MOZ,Mozambique,Sub-Saharan Africa ,Low income,2024,34631766,36.9,known,placed
+MRT,Mauritania,Sub-Saharan Africa ,Lower middle income,2024,5169395,52.2,known,placed
+MUS,Mauritius,Sub-Saharan Africa ,Upper middle income,2024,1245779,100,known,unplaced
+MWI,Malawi,Sub-Saharan Africa ,Low income,2024,21655286,15.6,known,placed
+MYS,Malaysia,East Asia & Pacific,Upper middle income,2024,35557673,100,known,placed
+NAM,Namibia,Sub-Saharan Africa ,Lower middle income,2024,3030131,59.3,known,placed
+NCL,New Caledonia,East Asia & Pacific,High income,2024,292639,100,known,placed
+NER,Niger,Sub-Saharan Africa ,Low income,2024,27032412,21.3,known,placed
+NGA,Nigeria,Sub-Saharan Africa ,Lower middle income,2024,232679478,62.5,known,placed
+NIC,Nicaragua,Latin America & Caribbean ,Lower middle income,2024,6916140,88.7,known,placed
+NLD,Netherlands,Europe & Central Asia,High income,2024,17993485,100,known,placed
+NOR,Norway,Europe & Central Asia,High income,2024,5572279,100,known,placed
+NPL,Nepal,South Asia,Lower middle income,2024,29651054,97.9,known,placed
+NRU,Naoero,East Asia & Pacific,High income,2024,11947,100,known,unplaced
+NZL,New Zealand,East Asia & Pacific,High income,2024,5290000,100,known,placed
+OMN,Oman,"Middle East, North Africa, Afghanistan & Pakistan",High income,2024,5281538,100,known,placed
+PAK,Pakistan,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,2024,251269164,95.7,known,placed
+PAN,Panama,Latin America & Caribbean ,High income,2024,4515577,96,known,placed
+PER,Peru,Latin America & Caribbean ,Upper middle income,2024,34217848,96.5,known,placed
+PHL,Philippines,East Asia & Pacific,Upper middle income,2024,115843670,94.8,known,placed
+PLW,Palau,East Asia & Pacific,High income,2024,17695,100,known,unplaced
+PNG,Papua New Guinea,East Asia & Pacific,Lower middle income,2024,10576502,43.3,known,placed
+POL,Poland,Europe & Central Asia,High income,2024,36559233,100,known,placed
+PRI,Puerto Rico (US),Latin America & Caribbean ,High income,2024,3202521,100,known,placed
+PRK,"Korea, Dem. People's Rep.",East Asia & Pacific,Low income,2024,26498823,61.4,known,placed
+PRT,Portugal,Europe & Central Asia,High income,2024,10694681,100,known,placed
+PRY,Paraguay,Latin America & Caribbean ,Upper middle income,2024,6929153,99.8,known,placed
+PSE,West Bank and Gaza,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,2024,5289152,100,known,placed
+PYF,French Polynesia,East Asia & Pacific,High income,2024,281807,100,known,unplaced
+QAT,Qatar,"Middle East, North Africa, Afghanistan & Pakistan",High income,2024,2857822,100,known,placed
+ROU,Romania,Europe & Central Asia,High income,2024,19051804,100,known,placed
+RUS,Russian Federation,Europe & Central Asia,High income,2024,143669648,100,known,placed
+RWA,Rwanda,Sub-Saharan Africa ,Low income,2024,14256567,72,known,placed
+SAU,Saudi Arabia,"Middle East, North Africa, Afghanistan & Pakistan",High income,2024,35300280,100,known,placed
+SDN,Sudan,Sub-Saharan Africa ,Low income,2024,50448963,66,known,placed
+SEN,Senegal,Sub-Saharan Africa ,Lower middle income,2024,18501984,82.9,known,placed
+SGP,Singapore,East Asia & Pacific,High income,2024,6036860,100,known,unplaced
+SLB,Solomon Islands,East Asia & Pacific,Lower middle income,2024,819198,81.5,known,placed
+SLE,Sierra Leone,Sub-Saharan Africa ,Low income,2024,8642022,39.2,known,placed
+SLV,El Salvador,Latin America & Caribbean ,Upper middle income,2024,6338193,98.7,known,placed
+SMR,San Marino,Europe & Central Asia,High income,2024,33977,100,known,unplaced
+SOM,"Somalia, Fed. Rep.",Sub-Saharan Africa ,Low income,2024,19009151,54.4,known,placed
+SRB,Serbia,Europe & Central Asia,Upper middle income,2024,6586476,100,known,placed
+SSD,South Sudan,Sub-Saharan Africa ,Low income,2024,11943408,5.4,known,placed
+STP,Sao Tome and Principe,Sub-Saharan Africa ,Lower middle income,2024,235536,77.7,known,unplaced
+SUR,Suriname,Latin America & Caribbean ,Upper middle income,2024,634431,99,known,placed
+SVK,Slovak Republic,Europe & Central Asia,High income,2024,5422069,100,known,placed
+SVN,Slovenia,Europe & Central Asia,High income,2024,2127400,100,known,placed
+SWE,Sweden,Europe & Central Asia,High income,2024,10569709,100,known,placed
+SWZ,Eswatini,Sub-Saharan Africa ,Lower middle income,2024,1242822,89.3,known,placed
+SXM,Sint Maarten (Dutch part),Latin America & Caribbean ,High income,2024,43350,100,known,unplaced
+SYC,Seychelles,Sub-Saharan Africa ,High income,2024,121354,100,known,unplaced
+SYR,Syrian Arab Republic,"Middle East, North Africa, Afghanistan & Pakistan",Low income,2024,24672760,89.3,known,placed
+TCA,Turks and Caicos Islands,Latin America & Caribbean ,High income,2024,46535,100,known,unplaced
+TCD,Chad,Sub-Saharan Africa ,Low income,2024,20299123,13.4,known,placed
+TGO,Togo,Sub-Saharan Africa ,Lower middle income,2024,8406558,61.1,known,placed
+THA,Thailand,East Asia & Pacific,Upper middle income,2024,71668011,100,known,placed
+TJK,Tajikistan,Europe & Central Asia,Lower middle income,2024,10590927,99.9,known,placed
+TKM,Turkmenistan,Europe & Central Asia,Upper middle income,2024,7494498,100,known,placed
+TLS,Timor-Leste,East Asia & Pacific,Lower middle income,2024,1400638,94.3,known,placed
+TON,Tonga,East Asia & Pacific,Upper middle income,2024,104175,100,known,unplaced
+TTO,Trinidad and Tobago,Latin America & Caribbean ,High income,2024,1368333,100,known,placed
+TUN,Tunisia,"Middle East, North Africa, Afghanistan & Pakistan",Lower middle income,2024,12277109,100,known,placed
+TUR,Turkiye,Europe & Central Asia,Upper middle income,2024,85518661,100,known,placed
+TUV,Tuvalu,East Asia & Pacific,Upper middle income,2024,9646,100,known,unplaced
+TZA,Tanzania,Sub-Saharan Africa ,Lower middle income,2024,68560157,52.4,known,placed
+UGA,Uganda,Sub-Saharan Africa ,Low income,2024,50015092,55.3,known,placed
+UKR,Ukraine,Europe & Central Asia,Upper middle income,2024,37860221,100,known,placed
+URY,Uruguay,Latin America & Caribbean ,High income,2024,3386588,100,known,placed
+USA,United States,North America,High income,2024,340003797,100,known,placed
+UZB,Uzbekistan,Europe & Central Asia,Lower middle income,2024,36361859,100,known,placed
+VCT,St. Vincent and the Grenadines,Latin America & Caribbean ,Upper middle income,2024,100616,100,known,unplaced
+VEN,"Venezuela, RB",Latin America & Caribbean ,Lower middle income,2024,28405543,100,known,placed
+VGB,British Virgin Islands,Latin America & Caribbean ,High income,2024,39471,100,known,unplaced
+VIR,Virgin Islands (U.S.),Latin America & Caribbean ,High income,2024,104377,100,known,unplaced
+VNM,Viet Nam,East Asia & Pacific,Upper middle income,2024,100987686,100,known,placed
+VUT,Vanuatu,East Asia & Pacific,Lower middle income,2024,327777,65.5,known,placed
+WSM,Samoa,East Asia & Pacific,Upper middle income,2024,218019,100,known,unplaced
+XKX,Kosovo,Europe & Central Asia,Upper middle income,2024,1594353,,unknown,placed
+YEM,"Yemen, Rep.","Middle East, North Africa, Afghanistan & Pakistan",Low income,2024,40583164,86.3,known,placed
+ZAF,South Africa,Sub-Saharan Africa ,Upper middle income,2024,64007187,90.2,known,placed
+ZMB,Zambia,Sub-Saharan Africa ,Lower middle income,2024,21314956,53.6,known,placed
+ZWE,Zimbabwe,Sub-Saharan Africa ,Lower middle income,2024,16634373,62,known,placed

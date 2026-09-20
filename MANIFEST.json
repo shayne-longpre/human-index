@@ -1,0 +1,77 @@
+{
+  "package": "Atlas of Humanity \u2014 original research handoff manifest",
+  "prepared_on": "2026-09-19",
+  "file_hash_scope": "original handoff files before implementation; see data/registry/source-lock.json and the published release manifest for current artifact hashes",
+  "application_implemented": true,
+  "source_archives_ingested": false,
+  "source_artifacts_acquired": true,
+  "implementation_report": "docs/BUILD_REPORT.md",
+  "validation_performed": [
+    "document code-fence balance",
+    "JSON syntax",
+    "local Markdown link checks",
+    "synthetic arithmetic/date fixture assertions"
+  ],
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "bytes": 4525,
+      "sha256": "70fa7c79790c8dfff44a2098f02c592b0fdf4f699be46ea7f15d87ce958775d5"
+    },
+    {
+      "path": "CODEX_PROMPT.md",
+      "bytes": 13235,
+      "sha256": "2d2b071d6fab72e793044cbdb91db9782c9bd93746dd48d68f5376e78bb0e058"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3790,
+      "sha256": "5ab28221bfa572d71341ab36d18571e9be8936526e7ff7446f1b5f8f915bf546"
+    },
+    {
+      "path": "data/registry/sources.json",
+      "bytes": 9254,
+      "sha256": "b8c11597b6779b08c7c57ff3fc37464c165e903073e0711c2be97a082c67bd97"
+    },
+    {
+      "path": "docs/ACCEPTANCE_TESTS.md",
+      "bytes": 6935,
+      "sha256": "3539cea7edfd93bdf7dc15d2346bf5dd3b66e73b89b3bc61c28fc93fc1e7f732"
+    },
+    {
+      "path": "docs/AI_EVIDENCE_PIPELINE.md",
+      "bytes": 3686,
+      "sha256": "5bac0d4327220f87f3995fcb66ba2f45c06c94dff22fd7d72eac69e89797238e"
+    },
+    {
+      "path": "docs/DATA_MODEL.md",
+      "bytes": 9812,
+      "sha256": "2405107743e85738b7787ef0c3fbf69942ae0bb3374acbae8d069596016d36ea"
+    },
+    {
+      "path": "docs/DESIGN.md",
+      "bytes": 8080,
+      "sha256": "735025e14ef4d897f7decc151fd5a4c3768b04c251c983614449c7ce5b00ee20"
+    },
+    {
+      "path": "docs/IMPLEMENTATION_PLAN.md",
+      "bytes": 10407,
+      "sha256": "b75351c96ffdce79796883dcadf54e644c60a0f8bf882de76c0a7f59e5b912cb"
+    },
+    {
+      "path": "docs/RESEARCH_AND_DECISIONS.md",
+      "bytes": 9229,
+      "sha256": "dd5f5134b4602489fe24011130a4f77fee4f0036bc804397eeb17d174ed77154"
+    },
+    {
+      "path": "docs/SOURCES.md",
+      "bytes": 13427,
+      "sha256": "4c054c2662756b9c8cde36060fbc2d030b52b4952c15fe86fd3d99b955b86559"
+    },
+    {
+      "path": "tests/semantic_contract_cases.json",
+      "bytes": 2978,
+      "sha256": "c1b9223abffe07fc96b0fe443c05ed0c55e1427bfe65e78796fca0a53d88e714"
+    }
+  ]
+}
