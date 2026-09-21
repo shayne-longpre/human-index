@@ -12,12 +12,12 @@ as national/territorial context with population-conserving fixed bins. Modern st
 metadata universe. Deep-time population has world support only and is never
 assigned to a historical polity.
 
-The UI has a metric switcher, exact-source-date timeline and playback,
+The UI has a metric switcher, one requested-date timeline and playback,
 choropleth, metric-specific population summary, modern and historical inspectors,
 accessible tables, and full-series CSVs. A toggleable Cliopatria v0.2.0 context
-layer switches among 36 genuine source snapshots spanning 3400 BCE–2024 CE. A
-dedicated political-snapshot scrubber makes those geometry/name changes directly
-controllable instead of hiding them behind metric dates. `RELATION` features are
+layer switches among 36 genuine source snapshots spanning 3400 BCE–2024 CE. The
+single slider combines evidence-change dates, while a status row reports each
+layer's independently resolved effective date or unavailability. `RELATION` features are
 excluded. A separate Modelski Ancient v2 layer publishes 621 exact-date city
 estimates for 154 source-geocoded points from 3700 BCE–1000 CE. Metric, year, and selected modern place are retained in the URL. A
 dedicated Sources page separates published release inputs
@@ -58,8 +58,15 @@ population that cannot be placed in the coarse geometry remain explicit.
 - The pinned Figshare Modelski Ancient v2 table is CC BY 4.0 and contains 154
   cities, 41 sparse source dates, and 621 estimates. Coordinates, modern-country
   labels, and geocode certainty codes are preserved as source metadata; no
-  interpolation or polity assignment is performed. Companion Chandler and
-  Modelski Modern tables remain documented alternatives for a later merge.
+  interpolation or polity assignment is performed. Companion Chandler v2 and
+  Modelski Modern v2 files are now acquired and profiled, but remain unpublished
+  pending a dated city-identity crosswalk, disagreement UI, and review of two
+  numeric-zero Chandler cells.
+- The official Maddison Project Database 2023 page verifies its CC BY 4.0 terms,
+  169-country coverage through 2022, and source-sheet citation requirement for
+  graphical use. Its DataverseNL workbook download is blocked by an anti-bot
+  challenge, so no workbook was acquired or bypassed and no income layer was
+  published.
 - UN World Population Prospects 2024 is documented as a more detailed direct
   expansion source, but it is not merged pending artifact, scenario, and territory
   audits.
@@ -81,11 +88,18 @@ published view manifest.
 - Display geometry is built separately and contributes no numerical totals.
 - Shared TypeScript contracts define metrics, taxonomies, supported years, value
   states, and release shapes.
+- A small declarative catalog owns taxonomy families and metric contracts;
+  build-time and browser-side validators reject dangling taxonomy, source,
+  universe, transformation, and artifact references. Metrics name their source
+  releases directly; taxonomy never stands in for lineage.
 - The client joins entity, population, and selected metric observations by exact
   code and year. Metric presentation is a small configuration layer rather than
   duplicated application screens.
 - Map dependencies load in a separate lazy chunk, and adjacent boundary snapshots
   are prefetched after the active snapshot resolves.
+- Historical names are available on hover and click instead of being painted as
+  dense static labels. Boundary snapshots now carry basic geometry/identity QA;
+  topology overlap review remains explicitly not computed.
 
 The next expansion should add a source only after its release, universe, temporal
 policy, and aggregation meaning are audited. The immediate population gap is a

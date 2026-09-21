@@ -1,6 +1,6 @@
-import type { Layer } from '@deck.gl/core';
+import type { Layer, PickingInfo } from '@deck.gl/core';
 import { MapboxOverlay } from '@deck.gl/mapbox';
-import { GeoJsonLayer, ScatterplotLayer, TextLayer } from '@deck.gl/layers';
+import { GeoJsonLayer, ScatterplotLayer } from '@deck.gl/layers';
 import {
   Map as MapLibreMap,
   NavigationControl,
@@ -135,7 +135,7 @@ export function MapView({
           data: geometry,
           filled: true,
           stroked: true,
-          pickable: territorialValuesAvailable,
+          pickable: true,
           autoHighlight: true,
           highlightColor: [255, 246, 220, 90],
           lineWidthUnits: 'pixels',
@@ -162,9 +162,6 @@ export function MapView({
     ];
 
     if (historicalEnabled && historicalSnapshot) {
-      const labeled = historicalSnapshot.features
-        .map((feature) => feature.properties)
-        .filter((properties) => properties.show_label);
       layers.push(
         new GeoJsonLayer<HistoricalProperties>({
           id: `historical-polities-${historicalSnapshot.atlas_year}`,
@@ -203,34 +200,10 @@ export function MapView({
             getLineColor: [selectedHistoricalId],
           },
         }),
-        new TextLayer<HistoricalProperties>({
-          id: `historical-labels-${historicalSnapshot.atlas_year}`,
-          data: labeled,
-          pickable: true,
-          getPosition: (properties) => properties.label_position,
-          getText: (properties) => properties.name,
-          getSize: (properties) => Math.max(10, Math.min(17, 9 + Math.log10(properties.area_km2))),
-          getColor: [241, 235, 218, 235],
-          getTextAnchor: 'middle',
-          getAlignmentBaseline: 'center',
-          maxWidth: 135,
-          wordBreak: 'break-word',
-          lineHeight: 1,
-          fontFamily: 'Inter, sans-serif',
-          fontWeight: 600,
-          outlineWidth: 3,
-          outlineColor: [7, 20, 17, 230],
-          onClick: ({ object }) => {
-            if (object) onHistoricalSelect(object);
-          },
-        }),
       );
     }
 
     if (citiesEnabled && cityPoints.length > 0) {
-      const labeledCities = [...cityPoints]
-        .sort((left, right) => right.observation.population - left.observation.population)
-        .slice(0, 8);
       layers.push(
         new ScatterplotLayer<HistoricalCityPoint>({
           id: `historical-cities-${year}`,
@@ -250,27 +223,34 @@ export function MapView({
           onClick: ({ object }) => { if (object) onCitySelect(object); },
           updateTriggers: { getLineColor: [selectedCityId], getLineWidth: [selectedCityId] },
         }),
-        new TextLayer<HistoricalCityPoint>({
-          id: `historical-city-labels-${year}`,
-          data: labeledCities,
-          pickable: true,
-          getPosition: (point) => [point.city.longitude, point.city.latitude],
-          getText: (point) => point.city.name,
-          getPixelOffset: [0, -13],
-          getSize: 10,
-          getColor: [248, 225, 167, 240],
-          getTextAnchor: 'middle',
-          getAlignmentBaseline: 'bottom',
-          fontFamily: 'Inter, sans-serif',
-          fontWeight: 600,
-          outlineWidth: 3,
-          outlineColor: [7, 20, 17, 235],
-          onClick: ({ object }) => { if (object) onCitySelect(object); },
-        }),
       );
     }
 
-    overlay.setProps({ layers });
+    overlay.setProps({
+      layers,
+      getTooltip: ({ layer, object }: PickingInfo) => {
+        if (!layer || !object) return null;
+        if (layer.id.startsWith('historical-cities-')) {
+          const point = object as HistoricalCityPoint;
+          return {
+            text: `${point.city.name}\n${point.observation.population.toLocaleString()} people · published estimate`,
+          };
+        }
+        if (layer.id.startsWith('historical-polities-')) {
+          const feature = object as { properties?: HistoricalProperties };
+          return feature.properties ? { text: `${feature.properties.name}\nCliopatria political context` } : null;
+        }
+        if (layer.id.startsWith('atlas-')) {
+          const feature = object as { properties?: CountryProperties };
+          if (!feature.properties) return null;
+          const value = valueByCode.get(feature.properties.code);
+          return {
+            text: `${feature.properties.name}\n${value === null || value === undefined ? `No ${metricLabel.toLocaleLowerCase()} observation` : `${value.toLocaleString()} · ${metricLabel}`}`,
+          };
+        }
+        return null;
+      },
+    });
   }, [
     geometry,
     historicalEnabled,

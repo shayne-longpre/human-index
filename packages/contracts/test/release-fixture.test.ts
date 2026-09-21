@@ -5,6 +5,10 @@ import { describe, expect, it } from 'vitest';
 import {
   aggregatePrevalence,
   assertSupportedYear,
+  buildEvidenceTimelineYears,
+  nearestTimelineIndex,
+  resolveHistoricalSnapshot,
+  validateAtlasReleaseManifest,
   validatePublishedMetrics,
   type AtlasEntity,
   type AtlasReleaseManifest,
@@ -16,7 +20,7 @@ import {
   type LifeExpectancyDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-20-r3');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-20-r4');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -52,6 +56,7 @@ for (const observation of electricity.observations) {
 
 describe('genuine-data MVP release', () => {
   it('publishes three valid, taxonomy-bound metrics with explicit time support', () => {
+    expect(() => validateAtlasReleaseManifest(manifest)).not.toThrow();
     expect(() => validatePublishedMetrics(manifest.metrics)).not.toThrow();
     expect(manifest.metrics.map((metric) => metric.id)).toEqual([
       'population_total',
@@ -65,6 +70,59 @@ describe('genuine-data MVP release', () => {
     expect(electricity.years).toEqual(Array.from({ length: 35 }, (_, index) => 1990 + index));
     expect(lifeExpectancy.years).toEqual(Array.from({ length: 65 }, (_, index) => 1960 + index));
     expect(() => assertSupportedYear(manifest.metrics[1], 2025)).toThrow(RangeError);
+  });
+
+  it('builds one shared time control while resolving each evidence layer independently', () => {
+    const years = buildEvidenceTimelineYears(manifest, historicalContext, historicalCities);
+    expect(years[0]).toBe(-9999);
+    expect(years.at(-1)).toBe(2025);
+    expect(years).toContain(-3399);
+    expect(years).toContain(-3699);
+    expect(years).toContain(1991);
+    expect(nearestTimelineIndex(years, -3400)).toBe(years.indexOf(-3399));
+
+    expect(resolveHistoricalSnapshot(historicalContext, -9999)).toBeNull();
+    expect(resolveHistoricalSnapshot(historicalContext, 2025)).toBeNull();
+    expect(resolveHistoricalSnapshot(historicalContext, 1967)?.atlas_year).toBe(1960);
+    expect(resolveHistoricalSnapshot(historicalContext, 1970)?.atlas_year).toBe(1970);
+  });
+
+  it('rejects dangling taxonomy, source, universe, and artifact references', () => {
+    const withUnknownFamily = structuredClone(manifest);
+    withUnknownFamily.metrics[0].taxonomy_ids = ['not-a-published-family'];
+    expect(() => validateAtlasReleaseManifest(withUnknownFamily)).toThrow(/unknown taxonomy family/);
+
+    const withUnknownSource = structuredClone(manifest);
+    withUnknownSource.historical_context.source_release_id = 'not-a-published-source';
+    expect(() => validateAtlasReleaseManifest(withUnknownSource)).toThrow(/unknown source release/);
+
+    const withUnknownMetricSource = structuredClone(manifest);
+    withUnknownMetricSource.metrics[0].source_release_ids = ['not-a-published-source'];
+    expect(() => validateAtlasReleaseManifest(withUnknownMetricSource)).toThrow(/unknown source release/);
+
+    const withUnknownUniverse = structuredClone(manifest);
+    withUnknownUniverse.metrics[1].population_universe_id = 'not-a-published-universe';
+    expect(() => validateAtlasReleaseManifest(withUnknownUniverse)).toThrow(/unknown population universe/);
+
+    const withMissingArtifact = structuredClone(manifest);
+    delete withMissingArtifact.artifacts[withMissingArtifact.metrics[1].data_file];
+    expect(() => validateAtlasReleaseManifest(withMissingArtifact)).toThrow(/missing artifact/);
+
+    const withOverlappingUniversePeriods = structuredClone(manifest);
+    const populationPeriods = withOverlappingUniversePeriods.metrics[0].population_universe_periods;
+    if (!populationPeriods) throw new Error('Population fixture needs date-specific universe periods');
+    populationPeriods[1].start_year = 1950;
+    expect(() => validateAtlasReleaseManifest(withOverlappingUniversePeriods)).toThrow(/overlapping/);
+
+    const withUniverseGap = structuredClone(manifest);
+    const gappedPeriods = withUniverseGap.metrics[0].population_universe_periods;
+    if (!gappedPeriods) throw new Error('Population fixture needs date-specific universe periods');
+    gappedPeriods[1].start_year = 1961;
+    expect(() => validateAtlasReleaseManifest(withUniverseGap)).toThrow(/does not resolve one population universe for 1960/);
+
+    const withTwoUniverseModes = structuredClone(manifest);
+    withTwoUniverseModes.metrics[0].population_universe_id = manifest.population_universes[0].id;
+    expect(() => validateAtlasReleaseManifest(withTwoUniverseModes)).toThrow(/both primary and date-specific/);
   });
 
   it('publishes sparse ancient-city points at exact source dates only', () => {
@@ -104,6 +162,20 @@ describe('genuine-data MVP release', () => {
     expect(historicalContext.snapshots.at(-1)).toMatchObject({ atlas_year: 2024, source_year: 2024 });
     expect(historicalContext.snapshots.every((snapshot) => snapshot.source_year !== 0)).toBe(true);
     expect(historicalContext.snapshots.every((snapshot) => snapshot.feature_count > 0)).toBe(true);
+    expect(
+      historicalContext.snapshots.every(
+        (snapshot) => snapshot.quality.duplicate_source_feature_ids === 0
+          && snapshot.quality.nonpositive_source_areas === 0
+          && snapshot.quality.unclosed_rings === 0
+          && snapshot.quality.invalid_coordinate_positions === 0,
+      ),
+    ).toBe(true);
+    expect(
+      historicalContext.snapshots.every(
+        (snapshot) => snapshot.quality.topology_overlap_review
+          === 'not_computed_requires_topology_engine_and_historical_review',
+      ),
+    ).toBe(true);
     for (let index = 1; index < historicalContext.snapshots.length; index += 1) {
       expect(historicalContext.snapshots[index].atlas_year).toBeGreaterThan(
         historicalContext.snapshots[index - 1].atlas_year,

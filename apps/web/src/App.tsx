@@ -1,7 +1,10 @@
 import {
   aggregatePrevalence,
+  buildEvidenceTimelineYears,
   formatAstronomicalYear,
-  validatePublishedMetrics,
+  nearestTimelineIndex,
+  resolveHistoricalSnapshot,
+  validateAtlasReleaseManifest,
   type MvpMetricId,
   type LifeExpectancyDataset,
   type PublishedMetric,
@@ -13,7 +16,6 @@ import { Inspector } from './components/Inspector';
 import { HistoricalInspector } from './components/HistoricalInspector';
 import { HistoricalPopulationTable } from './components/HistoricalPopulationTable';
 import { HistoricalCityInspector } from './components/HistoricalCityInspector';
-import { HistoricalTimeline } from './components/HistoricalTimeline';
 import { Legend } from './components/Legend';
 import type { HistoricalCityPoint } from './components/MapView';
 import { LifeExpectancyDistribution } from './components/LifeExpectancyDistribution';
@@ -28,7 +30,6 @@ import {
   loadReleaseBase,
   manifestUrl,
   prefetchHistoricalSnapshot,
-  resolveHistoricalSnapshot,
   type HistoricalFeatureCollection,
   type HistoricalProperties,
   type MetricDataset,
@@ -110,6 +111,7 @@ export function App() {
   const [citiesEnabled, setCitiesEnabled] = useState(true);
   const [historicalSnapshot, setHistoricalSnapshot] = useState<HistoricalFeatureCollection | null>(null);
   const [historicalLoading, setHistoricalLoading] = useState(false);
+  const [historicalError, setHistoricalError] = useState<string | null>(null);
   const [selectedHistorical, setSelectedHistorical] = useState<HistoricalProperties | null>(null);
   const [selectedCityPoint, setSelectedCityPoint] = useState<HistoricalCityPoint | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +122,7 @@ export function App() {
     loadReleaseBase()
       .then((loaded) => {
         if (!active) return;
-        validatePublishedMetrics(loaded.manifest.metrics);
+        validateAtlasReleaseManifest(loaded.manifest);
         const parameters = new URLSearchParams(window.location.search);
         const requestedMetric = loaded.manifest.metrics.find(
           (candidate) => candidate.id === parameters.get('metric'),
@@ -131,7 +133,11 @@ export function App() {
         const requestedYearParameter = parameters.get('year');
         const requestedYear = requestedYearParameter === null ? Number.NaN : Number(requestedYearParameter);
         const requestedPlace = parameters.get('place');
-        const releaseYears = loaded.manifest.metrics.flatMap((candidate) => candidate.available_years);
+        const releaseYears = buildEvidenceTimelineYears(
+          loaded.manifest,
+          loaded.historicalContext,
+          loaded.historicalCities,
+        );
         const releaseStartYear = Math.min(...releaseYears);
         const releaseEndYear = Math.max(...releaseYears);
         setRelease(loaded);
@@ -191,19 +197,23 @@ export function App() {
 
   useEffect(() => {
     setSelectedHistorical(null);
+    setHistoricalError(null);
     if (!historicalEnabled || !historicalReference) {
       setHistoricalSnapshot(null);
       setHistoricalLoading(false);
       return;
     }
     let active = true;
+    setHistoricalSnapshot(null);
     setHistoricalLoading(true);
     loadHistoricalSnapshot(historicalReference)
       .then((snapshot) => {
         if (active) setHistoricalSnapshot(snapshot);
       })
       .catch((cause: unknown) => {
-        if (active) setMetricError(cause instanceof Error ? cause.message : 'Could not load historical context');
+        if (active) {
+          setHistoricalError(cause instanceof Error ? cause.message : 'Could not load historical context');
+        }
       })
       .finally(() => {
         if (active) setHistoricalLoading(false);
@@ -286,23 +296,26 @@ export function App() {
   useEffect(() => {
     setSelectedCityPoint(null);
   }, [year]);
-  const allYears = metric?.available_years ?? [1960, 2025];
-  const firstYear = allYears[0];
-  const lastYear = allYears[allYears.length - 1];
-  const timelineIndex = allYears.reduce((nearestIndex, candidate, index) =>
-    Math.abs(candidate - year) < Math.abs(allYears[nearestIndex] - year) ? index : nearestIndex,
-  0);
+  const timelineYears = useMemo(
+    () => release
+      ? buildEvidenceTimelineYears(release.manifest, release.historicalContext, release.historicalCities)
+      : [2024],
+    [release],
+  );
+  const firstYear = timelineYears[0];
+  const lastYear = timelineYears[timelineYears.length - 1];
+  const timelineIndex = nearestTimelineIndex(timelineYears, year);
 
   useEffect(() => {
-    if (!playing || !metric) return;
+    if (!playing) return;
     const timer = window.setInterval(() => {
       setYear((current) => {
-        const next = metric.available_years.find((candidate) => candidate > current);
-        return next ?? metric.available_years[0];
+        const next = timelineYears.find((candidate) => candidate > current);
+        return next ?? timelineYears[0];
       });
     }, 700);
     return () => window.clearInterval(timer);
-  }, [metric, playing]);
+  }, [playing, timelineYears]);
 
   if (error) {
     return (
@@ -375,12 +388,6 @@ export function App() {
                   onClick={() => {
                     setPlaying(false);
                     setMetricId(candidate.id);
-                    if (!candidate.available_years.includes(year)) {
-                      const nearest = candidate.available_years.reduce((resolved, candidateYear) =>
-                        Math.abs(candidateYear - year) < Math.abs(resolved - year) ? candidateYear : resolved,
-                      );
-                      setYear(nearest);
-                    }
                   }}
                 >
                   <span className="metric-dot" aria-hidden="true" />
@@ -452,23 +459,6 @@ export function App() {
             <em>{dateEra}</em>
           </div>
 
-          {historicalEnabled ? (
-            <div className="historical-status" role="status">
-              <span>Political context</span>
-              <strong>
-                {historicalReference
-                  ? `${formatAstronomicalYear(historicalReference.atlas_year)} · ${historicalReference.feature_count} polities`
-                  : 'No Cliopatria coverage'}
-              </strong>
-            </div>
-          ) : null}
-          {citiesEnabled ? (
-            <div className="historical-status city-status" role="status">
-              <span>Ancient city layer</span>
-              <strong>{cityPoints.length ? `${cityPoints.length} exact-date estimates` : 'No estimate at this exact date'}</strong>
-            </div>
-          ) : null}
-
           <Inspector
             row={deepTimePopulation ? null : selectedRow}
             metric={metric}
@@ -490,7 +480,7 @@ export function App() {
         <section className="time-panel" aria-labelledby="time-title">
           <div className="time-heading">
             <div>
-              <span className="eyebrow">Exact source-supported dates only</span>
+              <span className="eyebrow">One requested date · independent evidence layers</span>
               <h2 id="time-title">Time</h2>
             </div>
             <div className="year-controls">
@@ -526,12 +516,12 @@ export function App() {
             className="timeline-range"
             type="range"
             min="0"
-            max={allYears.length - 1}
+            max={timelineYears.length - 1}
             step="1"
             value={timelineIndex}
             onChange={(event) => {
               setPlaying(false);
-              setYear(allYears[Number(event.target.value)]);
+              setYear(timelineYears[Number(event.target.value)]);
             }}
             aria-label={`Date, ${formatAstronomicalYear(year)}`}
           />
@@ -541,10 +531,37 @@ export function App() {
             <span>{formatAstronomicalYear(lastYear)}</span>
           </div>
           <p>
-            {metric.label} publishes {metric.available_years.length} exact source-supported dates from{' '}
-            {formatAstronomicalYear(metric.available_years[0])} to {formatAstronomicalYear(metric.available_years.at(-1) ?? lastYear)}.
-            {' '}The slider moves only among those dates; no interpolation or carry-forward is applied.
+            The slider combines {timelineYears.length} dates where at least one published layer changes. The requested
+            date is shared, while each layer applies its own stated policy. Measurements and city estimates are
+            exact-date only; political context uses the latest published snapshot within Cliopatria coverage.
           </p>
+          <div className="layer-date-grid" aria-label="Effective evidence dates">
+            <article className={supported ? 'layer-date-available' : 'layer-date-unavailable'}>
+              <span>Selected measure</span>
+              <strong>{supported ? `Exact · ${formatAstronomicalYear(year)}` : 'No exact observation'}</strong>
+              <small>{metric.label} · {metric.available_years.length} published dates</small>
+            </article>
+            <article className={historicalEnabled && historicalReference && !historicalError ? 'layer-date-available' : 'layer-date-unavailable'}>
+              <span>Political context</span>
+              <strong>
+                {!historicalEnabled
+                  ? 'Layer hidden'
+                  : historicalError
+                    ? 'Boundary unavailable'
+                  : historicalReference
+                    ? `Effective · ${formatAstronomicalYear(historicalReference.atlas_year)}`
+                    : 'Outside source coverage'}
+              </strong>
+              <small>{historicalError ?? (historicalReference ? `${historicalReference.feature_count} published polity features` : 'Cliopatria · 3400 BCE–2024 CE')}</small>
+            </article>
+            <article className={citiesEnabled && cityPoints.length ? 'layer-date-available' : 'layer-date-unavailable'}>
+              <span>Historical cities</span>
+              <strong>
+                {!citiesEnabled ? 'Layer hidden' : cityPoints.length ? `Exact · ${formatAstronomicalYear(year)}` : 'No exact observation'}
+              </strong>
+              <small>{cityPoints.length ? `${cityPoints.length} published city estimates` : 'Modelski Ancient · exact dates only'}</small>
+            </article>
+          </div>
           {!supported ? (
             <div className="unsupported-year" role="status">
               <span>{metric.label} has no published observation for {formatAstronomicalYear(year)}.</span>
@@ -552,16 +569,6 @@ export function App() {
             </div>
           ) : null}
         </section>
-
-        <HistoricalTimeline
-          index={release.historicalContext}
-          year={year}
-          enabled={historicalEnabled}
-          onYearChange={(nextYear) => {
-            setPlaying(false);
-            setYear(nextYear);
-          }}
-        />
 
         {metric.id === 'population_total' ? (
           <PopulationTimeline

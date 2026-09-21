@@ -11,6 +11,13 @@ import zipfile
 from pathlib import Path
 from typing import Any, BinaryIO
 
+from .catalog import (
+    LIFE_EXPECTANCY_BINS,
+    WORLD_BANK_UNIVERSE_ID,
+    metric_definition,
+    taxonomy_catalog,
+    validate_release_manifest,
+)
 from .core import InputArtifact, ValidationError, artifact_record, write_json
 from .geography import (
     DISPLAY_CROSSWALKS,
@@ -49,10 +56,8 @@ from .sources.us_census_population import (
 
 
 RETRIEVED_ON = "2026-09-20"
-RELEASE_ID = "atlas-mvp-2026-09-20-r3"
-UNIVERSE_ID = "world-bank-nonaggregate-economies-v1"
+RELEASE_ID = "atlas-mvp-2026-09-20-r4"
 CLIOPATRIA_GEOMETRY_MEMBER = "cliopatria_polities_only.geojson"
-LIFE_EXPECTANCY_BINS = [0, 50, 60, 70, 80, 90, 130]
 
 
 def _csv_bytes(rows: list[dict[str, Any]], fields: list[str]) -> bytes:
@@ -69,100 +74,6 @@ def _stream_sha256(handle: BinaryIO) -> str:
     while chunk := handle.read(1024 * 1024):
         digest.update(chunk)
     return digest.hexdigest()
-
-
-def _metric_definition(metric_id: str, years: list[int], data_file: str, download: str) -> dict[str, Any]:
-    shared = {
-        "available_years": years,
-        "temporal_policy": "exact_only",
-        "data_file": data_file,
-        "download_file": download,
-        "population_universe_id": UNIVERSE_ID,
-        "support_type": "world_bank_country_or_territory_year",
-    }
-    if metric_id == "population_total":
-        return {
-            **shared,
-            "population_universe_id": "date-specific-population-universe-v1",
-            "population_universe_periods": [
-                {
-                    "start_year": years[0],
-                    "end_year": 1950,
-                    "population_universe_id": "us-census-historical-world-v1",
-                },
-                {
-                    "start_year": 1960,
-                    "end_year": 2025,
-                    "population_universe_id": UNIVERSE_ID,
-                },
-            ],
-            "id": metric_id,
-            "label": "Population",
-            "taxonomy_ids": ["population_and_settlement"],
-            "indicator": f"U.S. Census historical comparison / World Bank {POPULATION_INDICATOR}",
-            "aggregation_kind": "population_total",
-            "unit": "people",
-            "support_type": "date_specific_world_or_country_territory",
-            "definition": "Global historical population estimate or range through 1950; resident territorial population total from 1960 onward.",
-            "display_scale": {
-                "transform": "log1p",
-                "fixed_domain": [10_000, 2_000_000_000],
-                "scale_version": "population-country-total-v1",
-            },
-            "safe_summary": "Published population evidence at its date-specific world or territorial support.",
-            "prohibited_interpretations": [
-                "local population density",
-                "gridded settlement reconstruction",
-            ],
-        }
-    if metric_id == "access_to_electricity":
-        return {
-            **shared,
-            "id": metric_id,
-            "label": "Electricity access",
-            "taxonomy_ids": ["material_conditions", "infrastructure_access"],
-            "indicator": ELECTRICITY_INDICATOR,
-            "aggregation_kind": "person_prevalence",
-            "unit": "percent of population",
-            "definition": "Share of the population with access to electricity.",
-            "display_scale": {
-                "transform": "linear",
-                "fixed_domain": [0, 100],
-                "bins": [0, 20, 40, 60, 80, 100],
-                "scale_version": "electricity-sequential-v1",
-            },
-            "safe_summary": "Estimated population with, without, or unknown access in the covered universe.",
-            "prohibited_interpretations": [
-                "local household measurement",
-                "electricity reliability",
-                "electricity affordability",
-                "electricity consumption",
-            ],
-        }
-    if metric_id == "life_expectancy_at_birth":
-        return {
-            **shared,
-            "id": metric_id,
-            "label": "Life expectancy",
-            "taxonomy_ids": ["health_and_survival"],
-            "indicator": LIFE_EXPECTANCY_INDICATOR,
-            "aggregation_kind": "context_distribution",
-            "unit": "years",
-            "definition": "Period life expectancy at birth for the national or territorial population in the stated year.",
-            "display_scale": {
-                "transform": "linear",
-                "fixed_domain": [45, 90],
-                "bins": LIFE_EXPECTANCY_BINS,
-                "scale_version": "life-expectancy-context-v1",
-            },
-            "safe_summary": "Population living in territories grouped by their published national mean life expectancy.",
-            "prohibited_interpretations": [
-                "an individual lifespan prediction",
-                "a person-level distribution",
-                "a global life-table estimate",
-            ],
-        }
-    raise KeyError(metric_id)
 
 
 def build(args: argparse.Namespace) -> None:
@@ -659,12 +570,13 @@ def build(args: argparse.Namespace) -> None:
                 "source_year": source_year,
                 "file": f"history/{filename}",
                 "feature_count": snapshot["feature_count"],
+                "quality": snapshot["quality"],
             }
         )
     write_json(
         historical_context_index_path,
         {
-            "schema_version": "0.3.0",
+            "schema_version": "0.4.0",
             "source_release_id": CLIOPATRIA_SOURCE_ID,
             "feature_kind": "political_context_not_statistical_support",
             "selection_policy": "latest published snapshot not after requested date",
@@ -725,45 +637,41 @@ def build(args: argparse.Namespace) -> None:
     ]
     population_metric_years = sorted(set(historical_years + population_years))
     manifest = {
-        "schema_version": "0.4.0",
+        "schema_version": "0.5.0",
         "release_id": RELEASE_ID,
         "status": "genuine_data_development_release",
         "published_on": RETRIEVED_ON,
         "default_view": {"metric_id": "population_total", "year": 2024},
-        "taxonomies": [
-            {
-                "id": "human_conditions_v1",
-                "families": [
-                    {"id": "population_and_settlement", "label": "Population & settlement"},
-                    {"id": "material_conditions", "label": "Material conditions"},
-                    {"id": "infrastructure_access", "label": "Infrastructure access"},
-                    {"id": "health_and_survival", "label": "Health & survival"},
-                ],
-            }
-        ],
+        "taxonomies": taxonomy_catalog(),
         "metrics": [
-            _metric_definition(
+            metric_definition(
                 "population_total",
                 population_metric_years,
                 "population.json",
                 "population.csv",
+                [
+                    HISTORICAL_POPULATION_SOURCE_ID,
+                    f"world-bank-wdi-{WORLD_BANK_LAST_UPDATED}",
+                ],
             ),
-            _metric_definition(
+            metric_definition(
                 "access_to_electricity",
                 electricity_years,
                 "electricity.json",
                 "electricity.csv",
+                [f"world-bank-wdi-{WORLD_BANK_LAST_UPDATED}"],
             ),
-            _metric_definition(
+            metric_definition(
                 "life_expectancy_at_birth",
                 life_expectancy_years,
                 "life-expectancy.json",
                 "life-expectancy.csv",
+                [f"world-bank-wdi-{WORLD_BANK_LAST_UPDATED}"],
             ),
         ],
         "population_universes": [
             {
-                "id": UNIVERSE_ID,
+                "id": WORLD_BANK_UNIVERSE_ID,
                 "label": "World Bank nonaggregate country/territory entities",
                 "entity_count": len(codes),
                 "inclusion_rule": "country metadata region is not Aggregates",
@@ -902,7 +810,7 @@ def build(args: argparse.Namespace) -> None:
                 "version": "1.0.0",
                 "input_artifact_ids": [artifact.id for artifact in inputs[:5]],
                 "parameters": {
-                    "universe_id": UNIVERSE_ID,
+                    "universe_id": WORLD_BANK_UNIVERSE_ID,
                     "population_years": [1960, 2025],
                     "electricity_years": [1990, 2024],
                     "life_expectancy_years": [1960, 2024],
@@ -1040,6 +948,7 @@ def build(args: argparse.Namespace) -> None:
             "Ancient-city points appear only at exact published dates; coordinates are source geocodes, modern-country labels are descriptive metadata, and city estimates are not summed as total urban or world population.",
         ],
     }
+    validate_release_manifest(manifest, {artifact.id for artifact in inputs})
     write_json(args.output / "manifest.json", manifest)
     print(
         json.dumps(

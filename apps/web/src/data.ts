@@ -5,6 +5,7 @@ import type {
   HistoricalCityDataset,
   HistoricalContextIndex,
   HistoricalContextSnapshotReference,
+  HistoricalSnapshotQuality,
   HistoricalPopulationDataset,
   LifeExpectancyDataset,
   MvpMetricId,
@@ -43,6 +44,7 @@ export type HistoricalFeatureCollection = FeatureCollection<Geometry, Historical
   excluded_feature_types: string[];
   dating_status: string;
   geometry_method: string;
+  quality: HistoricalSnapshotQuality;
 };
 export type MetricDataset = PopulationDataset | ElectricityDataset | LifeExpectancyDataset;
 
@@ -56,7 +58,7 @@ export interface ReleaseBase {
   historicalCities: HistoricalCityDataset;
 }
 
-export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-20-r3';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-20-r4';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {
@@ -114,18 +116,6 @@ export function downloadUrl(metricId: MvpMetricId, manifest: AtlasReleaseManifes
 
 export function historicalPopulationDownloadUrl(manifest: AtlasReleaseManifest): string {
   return `${releaseRoot}/${manifest.deep_time_population.download_file}`;
-}
-
-export function resolveHistoricalSnapshot(
-  index: HistoricalContextIndex,
-  year: number,
-): HistoricalContextSnapshotReference | null {
-  let resolved: HistoricalContextSnapshotReference | null = null;
-  for (const snapshot of index.snapshots) {
-    if (snapshot.atlas_year > year) break;
-    resolved = snapshot;
-  }
-  return resolved;
 }
 
 const historicalSnapshotCache = new Map<string, Promise<HistoricalFeatureCollection>>();

@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -138,6 +139,14 @@ def _exterior_rings(geometry: dict[str, Any]) -> Iterable[list[list[float]]]:
             yield polygon[0]
 
 
+def _all_rings(geometry: dict[str, Any]) -> Iterable[list[list[float]]]:
+    if geometry["type"] == "Polygon":
+        yield from geometry["coordinates"]
+    else:
+        for polygon in geometry["coordinates"]:
+            yield from polygon
+
+
 def _ring_area_and_centroid(ring: list[list[float]]) -> tuple[float, list[float]]:
     twice_area = 0.0
     cx = 0.0
@@ -172,6 +181,30 @@ def _feature_id(properties: dict[str, Any], geometry: dict[str, Any]) -> str:
         json.dumps(identity, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
     return f"cliopatria-{digest[:20]}"
+
+
+def _snapshot_quality(features: list[dict[str, Any]]) -> dict[str, Any]:
+    identifiers = [feature["properties"]["source_feature_id"] for feature in features]
+    names = [feature["properties"]["name"].casefold().strip() for feature in features]
+    geometry_types = Counter(feature["geometry"]["type"] for feature in features)
+    rings = [ring for feature in features for ring in _all_rings(feature["geometry"])]
+    invalid_coordinates = sum(
+        not (-180 <= position[0] <= 180 and -90 <= position[1] <= 90)
+        for ring in rings
+        for position in ring
+    )
+    return {
+        "duplicate_source_feature_ids": len(identifiers) - len(set(identifiers)),
+        "repeated_display_names": sum(count - 1 for count in Counter(names).values() if count > 1),
+        "nonpositive_source_areas": sum(
+            feature["properties"]["area_km2"] <= 0 for feature in features
+        ),
+        "geometry_type_counts": dict(sorted(geometry_types.items())),
+        "ring_count": len(rings),
+        "unclosed_rings": sum(ring[0] != ring[-1] for ring in rings),
+        "invalid_coordinate_positions": invalid_coordinates,
+        "topology_overlap_review": "not_computed_requires_topology_engine_and_historical_review",
+    }
 
 
 class CliopatriaAdapter:
@@ -275,5 +308,6 @@ class CliopatriaAdapter:
             "excluded_feature_types": ["RELATION"],
             "dating_status": "snapshot_year_verified; source year-zero endpoints quarantined",
             "geometry_method": f"source native with Douglas-Peucker {tolerance} degree display simplification",
+            "quality": _snapshot_quality(published),
             "features": published,
         }

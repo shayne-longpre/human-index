@@ -93,6 +93,7 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
               </div>
               <dl>
                 <div><dt>Indicator</dt><dd>{metric.indicator}</dd></div>
+                <div><dt>Source releases</dt><dd>{metric.source_release_ids.join(', ')}</dd></div>
                 <div><dt>Observed years</dt><dd>{formatAstronomicalYear(metric.available_years[0])}–{formatAstronomicalYear(metric.available_years.at(-1) ?? metric.available_years[0])}</dd></div>
                 <div><dt>Unit</dt><dd>{metric.unit}</dd></div>
                 <div><dt>Temporal policy</dt><dd>{humanize(metric.temporal_policy)}</dd></div>

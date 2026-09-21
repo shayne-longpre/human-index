@@ -17,7 +17,7 @@
         "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/LICENSE.md"
       ],
       "blockers": [],
-      "notes": "Pinned v0.2.0 archive acquired and profiled: 13,765 rows, including 13,380 POLITY and 385 RELATION records. Release r3 publishes 36 simplified POLITY-only context snapshots. RELATION is excluded and no feature contributes to population accounting. Six source year-zero endpoints remain quarantined; no snapshot samples source year zero.",
+      "notes": "Pinned v0.2.0 archive acquired and profiled: 13,765 rows, including 13,380 POLITY and 385 RELATION records. Release r4 publishes 36 simplified POLITY-only context snapshots with duplicate-ID, area, ring-closure, coordinate-bound, and geometry-type checks. RELATION is excluded and no feature contributes to population accounting. Topology/overlap review is not yet computed. Six source year-zero endpoints remain quarantined; no snapshot samples source year zero.",
       "checked_at": "2026-09-20",
       "verification_level": "artifact_acquired_profiled_and_fixture_published",
       "downloaded": true,
@@ -120,12 +120,12 @@
         "https://doi.org/10.34894/INZBF2"
       ],
       "blockers": [
-        "acquire_workbook",
+        "authorized_workbook_access_through_dataversenl_antibot",
         "read_source_sheet",
         "verify_units_ppp_and_territories"
       ],
-      "notes": "Graphical use requires original source-sheet citations; not individual income.",
-      "checked_at": "2026-09-19",
+      "notes": "The University of Groningen release page verifies MPD 2023, 169 countries, coverage through 2022, CC BY 4.0, and a requirement to cite original papers from the workbook source sheet for graphical use. The official DataverseNL Excel download returned its Anubis anti-bot challenge on 2026-09-20; no bypass was attempted. This is territorial GDP-per-capita context, not individual income.",
+      "checked_at": "2026-09-20",
       "verification_level": "documentation_only",
       "downloaded": false,
       "artifact_sha256": null,
@@ -335,6 +335,58 @@
       "downloaded": false,
       "artifact_sha256": null,
       "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "reba_chandler_v2",
+      "dossier": "S14-companion",
+      "role": "historical_city_population_points_alternative_series",
+      "candidate_release": "chandlerV2.csv from Figshare article 2059494",
+      "coverage_start": "2250 BCE",
+      "coverage_end": "1975 CE",
+      "license": "CC-BY-4.0",
+      "license_status": "official_figshare_metadata_and_exact_file_acquired",
+      "urls": [
+        "https://doi.org/10.6084/m9.figshare.2059494",
+        "https://ndownloader.figshare.com/files/5407640"
+      ],
+      "blockers": [
+        "review_two_zero_population_cells",
+        "normalize_unicode_whitespace_in_coordinates",
+        "build_dated_city_identity_crosswalk",
+        "design_source_disagreement_display"
+      ],
+      "notes": "Audited fixture has 1,597 city rows, 806 sparse source-date columns, and 9,438 populated cells. Two populated cells contain numeric zero and must not be assumed to mean a genuine city population of zero. Exact normalized names overlap the published Modelski Ancient table for 93 cities, but only 86 also share identical coordinate strings; names alone are not a safe merge key.",
+      "checked_at": "2026-09-20",
+      "verification_level": "artifact_acquired_and_profiled_not_published",
+      "downloaded": true,
+      "artifact_sha256": "5b8df64e46988b216988eef18b46ebc2cba57ecc1adc8a5c2e1e6d5b78068031",
+      "terms_snapshot_sha256": "1136fdfb3e8add5f3f4f9b3f3b1c6d30abe3e21d9706b9b45fbe9ed3014be044",
+      "release_ready": false
+    },
+    {
+      "id": "reba_modelski_modern_v2",
+      "dossier": "S14-companion",
+      "role": "historical_city_population_points_alternative_series",
+      "candidate_release": "modelskiModernV2.csv from Figshare article 2059500",
+      "coverage_start": "2000 CE",
+      "coverage_end": "2000 CE",
+      "license": "CC-BY-4.0",
+      "license_status": "official_figshare_metadata_and_exact_file_acquired",
+      "urls": [
+        "https://doi.org/10.6084/m9.figshare.2059500",
+        "https://ndownloader.figshare.com/files/5407637"
+      ],
+      "blockers": [
+        "build_dated_city_identity_crosswalk",
+        "design_source_disagreement_display"
+      ],
+      "notes": "Audited fixture has 293 city rows and 293 positive estimates at 2000 CE. Exact normalized names overlap Chandler for 224 cities, but only 184 also share identical coordinate strings; the two source series remain separate until a reviewed crosswalk exists.",
+      "checked_at": "2026-09-20",
+      "verification_level": "artifact_acquired_and_profiled_not_published",
+      "downloaded": true,
+      "artifact_sha256": "927ee6a9122be6aded1a2f71ff5bb6f36312aae6a778574af47f4e8c65265726",
+      "terms_snapshot_sha256": "b1a2acc1bf0352c54058dbd6e77f2ff87eb34c9fef7bcad58329d4763840bbe3",
       "release_ready": false
     },
     {

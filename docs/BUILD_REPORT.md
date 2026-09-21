@@ -1,4 +1,4 @@
-# Build report: deep-time population and temporal-map MVP
+# Build report: evidence-aware temporal-map MVP, release r4
 
 Date: 2026-09-20
 
@@ -22,12 +22,13 @@ and deck.gl choropleth, a place inspector with original record locators, metric-
 appropriate summaries, searchable accessible tables, and downloadable
 full-series CSV files. A Cliopatria context layer supplies 36 discrete,
 lazily-loaded historical border/name snapshots from 3400 BCE through 2024 CE.
-A dedicated 36-step border scrubber makes every snapshot directly selectable;
-the map changes its polygons and labels as the selected year changes, while the
-historical evidence table and inspector expose all features in the effective
-snapshot. A dedicated Sources page exposes published inputs and the wider
-research registry. Metric, year, and modern place state are shareable in the
-URL. Missing observations and unsupported years remain visible.
+A single requested-date control combines 136 evidence-change dates. Measures,
+historical city points, and political geometry resolve that date independently
+and report their exact or effective dates. The map changes its polygons without
+painting dense static names; hover and click expose the feature name, and click
+opens its evidence inspector. A dedicated Sources page exposes published inputs
+and the wider research registry. Metric, year, and modern place state are
+shareable in the URL. Missing observations and unsupported years remain visible.
 
 This remains a development release. Its early population values have global
 support only; they are not local density, country totals, household locations,
@@ -56,7 +57,8 @@ Electricity coverage grows from 98 known entities in 1990 to 215 in 2024. No
 interpolation, extrapolation, rebasing, or carry-forward is used. The historical
 population adapter similarly publishes only dates present in the Census table.
 The Cliopatria resolver selects the latest snapshot at or before the requested
-date; it does not interpolate geometry.
+date within the source's coverage; it does not interpolate geometry or extend
+the first/last snapshot outside 3400 BCE–2024 CE.
 
 For each population year, the release stores the covered-entity total, the
 separate `WLD` reference, their nonnegative unassigned residual, and unplaced-map
@@ -80,6 +82,12 @@ contracts, and metric presentation metadata. Source parsing is isolated in
 `pipelines/atlas_etl/sources`; display geometry is independent of numerical
 accounting; historical political geometry has a separate typed contract and lazy
 loader; and the client performs one code/year join for modern published metrics.
+`pipelines/atlas_etl/catalog.py` keeps taxonomy families and metric contracts
+declarative. Build-time and browser-side manifest validators reject dangling
+taxonomy, population-universe, source-release, transformation, and artifact
+references. Each metric directly names its source releases. Population's
+changing support is represented by explicit period mappings and a null primary
+universe, rather than an undeclared pseudo-universe.
 The heavy map renderer is a separate lazy chunk, and neighboring political
 snapshots are prefetched after the active snapshot resolves.
 The release manifest carries taxonomy membership, population universe, supported
@@ -102,7 +110,7 @@ in-app browser desktop render and interaction checks
 Results:
 
 - Strict TypeScript: pass.
-- Vitest: 2 files, 21 tests, all pass.
+- Vitest: 2 files, 23 tests, all pass.
 - Published release artifact checksums: pass for all 49 artifacts.
 - Population summaries: 66/66 recomputed; all reference residuals nonnegative.
 - Electricity summaries: 35/35 recomputed; all conserve population mass.
@@ -110,15 +118,24 @@ Results:
   population denominator across fixed bins plus unknown condition.
 - Electricity CSV: all 7,595 observation rows include their exact population
   denominator value and both original record locators.
-- Production build: pass. Largest initial application JavaScript chunk 285.85 kB
-  uncompressed / 86.80 kB gzip; the 1,961.67 kB map renderer is now a separate
-  lazy chunk. CSS is 107.55 kB uncompressed / 16.03 kB gzip.
+- Production build: pass. Largest initial application JavaScript chunk 291.83 kB
+  uncompressed / 88.49 kB gzip; the 1,961.30 kB map renderer remains a separate
+  lazy chunk. CSS is 106.75 kB uncompressed / 15.91 kB gzip.
 - Desktop app: population, electricity, and life-expectancy views, deep-time
-  global ranges, changing historical borders/names via the dedicated scrubber,
-  16 exact-date city estimates at 500 BCE, unsupported-year state, tables, inspectors,
-  original record locators, shareable state, and the 16-entry Sources page
-  verified. The 2024 electricity map rendered 215 known-entity values with the
-  intended gold-to-green scale rather than the gray unknown color.
+  global ranges, one timeline, independent effective-date states, changing
+  historical borders/names, click/hover labels, 8 exact-date city estimates at
+  1000 BCE, unsupported-year state, tables, inspectors,
+  original record locators, shareable state, and the 18-entry Sources page
+  verified. The 1990 electricity map rendered known values with the intended
+  gold-to-green scale rather than a uniform gray. A 390 × 844 narrow-frame
+  browser check verified the mobile map controls and stacked timeline status.
+- Boundary QA: every one of the 36 snapshots has zero duplicate source feature
+  IDs, nonpositive source areas, unclosed rings, and invalid coordinate
+  positions. Topology/overlap review remains explicitly not computed.
+- Source expansion audit: official CC BY 4.0 Chandler v2 and Modelski Modern v2
+  CSVs were acquired and profiled. They remain unpublished because name and
+  coordinate overlaps do not supply a defensible city-identity crosswalk, and
+  Chandler contains two unresolved numeric-zero cells.
 
 ## Known limits and next source work
 
@@ -133,5 +150,8 @@ candidate; it is documented but not ingested until its exact artifact terms,
 estimate/projection scenarios, and geography crosswalks are audited. HYDE remains
 blocked for gridded deep-time population. The next Cliopatria work is overlap,
 nesting, geometry-validity, and disputed-boundary review—not assigning the Census
-world total to its polygons. See `MVP_SOURCE_SELECTION.md` and
-`DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.
+world total to its polygons. The official Maddison 2023 workbook download is
+currently blocked by DataverseNL's anti-bot challenge; no bypass was attempted,
+and no GDP-per-capita layer was published without its required source-sheet
+citations. See `MVP_SOURCE_SELECTION.md`, `CITY_SOURCE_AUDIT.md`,
+`EVIDENCE_INTEGRATION.md`, and `DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.

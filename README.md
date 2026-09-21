@@ -3,7 +3,11 @@
 
 Explore humanity through time: where people lived, the material conditions surrounding them, the technologies available, the institutions they encountered, and the evidence that survives.
 
-Population gives the map its physical form. A time control moves between historical snapshots. Selecting a measure changes the map's color and a linked population summary. Sources, uncertainty, and missing evidence remain visible.
+Population gives the map its physical form. One time control sets a requested
+date, while each evidence layer resolves that date under its own explicit
+policy. Boundaries, measures, and city points can therefore change at different
+cadences. Selecting a measure changes the map's color and a linked population
+summary. Sources, uncertainty, and missing evidence remain visible.
 
 This is not a leaderboard of civilizations, a single “progress” score, or a claim that all human experiences can be measured across every era. The purpose is to make documented human conditions explorable without making the past look more certain than it is.
 
@@ -25,8 +29,9 @@ historical context layers in one timeline:
 
 A pinned Natural Earth 1:110m layer places 170 modern statistical supports on
 the map. A separately pinned Cliopatria v0.2.0 layer supplies 36 display-only
-historical political snapshots from 3400 BCE through 2024 CE; dragging time
-changes its source-valid borders and names. Historical polygons never receive or
+historical political snapshots from 3400 BCE through 2024 CE; the shared time
+control changes its effective borders and hover/click names independently of
+the selected measure. Historical polygons never receive or
 contribute population totals. A pinned Modelski Ancient v2 layer adds 621 sparse,
 exact-date city-population estimates for 154 cities from 3700 BCE–1000 CE as
 points, never as a complete urban or world total. Deep-time population remains a global source range,
@@ -69,7 +74,9 @@ See `docs/BUILD_REPORT.md` for verified implementation and test status,
 `docs/MVP_SOURCE_SELECTION.md` for the source decision, and `CODEX_PROMPT.md`
 plus `AGENTS.md` for the product and scientific contracts.
 The proposed deep-time population and historical-boundary sequence is in
-`docs/DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.
+`docs/DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`. The deliberately small source,
+taxonomy, transformation, and release architecture is documented in
+`docs/EVIDENCE_INTEGRATION.md`.
 
 ## Research brief
 
@@ -79,6 +86,7 @@ Reading order:
 2. `docs/RESEARCH_AND_DECISIONS.md` and `docs/SOURCES.md`: corrections to the original proposal and verified source details.
 3. `docs/DATA_MODEL.md`, `docs/DESIGN.md`, and `docs/IMPLEMENTATION_PLAN.md`: contracts, experience, and build sequence.
 4. `docs/ACCEPTANCE_TESTS.md` and `docs/AI_EVIDENCE_PIPELINE.md`: release gates and the later evidence-extraction workflow.
+5. `docs/EVIDENCE_INTEGRATION.md`: how sources and taxonomy are connected without silently merging unlike evidence.
 
 `data/registry/sources.json` remains a research-stage registry. The acquired artifacts used by the app are pinned in `data/registry/source-lock.json`. `tests/semantic_contract_cases.json` contains explicitly synthetic arithmetic/date test cases, not production observations.
 

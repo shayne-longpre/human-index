@@ -15,6 +15,7 @@ export interface PublishedMetric {
   id: MvpMetricId;
   label: string;
   taxonomy_ids: string[];
+  source_release_ids: string[];
   indicator: string;
   aggregation_kind: AggregationKind;
   unit: string;
@@ -23,7 +24,7 @@ export interface PublishedMetric {
   temporal_policy: 'exact_only' | 'valid_interval' | 'explicit_model';
   data_file: string;
   download_file: string;
-  population_universe_id: string;
+  population_universe_id: string | null;
   population_universe_periods?: Array<{
     start_year: number;
     end_year: number;
@@ -189,6 +190,18 @@ export interface HistoricalContextSnapshotReference {
   source_year: number;
   file: string;
   feature_count: number;
+  quality: HistoricalSnapshotQuality;
+}
+
+export interface HistoricalSnapshotQuality {
+  duplicate_source_feature_ids: number;
+  repeated_display_names: number;
+  nonpositive_source_areas: number;
+  geometry_type_counts: Record<string, number>;
+  ring_count: number;
+  unclosed_rings: number;
+  invalid_coordinate_positions: number;
+  topology_overlap_review: 'not_computed_requires_topology_engine_and_historical_review';
 }
 
 export interface HistoricalContextIndex {
@@ -314,6 +327,136 @@ export function validatePublishedMetrics(metrics: readonly PublishedMetric[]): v
     for (let index = 1; index < metric.available_years.length; index += 1) {
       if (metric.available_years[index] <= metric.available_years[index - 1]) {
         throw new Error(`Published metric ${metric.id} years are not strictly increasing`);
+      }
+    }
+  }
+}
+
+export function validateAtlasReleaseManifest(manifest: AtlasReleaseManifest): void {
+  validatePublishedMetrics(manifest.metrics);
+
+  const uniqueIds = (kind: string, ids: readonly string[]): Set<string> => {
+    const result = new Set(ids);
+    if (result.size !== ids.length) throw new Error(`Duplicate ${kind} id`);
+    return result;
+  };
+
+  uniqueIds('taxonomy', manifest.taxonomies.map((taxonomy) => taxonomy.id));
+  const familyIds = uniqueIds(
+    'taxonomy family',
+    manifest.taxonomies.flatMap((taxonomy) => taxonomy.families.map((family) => family.id)),
+  );
+  const universeIds = uniqueIds(
+    'population universe',
+    manifest.population_universes.map((universe) => universe.id),
+  );
+  const sourceReleaseIds = uniqueIds(
+    'source release',
+    manifest.source_releases.map((source) => source.id),
+  );
+  uniqueIds('transformation', manifest.transformations.map((transformation) => transformation.id));
+
+  for (const metric of manifest.metrics) {
+    if (new Set(metric.taxonomy_ids).size !== metric.taxonomy_ids.length) {
+      throw new Error(`Published metric ${metric.id} repeats a taxonomy family`);
+    }
+    for (const taxonomyId of metric.taxonomy_ids) {
+      if (!familyIds.has(taxonomyId)) {
+        throw new Error(`Published metric ${metric.id} references unknown taxonomy family ${taxonomyId}`);
+      }
+    }
+    if (metric.source_release_ids.length === 0) {
+      throw new Error(`Published metric ${metric.id} does not declare a source release`);
+    }
+    if (new Set(metric.source_release_ids).size !== metric.source_release_ids.length) {
+      throw new Error(`Published metric ${metric.id} repeats a source release`);
+    }
+    for (const sourceReleaseId of metric.source_release_ids) {
+      if (!sourceReleaseIds.has(sourceReleaseId)) {
+        throw new Error(`Published metric ${metric.id} references unknown source release ${sourceReleaseId}`);
+      }
+    }
+    if (metric.population_universe_id !== null && metric.population_universe_periods?.length) {
+      throw new Error(`Published metric ${metric.id} declares both primary and date-specific population universes`);
+    }
+    if (metric.population_universe_id !== null && !universeIds.has(metric.population_universe_id)) {
+      throw new Error(`Published metric ${metric.id} references unknown population universe ${metric.population_universe_id}`);
+    }
+    if (metric.population_universe_id === null && !metric.population_universe_periods?.length) {
+      throw new Error(`Published metric ${metric.id} does not declare a population universe`);
+    }
+    const periods = metric.population_universe_periods ?? [];
+    for (const [index, period] of periods.entries()) {
+      if (period.start_year > period.end_year) {
+        throw new Error(`Published metric ${metric.id} has an inverted population-universe period`);
+      }
+      if (index > 0 && period.start_year <= periods[index - 1].end_year) {
+        throw new Error(`Published metric ${metric.id} has overlapping population-universe periods`);
+      }
+      if (!universeIds.has(period.population_universe_id)) {
+        throw new Error(
+          `Published metric ${metric.id} references unknown population universe ${period.population_universe_id}`,
+        );
+      }
+    }
+    if (metric.population_universe_id === null) {
+      for (const year of metric.available_years) {
+        const matches = periods.filter((period) => year >= period.start_year && year <= period.end_year);
+        if (matches.length !== 1) {
+          throw new Error(`Published metric ${metric.id} does not resolve one population universe for ${year}`);
+        }
+      }
+    }
+    for (const file of [metric.data_file, metric.download_file]) {
+      if (!(file in manifest.artifacts)) {
+        throw new Error(`Published metric ${metric.id} references missing artifact ${file}`);
+      }
+    }
+  }
+
+  const defaultMetric = manifest.metrics.find((metric) => metric.id === manifest.default_view.metric_id);
+  if (!defaultMetric) throw new Error(`Default metric ${manifest.default_view.metric_id} is not published`);
+  if (!defaultMetric.available_years.includes(manifest.default_view.year)) {
+    throw new Error('Default view year is not supported by its metric');
+  }
+
+  const layerSourceReferences = [
+    manifest.deep_time_population.source_release_id,
+    manifest.historical_context.source_release_id,
+    manifest.historical_cities.source_release_id,
+  ];
+  for (const sourceReleaseId of layerSourceReferences) {
+    if (!sourceReleaseIds.has(sourceReleaseId)) {
+      throw new Error(`Published layer references unknown source release ${sourceReleaseId}`);
+    }
+  }
+
+  const requiredArtifacts = [
+    manifest.deep_time_population.data_file,
+    manifest.deep_time_population.download_file,
+    manifest.historical_context.index_file,
+    manifest.historical_cities.data_file,
+    manifest.historical_cities.download_file,
+  ];
+  for (const file of requiredArtifacts) {
+    if (!(file in manifest.artifacts)) throw new Error(`Published layer references missing artifact ${file}`);
+  }
+
+  for (const [file, artifact] of Object.entries(manifest.artifacts)) {
+    if (!Number.isInteger(artifact.bytes) || artifact.bytes <= 0) {
+      throw new Error(`Artifact ${file} has an invalid byte count`);
+    }
+    if (!/^[a-f0-9]{64}$/.test(artifact.sha256)) {
+      throw new Error(`Artifact ${file} has an invalid SHA-256`);
+    }
+  }
+
+  for (const transformation of manifest.transformations) {
+    for (const [file, output] of Object.entries(transformation.output_artifacts)) {
+      const published = manifest.artifacts[file];
+      if (!published) throw new Error(`Transformation ${transformation.id} emits unpublished artifact ${file}`);
+      if (published.bytes !== output.bytes || published.sha256 !== output.sha256) {
+        throw new Error(`Transformation ${transformation.id} metadata disagrees for ${file}`);
       }
     }
   }
