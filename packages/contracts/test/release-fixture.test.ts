@@ -10,11 +10,13 @@ import {
   type AtlasReleaseManifest,
   type ElectricityDataset,
   type HistoricalContextIndex,
+  type HistoricalCityDataset,
   type HistoricalPopulationDataset,
   type PopulationDataset,
+  type LifeExpectancyDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-20-r2');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-20-r3');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -27,6 +29,8 @@ const population = readJson<PopulationDataset>('population.json');
 const electricity = readJson<ElectricityDataset>('electricity.json');
 const historicalPopulation = readJson<HistoricalPopulationDataset>('historical-population.json');
 const historicalContext = readJson<HistoricalContextIndex>('historical-context.json');
+const historicalCities = readJson<HistoricalCityDataset>('historical-cities.json');
+const lifeExpectancy = readJson<LifeExpectancyDataset>('life-expectancy.json');
 const entities = readJson<{ entities: AtlasEntity[] }>('entities.json').entities;
 const sourceRegistry = JSON.parse(
   readFileSync(resolve('data/registry/sources.json'), 'utf8'),
@@ -47,18 +51,31 @@ for (const observation of electricity.observations) {
 }
 
 describe('genuine-data MVP release', () => {
-  it('publishes two valid, taxonomy-bound metrics with explicit time support', () => {
+  it('publishes three valid, taxonomy-bound metrics with explicit time support', () => {
     expect(() => validatePublishedMetrics(manifest.metrics)).not.toThrow();
     expect(manifest.metrics.map((metric) => metric.id)).toEqual([
       'population_total',
       'access_to_electricity',
+      'life_expectancy_at_birth',
     ]);
     expect(manifest.metrics[0].available_years[0]).toBe(-9999);
     expect(manifest.metrics[0].available_years).toContain(1950);
     expect(manifest.metrics[0].available_years).not.toContain(1951);
     expect(population.years).toEqual(Array.from({ length: 66 }, (_, index) => 1960 + index));
     expect(electricity.years).toEqual(Array.from({ length: 35 }, (_, index) => 1990 + index));
+    expect(lifeExpectancy.years).toEqual(Array.from({ length: 65 }, (_, index) => 1960 + index));
     expect(() => assertSupportedYear(manifest.metrics[1], 2025)).toThrow(RangeError);
+  });
+
+  it('publishes sparse ancient-city points at exact source dates only', () => {
+    expect(historicalCities.cities).toHaveLength(154);
+    expect(historicalCities.observations).toHaveLength(621);
+    expect(historicalCities.years).toHaveLength(41);
+    expect(historicalCities.years[0]).toBe(-3699);
+    expect(historicalCities.years.at(-1)).toBe(1000);
+    expect(historicalCities.temporal_policy).toBe('exact_only');
+    expect(historicalCities.spatial_support).toBe('source_geocoded_city_point_not_extent');
+    expect(historicalCities.observations.every((observation) => observation.population > 0)).toBe(true);
   });
 
   it('publishes exact deep-time world estimates without silently choosing within source ranges', () => {
@@ -115,6 +132,7 @@ describe('genuine-data MVP release', () => {
     expect(manifest.source_releases.map((source) => source.id)).toContain('world-bank-wdi-2026-07-13');
     expect(manifest.source_releases.map((source) => source.id)).toContain('natural-earth-v5.1.2');
     expect(manifest.source_releases.map((source) => source.id)).toContain('cliopatria-v0.2.0');
+    expect(manifest.source_releases.map((source) => source.id)).toContain('reba-modelski-ancient-v2');
     expect(manifest.source_releases.map((source) => source.id)).toContain(
       'us-census-historical-world-population-2026-09-20',
     );
@@ -128,6 +146,17 @@ describe('genuine-data MVP release', () => {
         .filter((source) => !source.release_ready)
         .every((source) => source.blockers.length > 0),
     ).toBe(true);
+  });
+
+  it('conserves the life-expectancy context distribution without creating person-level values', () => {
+    for (const summary of lifeExpectancy.summaries) {
+      const distributed = summary.bins.reduce((sum, bin) => sum + bin.population, 0);
+      expect(distributed + summary.unknown_condition_population).toBe(summary.population);
+      expect(summary.bins).toHaveLength(6);
+    }
+    const metric = manifest.metrics.find((candidate) => candidate.id === 'life_expectancy_at_birth');
+    expect(metric?.aggregation_kind).toBe('context_distribution');
+    expect(metric?.prohibited_interpretations).toContain('a person-level distribution');
   });
 
   it('reproduces every annual population summary and keeps residuals explicit', () => {
@@ -204,5 +233,16 @@ describe('genuine-data MVP release', () => {
     expect(lines).toHaveLength(entities.length * electricity.years.length + 1);
     expect(lines[1]).toContain('World Bank API EG.ELC.ACCS.ZS/');
     expect(lines[1]).toContain('World Bank API SP.POP.TOTL/');
+  });
+
+  it('exports life expectancy with population weights and city points with their source coordinates', () => {
+    const lifeLines = readFileSync(resolve(releaseRoot, 'life-expectancy.csv'), 'utf8').trim().split('\n');
+    expect(lifeLines[0]).toBe(
+      'code,year,value_years,status,population,population_status,original_record_locator,population_record_locator',
+    );
+    expect(lifeLines).toHaveLength(entities.length * lifeExpectancy.years.length + 1);
+    const cityLines = readFileSync(resolve(releaseRoot, 'historical-cities.csv'), 'utf8').trim().split('\n');
+    expect(cityLines).toHaveLength(historicalCities.observations.length + 1);
+    expect(cityLines[0]).toContain('geocode_certainty_code');
   });
 });

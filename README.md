@@ -11,20 +11,25 @@ This is not a leaderboard of civilizations, a single “progress” score, or a 
 
 **A working first genuine-data development release now exists.**
 
-The application now presents three genuine-data paths in one timeline:
+The application now presents three genuine-data measures plus two independent
+historical context layers in one timeline:
 
 - U.S. Census Bureau world-population estimate ranges at 39 published dates from
   10,000 BCE through 1950 CE;
 - annual World Bank population totals for 217 nonaggregate country/territory
   series from 1960–2025; and
 - annual electricity access for every observed source year from 1990–2024,
-  summarized with matching annual population weights.
+  summarized with matching annual population weights; and
+- World Bank life expectancy from 1960–2024, shown as a territorial mean and a
+  population-weighted context distribution—not an individual lifespan distribution.
 
 A pinned Natural Earth 1:110m layer places 170 modern statistical supports on
 the map. A separately pinned Cliopatria v0.2.0 layer supplies 36 display-only
 historical political snapshots from 3400 BCE through 2024 CE; dragging time
 changes its source-valid borders and names. Historical polygons never receive or
-contribute population totals. Deep-time population remains a global source range,
+contribute population totals. A pinned Modelski Ancient v2 layer adds 621 sparse,
+exact-date city-population estimates for 154 cities from 3700 BCE–1000 CE as
+points, never as a complete urban or world total. Deep-time population remains a global source range,
 and unplaced modern population remains in summaries and the table. Time controls
 use exact observations only. Source responses, published artifacts, hashes,
 coverage, and limitations are recorded in the release manifest and
@@ -79,10 +84,13 @@ Reading order:
 
 ## First release
 
-The first coherent release has two complementary experiences in one interface:
+The first coherent release has complementary experiences in one interface:
 
 - **Long-run population:** verified historical population snapshots, with an optional historical political-boundary overlay where available.
-- **Modern living conditions:** begin with access to electricity and a real population-share chart. Add income and health only with their distinct statistical meanings preserved.
+- **Modern living conditions:** electricity access and life expectancy, each with
+  its distinct aggregation meaning and matching population accounting.
+- **Historical context:** discrete changing polity geometry/names and sparse
+  exact-date ancient-city estimates, kept independent of global population.
 
 Sparse historical technology/institution observations become labeled case studies later. They are not silently expanded into estimates for all humanity.
 

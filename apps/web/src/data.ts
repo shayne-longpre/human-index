@@ -2,9 +2,11 @@ import type {
   AtlasEntity,
   AtlasReleaseManifest,
   ElectricityDataset,
+  HistoricalCityDataset,
   HistoricalContextIndex,
   HistoricalContextSnapshotReference,
   HistoricalPopulationDataset,
+  LifeExpectancyDataset,
   MvpMetricId,
   PopulationDataset,
 } from '@atlas/contracts';
@@ -42,7 +44,7 @@ export type HistoricalFeatureCollection = FeatureCollection<Geometry, Historical
   dating_status: string;
   geometry_method: string;
 };
-export type MetricDataset = PopulationDataset | ElectricityDataset;
+export type MetricDataset = PopulationDataset | ElectricityDataset | LifeExpectancyDataset;
 
 export interface ReleaseBase {
   entities: AtlasEntity[];
@@ -51,9 +53,10 @@ export interface ReleaseBase {
   population: PopulationDataset;
   historicalPopulation: HistoricalPopulationDataset;
   historicalContext: HistoricalContextIndex;
+  historicalCities: HistoricalCityDataset;
 }
 
-export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-20-r2';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-20-r3';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {
@@ -66,12 +69,13 @@ async function getJson<T>(url: string): Promise<T> {
 
 export async function loadReleaseBase(): Promise<ReleaseBase> {
   const manifest = await getJson<AtlasReleaseManifest>(`${releaseRoot}/manifest.json`);
-  const [entityPayload, geometry, population, historicalPopulation, historicalContext] = await Promise.all([
+  const [entityPayload, geometry, population, historicalPopulation, historicalContext, historicalCities] = await Promise.all([
     getJson<{ entities: AtlasEntity[] }>(`${releaseRoot}/entities.json`),
     getJson<CountryFeatureCollection>(`${releaseRoot}/countries.geojson`),
     getJson<PopulationDataset>(`${releaseRoot}/population.json`),
     getJson<HistoricalPopulationDataset>(`${releaseRoot}/${manifest.deep_time_population.data_file}`),
     getJson<HistoricalContextIndex>(`${releaseRoot}/${manifest.historical_context.index_file}`),
+    getJson<HistoricalCityDataset>(`${releaseRoot}/${manifest.historical_cities.data_file}`),
   ]);
   return {
     entities: entityPayload.entities,
@@ -80,6 +84,7 @@ export async function loadReleaseBase(): Promise<ReleaseBase> {
     population,
     historicalPopulation,
     historicalContext,
+    historicalCities,
   };
 }
 
@@ -138,4 +143,8 @@ export function loadHistoricalSnapshot(
   );
   historicalSnapshotCache.set(reference.file, pending);
   return pending;
+}
+
+export function prefetchHistoricalSnapshot(reference: HistoricalContextSnapshotReference | undefined): void {
+  if (reference) void loadHistoricalSnapshot(reference).catch(() => undefined);
 }

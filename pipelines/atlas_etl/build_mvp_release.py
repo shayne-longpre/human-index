@@ -1,4 +1,4 @@
-"""Publish the two-metric Atlas MVP from validated immutable inputs."""
+"""Publish the compact Atlas MVP from validated immutable inputs."""
 
 from __future__ import annotations
 
@@ -20,11 +20,19 @@ from .geography import (
 )
 from .sources.world_bank import (
     ELECTRICITY_INDICATOR,
+    LIFE_EXPECTANCY_INDICATOR,
     POPULATION_INDICATOR,
     SOURCE_URLS,
     WORLD_BANK_LAST_UPDATED,
     WORLD_REFERENCE_CODE,
     WorldBankAdapter,
+)
+from .sources.modelski_cities import (
+    SOURCE_ARTICLE_URL as MODELSKI_ARTICLE_URL,
+    SOURCE_DATA_URL as MODELSKI_DATA_URL,
+    SOURCE_DOWNLOAD_URL as MODELSKI_DOWNLOAD_URL,
+    SOURCE_ID as MODELSKI_SOURCE_ID,
+    ModelskiAncientCitiesAdapter,
 )
 from .sources.cliopatria import (
     SNAPSHOT_SOURCE_YEARS,
@@ -41,9 +49,10 @@ from .sources.us_census_population import (
 
 
 RETRIEVED_ON = "2026-09-20"
-RELEASE_ID = "atlas-mvp-2026-09-20-r2"
+RELEASE_ID = "atlas-mvp-2026-09-20-r3"
 UNIVERSE_ID = "world-bank-nonaggregate-economies-v1"
 CLIOPATRIA_GEOMETRY_MEMBER = "cliopatria_polities_only.geojson"
+LIFE_EXPECTANCY_BINS = [0, 50, 60, 70, 80, 90, 130]
 
 
 def _csv_bytes(rows: list[dict[str, Any]], fields: list[str]) -> bytes:
@@ -130,6 +139,29 @@ def _metric_definition(metric_id: str, years: list[int], data_file: str, downloa
                 "electricity consumption",
             ],
         }
+    if metric_id == "life_expectancy_at_birth":
+        return {
+            **shared,
+            "id": metric_id,
+            "label": "Life expectancy",
+            "taxonomy_ids": ["health_and_survival"],
+            "indicator": LIFE_EXPECTANCY_INDICATOR,
+            "aggregation_kind": "context_distribution",
+            "unit": "years",
+            "definition": "Period life expectancy at birth for the national or territorial population in the stated year.",
+            "display_scale": {
+                "transform": "linear",
+                "fixed_domain": [45, 90],
+                "bins": LIFE_EXPECTANCY_BINS,
+                "scale_version": "life-expectancy-context-v1",
+            },
+            "safe_summary": "Population living in territories grouped by their published national mean life expectancy.",
+            "prohibited_interpretations": [
+                "an individual lifespan prediction",
+                "a person-level distribution",
+                "a global life-table estimate",
+            ],
+        }
     raise KeyError(metric_id)
 
 
@@ -146,6 +178,13 @@ def build(args: argparse.Namespace) -> None:
             "world_bank_electricity",
             args.electricity,
             SOURCE_URLS["world_bank_electricity"],
+            RETRIEVED_ON,
+            "CC-BY-4.0",
+        ),
+        InputArtifact(
+            "world_bank_life_expectancy",
+            args.life_expectancy,
+            SOURCE_URLS["world_bank_life_expectancy"],
             RETRIEVED_ON,
             "CC-BY-4.0",
         ),
@@ -184,6 +223,20 @@ def build(args: argparse.Namespace) -> None:
             RETRIEVED_ON,
             "CC-BY-4.0",
         ),
+        InputArtifact(
+            "modelski_ancient_v2_csv",
+            args.historical_cities,
+            MODELSKI_DOWNLOAD_URL,
+            RETRIEVED_ON,
+            "CC-BY-4.0",
+        ),
+        InputArtifact(
+            "modelski_ancient_v2_metadata",
+            args.historical_cities_metadata,
+            "https://api.figshare.com/v2/articles/2059497",
+            RETRIEVED_ON,
+            "CC-BY-4.0",
+        ),
     ]
     for artifact in inputs:
         if not artifact.path.is_file():
@@ -205,12 +258,16 @@ def build(args: argparse.Namespace) -> None:
     adapter = WorldBankAdapter(
         population=args.population,
         electricity=args.electricity,
+        life_expectancy=args.life_expectancy,
         countries=args.countries,
     )
     historical_population_adapter = UsCensusHistoricalPopulationAdapter(
         args.historical_population
     )
     cliopatria_adapter = CliopatriaAdapter(args.cliopatria_geometry)
+    cities_adapter = ModelskiAncientCitiesAdapter(
+        args.historical_cities, args.historical_cities_metadata
+    )
     codes = adapter.nonaggregate_codes()
     metadata = adapter.entities()
     entity_names = {code: metadata[code]["name"] for code in codes}
@@ -232,12 +289,16 @@ def build(args: argparse.Namespace) -> None:
 
     population = adapter.series(POPULATION_INDICATOR)
     electricity = adapter.series(ELECTRICITY_INDICATOR)
+    life_expectancy = adapter.series(LIFE_EXPECTANCY_INDICATOR)
     population_years = adapter.years(POPULATION_INDICATOR)
     electricity_years = adapter.years(ELECTRICITY_INDICATOR, require_known=True)
+    life_expectancy_years = adapter.years(LIFE_EXPECTANCY_INDICATOR, require_known=True)
     if population_years != list(range(1960, 2026)):
         raise ValidationError("Population release does not cover every year from 1960 through 2025")
     if electricity_years != list(range(1990, 2025)):
         raise ValidationError("Electricity observations do not cover every year from 1990 through 2024")
+    if life_expectancy_years != list(range(1960, 2025)):
+        raise ValidationError("Life expectancy observations do not cover every year from 1960 through 2024")
 
     population_rows: list[dict[str, Any]] = []
     population_summaries: list[dict[str, Any]] = []
@@ -344,16 +405,102 @@ def build(args: argparse.Namespace) -> None:
             }
         )
 
+    life_expectancy_rows: list[dict[str, Any]] = []
+    life_expectancy_download_rows: list[dict[str, Any]] = []
+    life_expectancy_summaries: list[dict[str, Any]] = []
+    for year in life_expectancy_years:
+        covered_population = 0
+        unknown_condition_population = 0
+        missing_population_entities = 0
+        known_condition_entities = 0
+        bin_populations = [0 for _ in range(len(LIFE_EXPECTANCY_BINS) - 1)]
+        for code in sorted(codes):
+            value = life_expectancy.get((code, year))
+            pop = population.get((code, year))
+            life_expectancy_rows.append(
+                {
+                    "code": code,
+                    "year": year,
+                    "value_years": value,
+                    "status": "known" if value is not None else "unknown",
+                    "original_record_locator": adapter.record_locator(
+                        LIFE_EXPECTANCY_INDICATOR, code, year
+                    ),
+                }
+            )
+            life_expectancy_download_rows.append(
+                {
+                    "code": code,
+                    "year": year,
+                    "value_years": value,
+                    "status": "known" if value is not None else "unknown",
+                    "population": pop,
+                    "population_status": "known" if pop is not None else "unknown",
+                    "original_record_locator": adapter.record_locator(
+                        LIFE_EXPECTANCY_INDICATOR, code, year
+                    ),
+                    "population_record_locator": adapter.record_locator(
+                        POPULATION_INDICATOR, code, year
+                    ),
+                }
+            )
+            if pop is None:
+                missing_population_entities += 1
+                continue
+            covered_population += pop
+            if value is None:
+                unknown_condition_population += pop
+                continue
+            known_condition_entities += 1
+            bin_index = next(
+                (
+                    index
+                    for index, (lower, upper) in enumerate(
+                        zip(LIFE_EXPECTANCY_BINS, LIFE_EXPECTANCY_BINS[1:])
+                    )
+                    if lower <= value < upper
+                ),
+                None,
+            )
+            if bin_index is None:
+                raise ValidationError(f"Life expectancy is outside published bins for {code}/{year}")
+            bin_populations[bin_index] += pop
+        if sum(bin_populations) + unknown_condition_population != covered_population:
+            raise ValidationError(f"Life expectancy accounting does not conserve population in {year}")
+        life_expectancy_summaries.append(
+            {
+                "year": year,
+                "population": covered_population,
+                "known_condition_entities": known_condition_entities,
+                "missing_population_entities": missing_population_entities,
+                "unknown_condition_population": unknown_condition_population,
+                "bins": [
+                    {
+                        "lower_inclusive": lower,
+                        "upper_exclusive": upper,
+                        "population": bin_populations[index],
+                    }
+                    for index, (lower, upper) in enumerate(
+                        zip(LIFE_EXPECTANCY_BINS, LIFE_EXPECTANCY_BINS[1:])
+                    )
+                ],
+            }
+        )
+
     args.output.mkdir(parents=True, exist_ok=True)
     entities_path = args.output / "entities.json"
     population_path = args.output / "population.json"
     electricity_path = args.output / "electricity.json"
+    life_expectancy_path = args.output / "life-expectancy.json"
     geometry_path = args.output / "countries.geojson"
     population_csv_path = args.output / "population.csv"
     electricity_csv_path = args.output / "electricity.csv"
+    life_expectancy_csv_path = args.output / "life-expectancy.csv"
     historical_population_path = args.output / "historical-population.json"
     historical_population_csv_path = args.output / "historical-population.csv"
     historical_context_index_path = args.output / "historical-context.json"
+    historical_cities_path = args.output / "historical-cities.json"
+    historical_cities_csv_path = args.output / "historical-cities.csv"
 
     write_json(entities_path, {"schema_version": "0.2.0", "entities": entities})
     write_json(
@@ -376,6 +523,16 @@ def build(args: argparse.Namespace) -> None:
             "summaries": electricity_summaries,
         },
     )
+    write_json(
+        life_expectancy_path,
+        {
+            "schema_version": "0.4.0",
+            "metric_id": "life_expectancy_at_birth",
+            "years": life_expectancy_years,
+            "observations": life_expectancy_rows,
+            "summaries": life_expectancy_summaries,
+        },
+    )
     write_json(geometry_path, geometry)
     population_csv_path.write_bytes(
         _csv_bytes(
@@ -390,6 +547,21 @@ def build(args: argparse.Namespace) -> None:
                 "code",
                 "year",
                 "value_percent",
+                "status",
+                "population",
+                "population_status",
+                "original_record_locator",
+                "population_record_locator",
+            ],
+        )
+    )
+    life_expectancy_csv_path.write_bytes(
+        _csv_bytes(
+            life_expectancy_download_rows,
+            [
+                "code",
+                "year",
+                "value_years",
                 "status",
                 "population",
                 "population_status",
@@ -437,6 +609,39 @@ def build(args: argparse.Namespace) -> None:
         )
     )
 
+    historical_cities = cities_adapter.dataset()
+    write_json(historical_cities_path, historical_cities)
+    cities_by_id = {city["id"]: city for city in historical_cities["cities"]}
+    historical_cities_csv_path.write_bytes(
+        _csv_bytes(
+            [
+                {
+                    **observation,
+                    "name": cities_by_id[observation["city_id"]]["name"],
+                    "other_name": cities_by_id[observation["city_id"]]["other_name"],
+                    "modern_country_label": cities_by_id[observation["city_id"]]["modern_country_label"],
+                    "latitude": cities_by_id[observation["city_id"]]["latitude"],
+                    "longitude": cities_by_id[observation["city_id"]]["longitude"],
+                    "geocode_certainty_code": cities_by_id[observation["city_id"]]["geocode_certainty_code"],
+                }
+                for observation in historical_cities["observations"]
+            ],
+            [
+                "city_id",
+                "name",
+                "other_name",
+                "modern_country_label",
+                "latitude",
+                "longitude",
+                "geocode_certainty_code",
+                "year",
+                "population",
+                "status",
+                "original_record_locator",
+            ],
+        )
+    )
+
     history_directory = args.output / "history"
     history_directory.mkdir(parents=True, exist_ok=True)
     historical_snapshots: list[dict[str, Any]] = []
@@ -472,12 +677,16 @@ def build(args: argparse.Namespace) -> None:
             entities_path,
             population_path,
             electricity_path,
+            life_expectancy_path,
             geometry_path,
             population_csv_path,
             electricity_csv_path,
+            life_expectancy_csv_path,
             historical_population_path,
             historical_population_csv_path,
             historical_context_index_path,
+            historical_cities_path,
+            historical_cities_csv_path,
             *historical_snapshot_paths,
     ]
 
@@ -494,9 +703,11 @@ def build(args: argparse.Namespace) -> None:
             entities_path,
             population_path,
             electricity_path,
+            life_expectancy_path,
             geometry_path,
             population_csv_path,
             electricity_csv_path,
+            life_expectancy_csv_path,
         ]
     }
     write_json(
@@ -514,7 +725,7 @@ def build(args: argparse.Namespace) -> None:
     ]
     population_metric_years = sorted(set(historical_years + population_years))
     manifest = {
-        "schema_version": "0.3.0",
+        "schema_version": "0.4.0",
         "release_id": RELEASE_ID,
         "status": "genuine_data_development_release",
         "published_on": RETRIEVED_ON,
@@ -526,6 +737,7 @@ def build(args: argparse.Namespace) -> None:
                     {"id": "population_and_settlement", "label": "Population & settlement"},
                     {"id": "material_conditions", "label": "Material conditions"},
                     {"id": "infrastructure_access", "label": "Infrastructure access"},
+                    {"id": "health_and_survival", "label": "Health & survival"},
                 ],
             }
         ],
@@ -541,6 +753,12 @@ def build(args: argparse.Namespace) -> None:
                 electricity_years,
                 "electricity.json",
                 "electricity.csv",
+            ),
+            _metric_definition(
+                "life_expectancy_at_birth",
+                life_expectancy_years,
+                "life-expectancy.json",
+                "life-expectancy.csv",
             ),
         ],
         "population_universes": [
@@ -603,6 +821,15 @@ def build(args: argparse.Namespace) -> None:
             "selection_policy": "latest published snapshot not after requested date",
             "excluded_feature_types": ["RELATION"],
         },
+        "historical_cities": {
+            "data_file": historical_cities_path.name,
+            "download_file": historical_cities_csv_path.name,
+            "source_release_id": MODELSKI_SOURCE_ID,
+            "coverage": "3700 BCE to 1000 CE at 41 sparse source dates",
+            "temporal_policy": "exact_only",
+            "spatial_support": "source geocoded city points, not urban extents",
+            "interpretation": "published city estimates; not a complete urban census or world-population denominator",
+        },
         "source_releases": [
             {
                 "id": f"world-bank-wdi-{WORLD_BANK_LAST_UPDATED}",
@@ -636,6 +863,13 @@ def build(args: argparse.Namespace) -> None:
                     "relations_excluded_from_release": True,
                 },
             },
+            {
+                "id": MODELSKI_SOURCE_ID,
+                "publisher": "Meredith Reba / Figshare; underlying Modelski compilation",
+                "retrieved_on": RETRIEVED_ON,
+                "license": "CC BY 4.0",
+                "profile": cities_adapter.profile(),
+            },
         ],
         "alternative_sources": [
             {
@@ -653,23 +887,35 @@ def build(args: argparse.Namespace) -> None:
                 "reason_deferred": "authorized archive access and artifact terms unresolved",
                 "url": "https://public.yoda.uu.nl/geo/UU01/F45D44.html",
             },
+            {
+                "id": "reba-chandler-and-modelski-modern",
+                "role": "additional historical city population series",
+                "status": "documented_not_ingested",
+                "coverage": "2250 BCE to 2000 CE across companion tables",
+                "reason_deferred": "MVP uses one source table first; merging alternative estimates needs explicit city identity and disagreement handling",
+                "url": "https://doi.org/10.1038/sdata.2016.34",
+            },
         ],
         "transformations": [
             {
                 "id": "world-bank-mvp-normalize-v1",
                 "version": "1.0.0",
-                "input_artifact_ids": [artifact.id for artifact in inputs[:4]],
+                "input_artifact_ids": [artifact.id for artifact in inputs[:5]],
                 "parameters": {
                     "universe_id": UNIVERSE_ID,
                     "population_years": [1960, 2025],
                     "electricity_years": [1990, 2024],
+                    "life_expectancy_years": [1960, 2024],
+                    "life_expectancy_bins": LIFE_EXPECTANCY_BINS,
                     "no_interpolation": True,
                 },
                 "output_artifacts": modern_artifacts,
                 "validation": {
                     "population_summaries": len(population_summaries),
                     "electricity_summaries": len(electricity_summaries),
+                    "life_expectancy_summaries": len(life_expectancy_summaries),
                     "prevalence_mass_conservation": "passed_all_years",
+                    "context_distribution_mass_conservation": "passed_all_years",
                     "world_reference_residual_nonnegative": "passed_all_years",
                 },
             },
@@ -718,6 +964,26 @@ def build(args: argparse.Namespace) -> None:
                     ),
                 },
             },
+            {
+                "id": "modelski-ancient-city-points-v1",
+                "version": "1.0.0",
+                "input_artifact_ids": [
+                    "modelski_ancient_v2_csv",
+                    "modelski_ancient_v2_metadata",
+                ],
+                "parameters": {
+                    "date_conversion": "BC/AD columns to astronomical years",
+                    "temporal_policy": "exact_only",
+                    "no_interpolation": True,
+                    "spatial_support": "source point coordinates",
+                    "population_assignment_to_polities": "none",
+                },
+                "output_artifacts": {
+                    artifact_key(historical_cities_path): artifacts[artifact_key(historical_cities_path)],
+                    artifact_key(historical_cities_csv_path): artifacts[artifact_key(historical_cities_csv_path)],
+                },
+                "validation": cities_adapter.profile(),
+            },
         ],
         "artifacts": artifacts,
         "citations": [
@@ -729,6 +995,11 @@ def build(args: argparse.Namespace) -> None:
             {
                 "label": "World Bank, Access to electricity (% of population)",
                 "url": "https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS",
+                "license": "CC BY 4.0",
+            },
+            {
+                "label": "World Bank, Life expectancy at birth, total (years)",
+                "url": "https://data.worldbank.org/indicator/SP.DYN.LE00.IN",
                 "license": "CC BY 4.0",
             },
             {
@@ -746,15 +1017,27 @@ def build(args: argparse.Namespace) -> None:
                 "url": "https://github.com/Seshat-Global-History-Databank/cliopatria/tree/v0.2.0",
                 "license": "CC BY 4.0",
             },
+            {
+                "label": "Modelski Ancient Period Data v2",
+                "url": MODELSKI_DATA_URL,
+                "license": "CC BY 4.0",
+            },
+            {
+                "label": "Reba et al., Spatializing 6,000 years of global urbanization",
+                "url": MODELSKI_ARTICLE_URL,
+                "license": "CC BY 4.0",
+            },
         ],
         "limitations": [
             "Population color represents a territorial total, not local density or a gridded settlement reconstruction.",
             "Electricity values are national or territorial estimates, not local household observations.",
+            "Life expectancy is a national or territorial period mean; the population distribution groups people by territorial context and is not a person-level lifespan distribution.",
             "The covered universe is reconciled to WLD with an explicit residual but lacks source-coded parent/dependency relations.",
             "The 1:110m display geometry omits some small territories; their population remains in summaries.",
             "Pre-1960 historical population is a global estimate or source-disagreement range and is not spatially allocated.",
             "Cliopatria polygons and labels are contestable historical context, simplified for display, and never used as population supports.",
             "Only selected Cliopatria snapshot years are published; the effective boundary date is shown separately from the requested date.",
+            "Ancient-city points appear only at exact published dates; coordinates are source geocodes, modern-country labels are descriptive metadata, and city estimates are not summed as total urban or world population.",
         ],
     }
     write_json(args.output / "manifest.json", manifest)
@@ -767,7 +1050,9 @@ def build(args: argparse.Namespace) -> None:
                 "population_years": [population_years[0], population_years[-1]],
                 "historical_population_dates": len(historical_population_observations),
                 "electricity_years": [electricity_years[0], electricity_years[-1]],
+                "life_expectancy_years": [life_expectancy_years[0], life_expectancy_years[-1]],
                 "historical_context_snapshots": len(historical_snapshots),
+                "historical_city_observations": len(historical_cities["observations"]),
                 "artifacts_bytes": sum(record["bytes"] for record in artifacts.values()),
             },
             indent=2,
@@ -779,12 +1064,15 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--population", type=Path, required=True)
     parser.add_argument("--electricity", type=Path, required=True)
+    parser.add_argument("--life-expectancy", type=Path, required=True)
     parser.add_argument("--countries", type=Path, required=True)
     parser.add_argument("--geometry", type=Path, required=True)
     parser.add_argument("--historical-population", type=Path, required=True)
     parser.add_argument("--cliopatria-archive", type=Path, required=True)
     parser.add_argument("--cliopatria-geometry", type=Path, required=True)
     parser.add_argument("--cliopatria-license", type=Path, required=True)
+    parser.add_argument("--historical-cities", type=Path, required=True)
+    parser.add_argument("--historical-cities-metadata", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--lockfile", type=Path, required=True)
     return parser.parse_args()

@@ -7,16 +7,19 @@ Updated: 2026-09-20
 The runnable MVP publishes U.S. Census Bureau world-population estimate ranges at
 39 dates from 10,000 BCE through 1950 CE, World Bank population totals for every
 year from 1960 through 2025, and electricity access for every observed year from
-1990 through 2024. Modern statistics use the same 217-entity nonaggregate
+1990 through 2024. It also publishes World Bank life expectancy for 1960–2024
+as national/territorial context with population-conserving fixed bins. Modern statistics use the same 217-entity nonaggregate
 metadata universe. Deep-time population has world support only and is never
 assigned to a historical polity.
 
 The UI has a metric switcher, exact-source-date timeline and playback,
 choropleth, metric-specific population summary, modern and historical inspectors,
 accessible tables, and full-series CSVs. A toggleable Cliopatria v0.2.0 context
-layer switches among 36 genuine source snapshots spanning 3400 BCE–2024 CE, so
-political geometry and labels change as the date changes. `RELATION` features are
-excluded. Metric, year, and selected modern place are retained in the URL. A
+layer switches among 36 genuine source snapshots spanning 3400 BCE–2024 CE. A
+dedicated political-snapshot scrubber makes those geometry/name changes directly
+controllable instead of hiding them behind metric dates. `RELATION` features are
+excluded. A separate Modelski Ancient v2 layer publishes 621 exact-date city
+estimates for 154 source-geocoded points from 3700 BCE–1000 CE. Metric, year, and selected modern place are retained in the URL. A
 dedicated Sources page separates published release inputs
 from candidate and blocked research sources.
 
@@ -29,7 +32,8 @@ population that cannot be placed in the coarse geometry remain explicit.
 
 ## Source audit decisions
 
-- World Bank API responses for `EG.ELC.ACCS.ZS`, `SP.POP.TOTL`, and country
+- World Bank API responses for `EG.ELC.ACCS.ZS`, `SP.POP.TOTL`,
+  `SP.DYN.LE00.IN`, and country
   metadata were acquired successfully on 2026-09-20. Each response reports one
   page for the requested page size and a source update date of 2026-07-13 for the
   indicator series.
@@ -37,6 +41,9 @@ population that cannot be placed in the coarse geometry remain explicit.
   observations from 1990–2024; the API has no 2025 electricity values in this
   retrieval, and the UI displays that year as unsupported rather than carrying
   2024 forward.
+- Life expectancy has actual source observations from 1960–2024. The map shows
+  territorial means; its summary groups population by fixed territorial-mean
+  bins and preserves unknown condition and missing population weights.
 - Natural Earth vector release v5.1.2 is the pinned display geometry. Its
   1:110m country layer is intentionally too coarse to show every small territory.
 - The U.S. Census Bureau historical world-population table was acquired and
@@ -48,6 +55,11 @@ population that cannot be placed in the coarse geometry remain explicit.
   `POLITY`-only snapshots; no geometry contributes to numerical accounting.
   Source year-zero endpoints are quarantined and no published snapshot samples
   them.
+- The pinned Figshare Modelski Ancient v2 table is CC BY 4.0 and contains 154
+  cities, 41 sparse source dates, and 621 estimates. Coordinates, modern-country
+  labels, and geocode certainty codes are preserved as source metadata; no
+  interpolation or polity assignment is performed. Companion Chandler and
+  Modelski Modern tables remain documented alternatives for a later merge.
 - UN World Population Prospects 2024 is documented as a more detailed direct
   expansion source, but it is not merged pending artifact, scenario, and territory
   audits.
@@ -63,7 +75,7 @@ published view manifest.
 ## Implemented architecture
 
 - Narrow source adapters parse source-native artifacts; World Bank, U.S. Census,
-  and Cliopatria each have their own adapter.
+  Cliopatria, and Modelski each have their own adapter.
 - The release builder owns statistical-universe validation, summaries, lineage,
   and artifact hashes.
 - Display geometry is built separately and contributes no numerical totals.
@@ -72,6 +84,8 @@ published view manifest.
 - The client joins entity, population, and selected metric observations by exact
   code and year. Metric presentation is a small configuration layer rather than
   duplicated application screens.
+- Map dependencies load in a separate lazy chunk, and adjacent boundary snapshots
+  are prefetched after the active snapshot resolves.
 
 The next expansion should add a source only after its release, universe, temporal
 policy, and aggregation meaning are audited. The immediate population gap is a

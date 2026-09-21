@@ -27,9 +27,10 @@ function humanize(value: string): string {
 }
 
 function releaseRole(id: string): string {
-  if (id.startsWith('world-bank')) return 'Modern population and electricity observations';
+  if (id.startsWith('world-bank')) return 'Modern population, electricity, and life-expectancy observations';
   if (id.startsWith('us-census')) return 'Deep-time global population estimates and source ranges';
   if (id.startsWith('cliopatria')) return 'Historical political context geometry and names';
+  if (id.startsWith('reba-modelski')) return 'Sparse exact-date ancient city population points';
   return 'Modern display geometry only';
 }
 

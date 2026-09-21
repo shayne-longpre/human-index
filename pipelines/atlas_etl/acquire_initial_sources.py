@@ -19,6 +19,7 @@ from .sources.world_bank import SOURCE_URLS
 from .sources.cliopatria import SOURCE_LICENSE_URL as CLIOPATRIA_LICENSE_URL
 from .sources.cliopatria import SOURCE_URL as CLIOPATRIA_URL
 from .sources.us_census_population import SOURCE_URL as HISTORICAL_POPULATION_URL
+from .sources.modelski_cities import SOURCE_DOWNLOAD_URL as MODELSKI_DOWNLOAD_URL
 
 
 USER_AGENT = "Atlas-of-Humanity/0.1 source-audit (research software)"
@@ -53,9 +54,11 @@ def main() -> None:
     historical_population = args.output / "us_census" / RETRIEVED_ON
     cliopatria = args.output / "cliopatria" / "v0.2.0"
     cliopatria_archive = cliopatria / "cliopatria.geojson.zip"
+    reba_cities = args.output / "reba_cities" / "2016"
     artifacts = [
         download(SOURCE_URLS["world_bank_electricity"], world_bank / "electricity.json"),
         download(SOURCE_URLS["world_bank_population"], world_bank / "population.json"),
+        download(SOURCE_URLS["world_bank_life_expectancy"], world_bank / "life-expectancy.json"),
         download(SOURCE_URLS["world_bank_countries"], world_bank / "countries.json"),
         download(
             NATURAL_EARTH_URL,
@@ -67,6 +70,11 @@ def main() -> None:
         ),
         download(CLIOPATRIA_URL, cliopatria_archive),
         download(CLIOPATRIA_LICENSE_URL, cliopatria / "LICENSE.md"),
+        download(
+            "https://api.figshare.com/v2/articles/2059497",
+            reba_cities / "modelski-ancient.metadata.json",
+        ),
+        download(MODELSKI_DOWNLOAD_URL, reba_cities / "modelskiAncientV2.csv"),
     ]
     with zipfile.ZipFile(cliopatria_archive) as archive:
         member = CLIOPATRIA_GEOMETRY_MEMBER

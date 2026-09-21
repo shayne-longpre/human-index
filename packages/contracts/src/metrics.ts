@@ -53,10 +53,40 @@ export const populationTotalMetric: MetricDefinition = {
   globalSummaryEnabled: true,
 };
 
-export const metricDefinitions = [populationTotalMetric, electricityAccessMetric] as const;
+export const lifeExpectancyMetric: MetricDefinition = {
+  id: 'life_expectancy_at_birth',
+  label: 'Life expectancy',
+  taxonomyIds: ['health_and_survival'],
+  definition: 'Period life expectancy at birth for the national or territorial population in the stated year.',
+  unit: 'years',
+  aggregationKind: 'context_distribution',
+  statisticalUniverse: 'resident persons represented by nonaggregate World Bank entities with population weights',
+  sourceSupportType: 'country_or_territory_year',
+  contextVsIndividual: 'territorial_context',
+  comparabilityGroup: 'world-bank-sp-dyn-le00-in-2026-07-13',
+  temporalPolicy: 'exact_only',
+  preferredPopulationSource: 'world-bank-sp-pop-totl-2026-07-13',
+  displayScale: {
+    transform: 'linear',
+    fixedDomain: [45, 90],
+    bins: [0, 50, 60, 70, 80, 90, 130],
+    scaleVersion: 'life-expectancy-context-v1',
+  },
+  summarySentenceTemplate:
+    'Population living in territories grouped by their published national mean life expectancy.',
+  prohibitedInterpretations: [
+    'an individual lifespan prediction',
+    'a person-level distribution',
+    'a global life-table estimate',
+  ],
+  globalSummaryEnabled: true,
+};
+
+export const metricDefinitions = [populationTotalMetric, electricityAccessMetric, lifeExpectancyMetric] as const;
 
 export const metricTaxonomy = {
   population_and_settlement: [populationTotalMetric.id],
   material_conditions: [electricityAccessMetric.id],
   infrastructure_access: [electricityAccessMetric.id],
+  health_and_survival: [lifeExpectancyMetric.id],
 } as const;

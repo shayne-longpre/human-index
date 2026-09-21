@@ -3,16 +3,20 @@ import {
   formatAstronomicalYear,
   validatePublishedMetrics,
   type MvpMetricId,
+  type LifeExpectancyDataset,
   type PublishedMetric,
   type ViewRow,
 } from '@atlas/contracts';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { DataTable } from './components/DataTable';
 import { Inspector } from './components/Inspector';
 import { HistoricalInspector } from './components/HistoricalInspector';
 import { HistoricalPopulationTable } from './components/HistoricalPopulationTable';
+import { HistoricalCityInspector } from './components/HistoricalCityInspector';
+import { HistoricalTimeline } from './components/HistoricalTimeline';
 import { Legend } from './components/Legend';
-import { MapView } from './components/MapView';
+import type { HistoricalCityPoint } from './components/MapView';
+import { LifeExpectancyDistribution } from './components/LifeExpectancyDistribution';
 import { PopulationBar } from './components/PopulationBar';
 import { PopulationTimeline } from './components/PopulationTimeline';
 import { SourcesPage } from './components/SourcesPage';
@@ -23,6 +27,7 @@ import {
   loadMetricData,
   loadReleaseBase,
   manifestUrl,
+  prefetchHistoricalSnapshot,
   resolveHistoricalSnapshot,
   type HistoricalFeatureCollection,
   type HistoricalProperties,
@@ -30,6 +35,8 @@ import {
   type ReleaseBase,
 } from './data';
 import { metricViews } from './metricViews';
+
+const MapView = lazy(() => import('./components/MapView').then((module) => ({ default: module.MapView })));
 
 // Keeps the app join independent of map geometry and rendering state.
 function buildRows(
@@ -63,6 +70,16 @@ function buildRows(
         });
       }
     }
+  } else if (dataset?.metric_id === 'life_expectancy_at_birth') {
+    for (const observation of dataset.observations) {
+      if (observation.year === year) {
+        metricByCode.set(observation.code, {
+          value: observation.value_years,
+          status: observation.status,
+          locator: observation.original_record_locator,
+        });
+      }
+    }
   }
 
   return release.entities.map((entity) => {
@@ -90,9 +107,11 @@ export function App() {
   const [tableOpen, setTableOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [historicalEnabled, setHistoricalEnabled] = useState(true);
+  const [citiesEnabled, setCitiesEnabled] = useState(true);
   const [historicalSnapshot, setHistoricalSnapshot] = useState<HistoricalFeatureCollection | null>(null);
   const [historicalLoading, setHistoricalLoading] = useState(false);
   const [selectedHistorical, setSelectedHistorical] = useState<HistoricalProperties | null>(null);
+  const [selectedCityPoint, setSelectedCityPoint] = useState<HistoricalCityPoint | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [metricError, setMetricError] = useState<string | null>(null);
 
@@ -192,6 +211,15 @@ export function App() {
     return () => { active = false; };
   }, [historicalEnabled, historicalReference]);
 
+  useEffect(() => {
+    if (!release || !historicalEnabled || !historicalReference) return;
+    const index = release.historicalContext.snapshots.findIndex(
+      (snapshot) => snapshot.file === historicalReference.file,
+    );
+    prefetchHistoricalSnapshot(release.historicalContext.snapshots[index - 1]);
+    prefetchHistoricalSnapshot(release.historicalContext.snapshots[index + 1]);
+  }, [historicalEnabled, historicalReference, release]);
+
   const metric = useMemo(
     () => release?.manifest.metrics.find((candidate) => candidate.id === metricId) ?? null,
     [metricId, release],
@@ -222,15 +250,42 @@ export function App() {
       rate: row.metricValue === null ? null : row.metricValue / 100,
     })));
   }, [currentDataset, metricId, rows, supported]);
+  const lifeExpectancySummary = useMemo(() => {
+    if (metricId !== 'life_expectancy_at_birth' || currentDataset?.metric_id !== 'life_expectancy_at_birth') {
+      return null;
+    }
+    return (currentDataset as LifeExpectancyDataset).summaries.find((summary) => summary.year === year) ?? null;
+  }, [currentDataset, metricId, year]);
+  const cityPoints = useMemo<HistoricalCityPoint[]>(() => {
+    if (!release) return [];
+    const cityById = new Map(release.historicalCities.cities.map((city) => [city.id, city]));
+    return release.historicalCities.observations
+      .filter((observation) => observation.year === year)
+      .flatMap((observation) => {
+        const city = cityById.get(observation.city_id);
+        return city ? [{ city, observation }] : [];
+      });
+  }, [release, year]);
 
   const select = useCallback((code: string) => {
     setSelectedHistorical(null);
+    setSelectedCityPoint(null);
     setSelectedCode(code);
   }, []);
   const selectHistorical = useCallback((properties: HistoricalProperties) => {
     setSelectedCode(null);
+    setSelectedCityPoint(null);
     setSelectedHistorical(properties);
   }, []);
+  const selectCity = useCallback((point: HistoricalCityPoint) => {
+    setSelectedCode(null);
+    setSelectedHistorical(null);
+    setSelectedCityPoint(point);
+  }, []);
+
+  useEffect(() => {
+    setSelectedCityPoint(null);
+  }, [year]);
   const allYears = metric?.available_years ?? [1960, 2025];
   const firstYear = allYears[0];
   const lastYear = allYears[allYears.length - 1];
@@ -302,8 +357,8 @@ export function App() {
             <h1>Where people lived.<br />What the evidence can tell us.</h1>
           </div>
           <p>
-            Explore population through deep time and annual electricity-access evidence. Missing observations stay
-            visible, time is never filled silently, and every value keeps its statistical support.
+            Explore population through deep time, changing political maps, ancient city estimates, electricity access,
+            and life expectancy. Missing observations stay visible and time is never filled silently.
           </p>
         </section>
 
@@ -320,6 +375,12 @@ export function App() {
                   onClick={() => {
                     setPlaying(false);
                     setMetricId(candidate.id);
+                    if (!candidate.available_years.includes(year)) {
+                      const nearest = candidate.available_years.reduce((resolved, candidateYear) =>
+                        Math.abs(candidateYear - year) < Math.abs(resolved - year) ? candidateYear : resolved,
+                      );
+                      setYear(nearest);
+                    }
                   }}
                 >
                   <span className="metric-dot" aria-hidden="true" />
@@ -341,6 +402,18 @@ export function App() {
                 <span className="release-dot" aria-hidden="true" />
                 Historical borders & names
               </button>
+              <button
+                type="button"
+                className={citiesEnabled ? 'context-toggle context-toggle-active' : 'context-toggle'}
+                aria-pressed={citiesEnabled}
+                onClick={() => {
+                  setCitiesEnabled((enabled) => !enabled);
+                  setSelectedCityPoint(null);
+                }}
+              >
+                <span className="city-dot" aria-hidden="true" />
+                Ancient city estimates
+              </button>
               <div className="release-badge">
                 <span className="release-dot" aria-hidden="true" />
                 Genuine source data
@@ -348,23 +421,29 @@ export function App() {
             </div>
           </div>
 
-          <MapView
-            geometry={release.geometry}
-            metricId={metric.id}
-            metricLabel={metric.label}
-            year={year}
-            valueByCode={valueByCode}
-            loading={!currentDataset}
-            historicalSnapshot={historicalSnapshot}
-            historicalLoading={historicalLoading}
-            historicalEnabled={historicalEnabled}
-            selectedHistoricalId={selectedHistorical?.source_feature_id ?? null}
-            caption={deepTimePopulation ? 'Global population estimate only' : view.mapCaption}
-            caution={deepTimePopulation ? 'No historical population is assigned to these polities.' : view.mapCaution}
-            selectedCode={selectedCode}
-            onSelect={select}
-            onHistoricalSelect={selectHistorical}
-          />
+          <Suspense fallback={<div className="map-loading" role="status"><span className="loading-mark" aria-hidden="true" />Loading map renderer…</div>}>
+            <MapView
+              geometry={release.geometry}
+              metricId={metric.id}
+              metricLabel={metric.label}
+              year={year}
+              valueByCode={valueByCode}
+              loading={!currentDataset}
+              historicalSnapshot={historicalSnapshot}
+              historicalLoading={historicalLoading}
+              historicalEnabled={historicalEnabled}
+              cityPoints={cityPoints}
+              citiesEnabled={citiesEnabled}
+              selectedCityId={selectedCityPoint?.city.id ?? null}
+              selectedHistoricalId={selectedHistorical?.source_feature_id ?? null}
+              caption={deepTimePopulation ? 'Global population estimate only' : view.mapCaption}
+              caution={deepTimePopulation ? 'No historical population is assigned to these polities.' : view.mapCaution}
+              selectedCode={selectedCode}
+              onSelect={select}
+              onHistoricalSelect={selectHistorical}
+              onCitySelect={selectCity}
+            />
+          </Suspense>
           <Legend metric={metric} unavailable={deepTimePopulation} />
 
           <div className="date-display" aria-label={`Requested date ${formatAstronomicalYear(year)}`}>
@@ -383,6 +462,12 @@ export function App() {
               </strong>
             </div>
           ) : null}
+          {citiesEnabled ? (
+            <div className="historical-status city-status" role="status">
+              <span>Ancient city layer</span>
+              <strong>{cityPoints.length ? `${cityPoints.length} exact-date estimates` : 'No estimate at this exact date'}</strong>
+            </div>
+          ) : null}
 
           <Inspector
             row={deepTimePopulation ? null : selectedRow}
@@ -394,6 +479,11 @@ export function App() {
             feature={selectedHistorical}
             snapshotYear={historicalSnapshot?.atlas_year ?? null}
             onClose={() => setSelectedHistorical(null)}
+          />
+          <HistoricalCityInspector
+            city={selectedCityPoint?.city ?? null}
+            observation={selectedCityPoint?.observation ?? null}
+            onClose={() => setSelectedCityPoint(null)}
           />
         </section>
 
@@ -463,6 +553,16 @@ export function App() {
           ) : null}
         </section>
 
+        <HistoricalTimeline
+          index={release.historicalContext}
+          year={year}
+          enabled={historicalEnabled}
+          onYearChange={(nextYear) => {
+            setPlaying(false);
+            setYear(nextYear);
+          }}
+        />
+
         {metric.id === 'population_total' ? (
           <PopulationTimeline
             summaries={release.population.summaries}
@@ -471,6 +571,8 @@ export function App() {
             year={year}
             entityCount={release.entities.length}
           />
+        ) : metric.id === 'life_expectancy_at_birth' && lifeExpectancySummary ? (
+          <LifeExpectancyDistribution summary={lifeExpectancySummary} />
         ) : prevalenceSummary && populationSummary ? (
           <PopulationBar
             summary={prevalenceSummary}
@@ -521,6 +623,7 @@ export function App() {
             <HistoricalPopulationTable
               observation={release.historicalPopulation.observations.find((observation) => observation.year === year) ?? null}
               historicalSnapshot={historicalSnapshot}
+              cityPoints={cityPoints}
             />
           ) : <DataTable rows={rows} metric={metric} onSelect={select} />
         ) : null}

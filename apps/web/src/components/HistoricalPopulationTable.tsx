@@ -1,10 +1,12 @@
 import type { HistoricalPopulationObservation } from '@atlas/contracts';
 import type { HistoricalFeatureCollection } from '../data';
 import { formatInteger } from '../format';
+import type { HistoricalCityPoint } from './MapView';
 
 interface HistoricalPopulationTableProps {
   observation: HistoricalPopulationObservation | null;
   historicalSnapshot: HistoricalFeatureCollection | null;
+  cityPoints: HistoricalCityPoint[];
 }
 
 function estimateValue(estimate: { lower: number; upper?: number }): string {
@@ -22,6 +24,7 @@ function sourceYearLabel(year: number): string {
 export function HistoricalPopulationTable({
   observation,
   historicalSnapshot,
+  cityPoints,
 }: HistoricalPopulationTableProps) {
   return (
     <section className="table-section" aria-labelledby="historical-evidence-title">
@@ -69,9 +72,29 @@ export function HistoricalPopulationTable({
           </tbody>
         </table>
       </div>
+      <div className="table-scroll historical-table-scroll">
+        <table>
+          <thead>
+            <tr><th scope="col">Historical city point</th><th scope="col">Source metadata</th><th scope="col" className="numeric">Estimated people</th></tr>
+          </thead>
+          <tbody>
+            {cityPoints.length ? [...cityPoints]
+              .sort((left, right) => right.observation.population - left.observation.population)
+              .map(({ city, observation: cityObservation }) => (
+                <tr key={city.id}>
+                  <th scope="row">{city.name}</th>
+                  <td>{city.modern_country_label} · geocode certainty code {city.geocode_certainty_code}</td>
+                  <td className="numeric">{formatInteger(cityObservation.population)}</td>
+                </tr>
+              )) : (
+                <tr><td colSpan={3}>No city estimate is published for this exact requested date.</td></tr>
+              )}
+          </tbody>
+        </table>
+      </div>
       <p className="scope-note">
-        The population rows and polity rows are intentionally not joined. Their coexistence in this table
-        does not assign any portion of the global estimate to a polity.
+        The global-population, polity, and city rows are intentionally not joined. City rows are sparse source
+        estimates, not a complete urban total; no portion of the global estimate is assigned to a city or polity.
       </p>
     </section>
   );

@@ -24,6 +24,13 @@ export const metricViews: Record<MvpMetricId, MetricView> = {
     legendAria: 'Electricity access color scale from zero to one hundred percent',
     legendClass: 'legend-ramp-electricity',
   },
+  life_expectancy_at_birth: {
+    mapCaption: 'National / territorial period mean',
+    mapCaution: 'Color is context, not an individual lifespan prediction.',
+    legendLabels: ['45', '55', '65', '75', '90 years'],
+    legendAria: 'Life expectancy color scale from forty-five to ninety years',
+    legendClass: 'legend-ramp-life',
+  },
 };
 
 const populationStops: Array<{ value: number; color: Rgba }> = [
@@ -52,10 +59,15 @@ function populationColor(value: number | null): Rgba {
 }
 
 export function metricColor(metricId: MvpMetricId, value: number | null): Rgba {
-  return metricId === 'population_total' ? populationColor(value) : electricityColor(value);
+  if (metricId === 'population_total') return populationColor(value);
+  if (metricId === 'access_to_electricity') return electricityColor(value);
+  if (value === null) return unknownColor;
+  return electricityColor((Math.max(45, Math.min(90, value)) - 45) / 45 * 100);
 }
 
 export function formatMetricValue(metric: PublishedMetric, value: number | null): string {
   if (value === null) return 'Unknown';
-  return metric.id === 'population_total' ? `${formatInteger(value)} people` : formatPercent(value);
+  if (metric.id === 'population_total') return `${formatInteger(value)} people`;
+  if (metric.id === 'access_to_electricity') return formatPercent(value);
+  return `${value.toFixed(1)} years`;
 }

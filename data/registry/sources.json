@@ -17,7 +17,7 @@
         "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/LICENSE.md"
       ],
       "blockers": [],
-      "notes": "Pinned v0.2.0 archive acquired and profiled: 13,765 rows, including 13,380 POLITY and 385 RELATION records. Release r2 publishes 36 simplified POLITY-only context snapshots. RELATION is excluded and no feature contributes to population accounting. Six source year-zero endpoints remain quarantined; no snapshot samples source year zero.",
+      "notes": "Pinned v0.2.0 archive acquired and profiled: 13,765 rows, including 13,380 POLITY and 385 RELATION records. Release r3 publishes 36 simplified POLITY-only context snapshots. RELATION is excluded and no feature contributes to population accounting. Six source year-zero endpoints remain quarantined; no snapshot samples source year zero.",
       "checked_at": "2026-09-20",
       "verification_level": "artifact_acquired_profiled_and_fixture_published",
       "downloaded": true,
@@ -80,9 +80,9 @@
     {
       "id": "world_bank_electricity",
       "dossier": "S3",
-      "role": "person_prevalence",
+      "role": "population_person_prevalence_and_context_distribution",
       "candidate_release": "retrieval_snapshot_required",
-      "coverage_start": "1960 CE for population; 1990 CE for electricity",
+      "coverage_start": "1960 CE for population and life expectancy; 1990 CE for electricity",
       "coverage_end": "2025 CE for population; 2024 CE for electricity",
       "license": "CC-BY-4.0",
       "license_status": "indicator_page_checked",
@@ -92,12 +92,13 @@
       ],
       "indicators": [
         "EG.ELC.ACCS.ZS",
-        "SP.POP.TOTL"
+        "SP.POP.TOTL",
+        "SP.DYN.LE00.IN"
       ],
       "blockers": [
         "review_parent_and_dependent_territory_partition"
       ],
-      "notes": "API rows and metadata acquired/profiled for the full MVP windows. The app publishes annual population for 1960-2025 and electricity for actual observation years 1990-2024. Aggregates are excluded; WLD is reference-only and the residual is explicit. Do not imply local density or household identification. See data/registry/source-lock.json.",
+      "notes": "API rows and metadata acquired/profiled for the full MVP windows. The app publishes annual population for 1960-2025, electricity for 1990-2024, and life expectancy for 1960-2024. Life expectancy is territorial context, not an individual distribution. Aggregates are excluded; WLD is reference-only and the residual is explicit. See data/registry/source-lock.json.",
       "checked_at": "2026-09-20",
       "verification_level": "artifact_acquired_and_profiled",
       "downloaded": true,
@@ -292,26 +293,23 @@
       "id": "reba_historical_urban_population",
       "dossier": "S14",
       "role": "historical_city_population_points",
-      "candidate_release": "2016 data descriptor artifact",
+      "candidate_release": "Modelski Ancient Period Data v2",
       "coverage_start": "3700 BCE",
-      "coverage_end": "2000 CE",
-      "license": null,
-      "license_status": "paper_cc_by_4_metadata_cc0_exact_data_artifact_to_pin",
+      "coverage_end": "1000 CE",
+      "license": "CC-BY-4.0",
+      "license_status": "figshare_v2_metadata_and_exact_file_checked",
       "urls": [
+        "https://doi.org/10.6084/m9.figshare.2059497.v2",
         "https://doi.org/10.1038/sdata.2016.34"
       ],
-      "blockers": [
-        "acquire_exact_data_artifact",
-        "audit_underlying_chandler_and_modelski_source_rights",
-        "profile_city_identity_dates_and_population_uncertainty"
-      ],
-      "notes": "Useful for an urban-settlement layer from 3700 BCE, not a complete population surface or a denominator for all humanity.",
+      "blockers": [],
+      "notes": "Pinned Figshare V2 CSV: 154 cities, 41 sparse exact dates from 3700 BCE to 1000 CE, and 621 published estimates. Coordinates and source certainty codes are preserved. The layer is not a complete population surface or denominator; companion Chandler and Modelski Modern files remain unmerged alternatives.",
       "checked_at": "2026-09-20",
-      "verification_level": "documentation_only",
-      "downloaded": false,
-      "artifact_sha256": null,
-      "terms_snapshot_sha256": null,
-      "release_ready": false
+      "verification_level": "artifact_acquired_profiled_and_fixture_published",
+      "downloaded": true,
+      "artifact_sha256": "71beafaacbdeb8d8fc156951521e9a14e20d6704b0d77be5528511c52fad3e1d",
+      "terms_snapshot_sha256": "a0518f5a4acddb5f5681fea7c5afb1f691c4450c42d5935eefb75d992cfea21b",
+      "release_ready": true
     },
     {
       "id": "world_historical_gazetteer",

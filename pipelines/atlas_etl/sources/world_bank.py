@@ -10,6 +10,7 @@ from ..core import ValidationError, load_json
 
 POPULATION_INDICATOR = "SP.POP.TOTL"
 ELECTRICITY_INDICATOR = "EG.ELC.ACCS.ZS"
+LIFE_EXPECTANCY_INDICATOR = "SP.DYN.LE00.IN"
 WORLD_REFERENCE_CODE = "WLD"
 WORLD_BANK_LAST_UPDATED = "2026-07-13"
 
@@ -21,6 +22,10 @@ SOURCE_URLS = {
     "world_bank_electricity": (
         "https://api.worldbank.org/v2/country/all/indicator/"
         "EG.ELC.ACCS.ZS?format=json&date=1990:2025&per_page=20000"
+    ),
+    "world_bank_life_expectancy": (
+        "https://api.worldbank.org/v2/country/all/indicator/"
+        "SP.DYN.LE00.IN?format=json&date=1960:2025&per_page=20000"
     ),
     "world_bank_countries": (
         "https://api.worldbank.org/v2/country?format=json&per_page=500"
@@ -43,9 +48,17 @@ def _api_response(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
 class WorldBankAdapter:
     """Expose native World Bank entities and observations through stable methods."""
 
-    def __init__(self, *, population: Path, electricity: Path, countries: Path) -> None:
+    def __init__(
+        self,
+        *,
+        population: Path,
+        electricity: Path,
+        life_expectancy: Path,
+        countries: Path,
+    ) -> None:
         self._population_meta, self._population_rows = _api_response(population)
         self._electricity_meta, self._electricity_rows = _api_response(electricity)
+        self._life_expectancy_meta, self._life_expectancy_rows = _api_response(life_expectancy)
         self._country_meta, country_rows = _api_response(countries)
         self._entities = {row["id"]: row for row in country_rows}
         self._series_cache: dict[str, dict[tuple[str, int], float | int | None]] = {}
@@ -55,6 +68,7 @@ class WorldBankAdapter:
         for label, metadata in (
             ("population", self._population_meta),
             ("electricity", self._electricity_meta),
+            ("life expectancy", self._life_expectancy_meta),
         ):
             if metadata.get("lastupdated") != WORLD_BANK_LAST_UPDATED:
                 raise ValidationError(
@@ -68,6 +82,7 @@ class WorldBankAdapter:
             )
         self.series(POPULATION_INDICATOR)
         self.series(ELECTRICITY_INDICATOR)
+        self.series(LIFE_EXPECTANCY_INDICATOR)
 
     def nonaggregate_codes(self) -> set[str]:
         return {
@@ -90,6 +105,8 @@ class WorldBankAdapter:
             rows = self._population_rows
         elif indicator_id == ELECTRICITY_INDICATOR:
             rows = self._electricity_rows
+        elif indicator_id == LIFE_EXPECTANCY_INDICATOR:
+            rows = self._life_expectancy_rows
         else:
             raise KeyError(f"World Bank indicator was not acquired: {indicator_id}")
 
@@ -117,6 +134,12 @@ class WorldBankAdapter:
                 and not 0 <= value <= 100
             ):
                 raise ValidationError(f"Electricity rate outside [0,100] for {code}/{year}")
+            if (
+                indicator_id == LIFE_EXPECTANCY_INDICATOR
+                and value is not None
+                and not 0 < value < 130
+            ):
+                raise ValidationError(f"Life expectancy outside (0,130) for {code}/{year}")
             indexed[key] = value
         self._series_cache[indicator_id] = indexed
         return indexed
@@ -135,6 +158,7 @@ class WorldBankAdapter:
         codes = self.nonaggregate_codes()
         population = self.series(POPULATION_INDICATOR)
         electricity = self.series(ELECTRICITY_INDICATOR)
+        life_expectancy = self.series(LIFE_EXPECTANCY_INDICATOR)
         return {
             "source_update": WORLD_BANK_LAST_UPDATED,
             "metadata_entities": len(self._entities),
@@ -153,6 +177,14 @@ class WorldBankAdapter:
             "electricity_known_by_year": {
                 str(year): sum(electricity.get((code, year)) is not None for code in codes)
                 for year in self.years(ELECTRICITY_INDICATOR)
+            },
+            "life_expectancy_rows": len(self._life_expectancy_rows),
+            "life_expectancy_observation_years": self.years(
+                LIFE_EXPECTANCY_INDICATOR, require_known=True
+            ),
+            "life_expectancy_known_by_year": {
+                str(year): sum(life_expectancy.get((code, year)) is not None for code in codes)
+                for year in self.years(LIFE_EXPECTANCY_INDICATOR)
             },
         }
 

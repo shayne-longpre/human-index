@@ -14,7 +14,7 @@ implementation must save the terms applying to the exact acquired artifact.
 - Intended use: optional historical context overlay; not the default statistical geography for modern indicator joins.
 - Acquisition result (2026-09-20): the exact tagged archive and license were
   acquired and hashed. The archive contains 13,765 records: 13,380 `POLITY` and
-  385 `RELATION`. Release r2 publishes 36 lazily loaded, simplified `POLITY`-only
+  385 `RELATION`. Release r3 publishes 36 lazily loaded, simplified `POLITY`-only
   snapshots. Six source year-zero endpoints are quarantined; no snapshot samples
   source year zero. Borders remain contestable context, not a population
   partition.
@@ -39,31 +39,39 @@ The [HYDE 3.2 methods paper, §2.1](https://essd.copernicus.org/articles/9/927/2
 
 Implementation gate: inspect the selected release's own documentation; distinguish counts from density, zero from nodata, and scenarios from confidence intervals. Compute actual cell areas. Record population totals before and after every resampling operation. Deep-time display resolution should not imply neighborhood-level knowledge.
 
-## S3 — World Bank: first measured condition
+## S3 — World Bank: modern population and measured conditions
 
 - Indicator: **`EG.ELC.ACCS.ZS` — access to electricity, percent of population**.
+- Indicator: **`SP.DYN.LE00.IN` — life expectancy at birth, total, years**.
 - Weights: **`SP.POP.TOTL`**, with exact country/territory coverage and date compatibility audited.
 - License: electricity indicator page states **CC BY 4.0**. Preserve the original SDG7/ESMAP attribution and validate terms for every acquired series.
-- [Electricity definition/download page](https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS), [population page](https://data.worldbank.org/indicator/SP.POP.TOTL), [API structure documentation](https://datahelpdesk.worldbank.org/knowledgebase/articles/898581-api-basic-call-structures).
+- [Electricity definition/download page](https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS), [life-expectancy page](https://data.worldbank.org/indicator/SP.DYN.LE00.IN), [population page](https://data.worldbank.org/indicator/SP.POP.TOTL), [API structure documentation](https://datahelpdesk.worldbank.org/knowledgebase/articles/898581-api-basic-call-structures).
 
 Audited MVP acquisition endpoints:
 
 ```text
 https://api.worldbank.org/v2/country/all/indicator/EG.ELC.ACCS.ZS?format=json&date=1990:2025&per_page=20000
 https://api.worldbank.org/v2/country/all/indicator/SP.POP.TOTL?format=json&date=1960:2025&per_page=20000
+https://api.worldbank.org/v2/country/all/indicator/SP.DYN.LE00.IN?format=json&date=1960:2025&per_page=20000
 https://api.worldbank.org/v2/country?format=json&per_page=500
 ```
 
 Fetch all pages; preserve the API metadata and retrieval date. Exclude region/income-group aggregates using country metadata. Audit dependent territories and statistical universes separately. Null values remain missing. Publish years only after profiling actual rows.
 
 MVP acquisition result (2026-09-20): one-page responses were validated for
-17,490 population rows covering 1960–2025 and 9,540 electricity rows covering the
-requested 1990–2025 window. The last actual electricity observation year is 2024.
+17,490 population rows covering 1960–2025, 9,540 electricity rows covering the
+requested 1990–2025 window, and 17,490 life-expectancy rows covering the requested
+1960–2025 window. The last actual electricity and life-expectancy observation year is 2024.
 The publisher update date is 2026-07-13. The released universe has 217
 nonaggregate entities. See `MVP_SOURCE_SELECTION.md` and the release manifest for
 coverage by year, hashes, and the explicit `WLD` reconciliation residual.
 
 This is a prevalence measure. A country-level rate supports an estimated count with access, but does not identify which local cells or households have access. A filled national polygon or recolored population grid must say **national estimate, not local measurement**. Access does not by itself measure reliability, affordability, or consumption.
+
+Life expectancy is a period life-table mean at national or territorial support.
+The Atlas may group population by those territorial means, but must not describe
+that context distribution as a distribution of individual lifespans or as a
+global life-table estimate.
 
 ## S4 — Maddison Project Database: long-run GDP per capita
 
@@ -158,13 +166,17 @@ ontology of political belonging, and it does not solve ancient geometry.
 
 ## S14 — Reba historical urban population
 
-- [Data descriptor and artifact entry point](https://doi.org/10.1038/sdata.2016.34).
-- Documented span: city locations and historical population estimates from 3700
-  BCE–2000 CE.
+- [Data descriptor](https://doi.org/10.1038/sdata.2016.34) and pinned
+  [Modelski Ancient v2 artifact](https://doi.org/10.6084/m9.figshare.2059497.v2).
+- The implemented table spans 3700 BCE–1000 CE: 154 city points, 41 sparse exact
+  dates, and 621 published population estimates. Figshare metadata declares CC BY
+  4.0; the exact CSV and metadata record are content-hashed in the source lock.
 - Intended use: an independently sourced city/urban-population point layer, not
   rural population, a global population denominator, or a polity total.
-- Status: exact data artifact and underlying Chandler/Modelski source rights must
-  be pinned and audited before redistribution.
+- Status: Modelski Ancient v2 is implemented. Source coordinates, modern-country
+  labels, and certainty codes are preserved without reinterpretation. Companion
+  Chandler and Modelski Modern tables remain deferred until city identity and
+  competing-estimate handling are designed explicitly.
 
 ## S15 — World Historical Gazetteer
 

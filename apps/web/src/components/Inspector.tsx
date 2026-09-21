@@ -1,4 +1,4 @@
-import type { AtlasReleaseManifest, PublishedMetric, ViewRow } from '@atlas/contracts';
+import { formatAstronomicalYear, type AtlasReleaseManifest, type PublishedMetric, type ViewRow } from '@atlas/contracts';
 import { formatInteger, formatPeople } from '../format';
 import { formatMetricValue } from '../metricViews';
 
@@ -25,7 +25,7 @@ export function Inspector({ row, metric, manifest, onClose }: InspectorProps) {
       <dl className="inspector-list">
         <div>
           <dt>Effective date</dt>
-          <dd>{row.year} CE</dd>
+          <dd>{formatAstronomicalYear(row.year)}</dd>
         </div>
         {metric.id !== 'population_total' ? (
           <div>

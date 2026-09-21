@@ -1,6 +1,6 @@
 import type { Layer } from '@deck.gl/core';
 import { MapboxOverlay } from '@deck.gl/mapbox';
-import { GeoJsonLayer, TextLayer } from '@deck.gl/layers';
+import { GeoJsonLayer, ScatterplotLayer, TextLayer } from '@deck.gl/layers';
 import {
   Map as MapLibreMap,
   NavigationControl,
@@ -8,7 +8,7 @@ import {
   type StyleSpecification,
 } from 'maplibre-gl';
 import { useEffect, useRef, useState } from 'react';
-import type { MvpMetricId } from '@atlas/contracts';
+import type { HistoricalCity, HistoricalCityObservation, MvpMetricId } from '@atlas/contracts';
 import type {
   CountryFeatureCollection,
   CountryProperties,
@@ -27,12 +27,21 @@ interface MapViewProps {
   historicalSnapshot: HistoricalFeatureCollection | null;
   historicalLoading: boolean;
   historicalEnabled: boolean;
+  cityPoints: HistoricalCityPoint[];
+  citiesEnabled: boolean;
+  selectedCityId: string | null;
   selectedHistoricalId: string | null;
   caption: string;
   caution: string;
   selectedCode: string | null;
   onSelect: (code: string) => void;
   onHistoricalSelect: (properties: HistoricalProperties) => void;
+  onCitySelect: (point: HistoricalCityPoint) => void;
+}
+
+export interface HistoricalCityPoint {
+  city: HistoricalCity;
+  observation: HistoricalCityObservation;
 }
 
 const style: StyleSpecification = {
@@ -57,12 +66,16 @@ export function MapView({
   historicalSnapshot,
   historicalLoading,
   historicalEnabled,
+  cityPoints,
+  citiesEnabled,
+  selectedCityId,
   selectedHistoricalId,
   caption,
   caution,
   selectedCode,
   onSelect,
   onHistoricalSelect,
+  onCitySelect,
 }: MapViewProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -214,17 +227,64 @@ export function MapView({
       );
     }
 
+    if (citiesEnabled && cityPoints.length > 0) {
+      const labeledCities = [...cityPoints]
+        .sort((left, right) => right.observation.population - left.observation.population)
+        .slice(0, 8);
+      layers.push(
+        new ScatterplotLayer<HistoricalCityPoint>({
+          id: `historical-cities-${year}`,
+          data: cityPoints,
+          pickable: true,
+          autoHighlight: true,
+          getPosition: (point) => [point.city.longitude, point.city.latitude],
+          getRadius: (point) => Math.max(4, Math.min(15, 3 + Math.log10(point.observation.population) * 1.8)),
+          radiusUnits: 'pixels',
+          getFillColor: [241, 207, 124, 210],
+          getLineColor: (point) => point.city.id === selectedCityId
+            ? [255, 255, 245, 255]
+            : [46, 36, 18, 235],
+          getLineWidth: (point) => point.city.id === selectedCityId ? 2.5 : 1,
+          lineWidthUnits: 'pixels',
+          stroked: true,
+          onClick: ({ object }) => { if (object) onCitySelect(object); },
+          updateTriggers: { getLineColor: [selectedCityId], getLineWidth: [selectedCityId] },
+        }),
+        new TextLayer<HistoricalCityPoint>({
+          id: `historical-city-labels-${year}`,
+          data: labeledCities,
+          pickable: true,
+          getPosition: (point) => [point.city.longitude, point.city.latitude],
+          getText: (point) => point.city.name,
+          getPixelOffset: [0, -13],
+          getSize: 10,
+          getColor: [248, 225, 167, 240],
+          getTextAnchor: 'middle',
+          getAlignmentBaseline: 'bottom',
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: 600,
+          outlineWidth: 3,
+          outlineColor: [7, 20, 17, 235],
+          onClick: ({ object }) => { if (object) onCitySelect(object); },
+        }),
+      );
+    }
+
     overlay.setProps({ layers });
   }, [
     geometry,
     historicalEnabled,
     historicalSnapshot,
+    citiesEnabled,
+    cityPoints,
     knownValueCount,
     metricId,
     onHistoricalSelect,
+    onCitySelect,
     onSelect,
     selectedCode,
     selectedHistoricalId,
+    selectedCityId,
     territorialValuesAvailable,
     valueByCode,
     year,
@@ -236,7 +296,7 @@ export function MapView({
         ref={elementRef}
         className="map-canvas"
         role="img"
-        aria-label={`World map for ${year} ${metricLabel.toLocaleLowerCase()}${historicalEnabled && historicalSnapshot ? ` with ${historicalSnapshot.feature_count} Cliopatria polity features` : ''}`}
+        aria-label={`World map for ${year} ${metricLabel.toLocaleLowerCase()}${historicalEnabled && historicalSnapshot ? ` with ${historicalSnapshot.feature_count} Cliopatria polity features` : ''}${citiesEnabled && cityPoints.length ? ` and ${cityPoints.length} historical city observations` : ''}`}
       />
       {fallback ? (
         <div className="map-fallback" role="status">
@@ -256,7 +316,7 @@ export function MapView({
         <span>{caution}</span>
       </div>
       <div className="map-attribution">
-        Geometry © Natural Earth · historical context © Cliopatria CC BY 4.0
+        Geometry © Natural Earth · historical context © Cliopatria · cities © Reba/Modelski · CC BY 4.0
       </div>
     </div>
   );

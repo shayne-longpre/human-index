@@ -74,7 +74,12 @@ Set up CI for deterministic fixtures, semantic tests, type checking, lint, build
 
 ## Stage 4 — Expansion through typed adapters
 
-Add Maddison GDP per capita as a `context_distribution`, retaining original source-sheet references and exact unit definitions. Add a health series only with life-table/denominator semantics preserved. Add a few reviewed Seshat observations as case-study context. Institutional and violence layers have separate scientific acceptance gates.
+World Bank life expectancy is now the first health `context_distribution`, with
+life-table meaning, exact dates, and population accounting preserved. Next, add
+Maddison GDP per capita as a separate `context_distribution`, retaining original
+source-sheet references and exact unit definitions. Add a few reviewed Seshat
+observations as case-study context. Institutional and violence layers have
+separate scientific acceptance gates.
 
 Do not accept a metric unless its meaning fits the registry and its data support can be explained. Avoid metric-specific hacks in chart code. Only then consider comparisons, a globe, larger source coverage, and the AI evidence pipeline.
 

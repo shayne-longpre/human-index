@@ -1,6 +1,6 @@
 import type { AggregationKind, ValueStatus } from './types';
 
-export type MvpMetricId = 'population_total' | 'access_to_electricity';
+export type MvpMetricId = 'population_total' | 'access_to_electricity' | 'life_expectancy_at_birth';
 
 export interface AtlasEntity {
   code: string;
@@ -120,6 +120,15 @@ export interface AtlasReleaseManifest {
     selection_policy: string;
     excluded_feature_types: string[];
   };
+  historical_cities: {
+    data_file: string;
+    download_file: string;
+    source_release_id: string;
+    coverage: string;
+    temporal_policy: 'exact_only';
+    spatial_support: string;
+    interpretation: string;
+  };
   source_releases: PublishedSourceRelease[];
   alternative_sources: AlternativeSource[];
   transformations: PublishedTransformation[];
@@ -214,6 +223,66 @@ export interface ElectricityDataset {
   years: number[];
   observations: ElectricityObservation[];
   summaries: ElectricitySummary[];
+}
+
+export interface LifeExpectancyObservation {
+  code: string;
+  year: number;
+  value_years: number | null;
+  status: Extract<ValueStatus, 'known' | 'unknown'>;
+  original_record_locator: string;
+}
+
+export interface LifeExpectancyBin {
+  lower_inclusive: number;
+  upper_exclusive: number;
+  population: number;
+}
+
+export interface LifeExpectancySummary {
+  year: number;
+  population: number;
+  known_condition_entities: number;
+  missing_population_entities: number;
+  unknown_condition_population: number;
+  bins: LifeExpectancyBin[];
+}
+
+export interface LifeExpectancyDataset {
+  schema_version: string;
+  metric_id: 'life_expectancy_at_birth';
+  years: number[];
+  observations: LifeExpectancyObservation[];
+  summaries: LifeExpectancySummary[];
+}
+
+export interface HistoricalCity {
+  id: string;
+  name: string;
+  other_name: string | null;
+  modern_country_label: string;
+  latitude: number;
+  longitude: number;
+  geocode_certainty_code: '1' | '2' | '3';
+}
+
+export interface HistoricalCityObservation {
+  city_id: string;
+  year: number;
+  population: number;
+  status: 'published_estimate';
+  original_record_locator: string;
+}
+
+export interface HistoricalCityDataset {
+  schema_version: string;
+  layer_id: 'historical_city_population_points';
+  source_release_id: string;
+  temporal_policy: 'exact_only';
+  spatial_support: 'source_geocoded_city_point_not_extent';
+  years: number[];
+  cities: HistoricalCity[];
+  observations: HistoricalCityObservation[];
 }
 
 export interface ViewRow {

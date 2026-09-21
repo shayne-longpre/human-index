@@ -2,7 +2,7 @@
 
 Updated: 2026-09-20
 
-## Implemented in release r2
+## Implemented in release r3
 
 - All 39 dates in the U.S. Census Bureau historical world-population comparison
   table are published from 10,000 BCE through 1950 CE. Summary bounds are shown
@@ -10,7 +10,12 @@ Updated: 2026-09-20
 - Thirty-six Cliopatria v0.2.0 `POLITY` snapshots are published from 3400 BCE
   through 2024 CE. The UI switches real source geometry and valid names at the
   effective snapshot date and exposes the feature metadata in an inspector and
-  accessible table.
+  accessible table. A dedicated scrubber now visits every political snapshot,
+  independent of the sparser population observation dates.
+- Modelski Ancient Period Data v2 supplies 621 sparse, exact-date population
+  estimates for 154 source-geocoded city points from 3700 BCE through 1000 CE.
+  The Atlas preserves the source certainty code and never treats these points as
+  a complete urban or world-population denominator.
 - These layers are deliberately independent. The population is world-supported;
   the political polygons are display context. Toggling or selecting a polity
   cannot change a population total.
@@ -183,6 +188,8 @@ nodata is distinct from zero; the UI states that the surface is reconstructed.
 - Switch boundary snapshots at documented validity changes—never interpolate
   borders geometrically.
 - Add city points and historical names from separately licensed releases.
+  Modelski Ancient v2 points are now implemented; temporal-name reconciliation
+  beyond the source's city label remains future work.
 
 ### Phase 4 — population by historical polity
 
