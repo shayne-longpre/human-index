@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated: 2026-09-20
+Updated: 2026-09-21
 
 ## MVP release
 
@@ -21,7 +21,9 @@ layer's independently resolved effective date or unavailability. `RELATION` feat
 excluded. A separate Modelski Ancient v2 layer publishes 621 exact-date city
 estimates for 154 source-geocoded points from 3700 BCE–1000 CE. Metric, year, and selected modern place are retained in the URL. A
 dedicated Sources page separates published release inputs
-from candidate and blocked research sources.
+from candidate and blocked research sources. Its grouped source matrix separates
+artifact acquisition, publication in the active release, and unresolved work
+for nine data verticals.
 
 The statistical universe is the set of World Bank API entities whose country
 metadata does not mark the entity as an aggregate and that have a 2024 population
@@ -60,20 +62,26 @@ population that cannot be placed in the coarse geometry remain explicit.
   labels, and geocode certainty codes are preserved as source metadata; no
   interpolation or polity assignment is performed. Companion Chandler v2 and
   Modelski Modern v2 files are now acquired and profiled, but remain unpublished
-  pending a dated city-identity crosswalk, disagreement UI, and review of two
-  numeric-zero Chandler cells.
+  pending human review of 353 generated cross-source identity candidates, a
+  disagreement UI, and review of two numeric-zero Chandler cells.
 - The official Maddison Project Database 2023 page verifies its CC BY 4.0 terms,
   169-country coverage through 2022, and source-sheet citation requirement for
   graphical use. Its DataverseNL workbook download is blocked by an anti-bot
   challenge, so no workbook was acquired or bypassed and no income layer was
   published.
-- UN World Population Prospects 2024 is documented as a more detailed direct
-  expansion source, but it is not merged pending artifact, scenario, and territory
-  audits.
-- The HYDE 3.5 archive landing page remains protected by its provider's anti-bot
-  access gate. No archive, artifact license, variable schema, or sample was
-  acquired. Gridded historical population therefore remains visibly blocked; the
-  Census global series is not presented as a substitute population surface.
+- UN World Population Prospects 2024's official medium demographic-indicators
+  artifact is acquired and profiled. It remains unpublished pending exact
+  artifact terms/units, aggregate and territory selection, an explicit
+  estimate/projection presentation contract, 2101 boundary-row review, and a
+  source-overlap policy with World Bank.
+- The HYDE 3.5 downloadable directory and its CC BY-NC 4.0 license were inspected.
+  Automated artifact retrieval remains blocked by the provider's anti-bot gate,
+  and no data artifact or variable metadata is acquired. The ingestion contract
+  now makes licensing, count/density, nodata, scenario, and conservation gates
+  explicit. The Census global series is not presented as a substitute surface.
+- A bounded 1500 CE Mediterranean Cliopatria topology pilot found 28 overlap
+  candidates among 57 active features. All remain queued for historian review;
+  no polygon is promoted from context geometry to statistical support.
 
 Exact input URLs, hashes, byte counts, output hashes, exclusions, and crosswalks
 are recorded by the fixture builder in `data/registry/source-lock.json` and the

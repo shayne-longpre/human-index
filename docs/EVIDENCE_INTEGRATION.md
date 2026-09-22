@@ -15,6 +15,21 @@ and blockers. A registry entry can be useful research without being publishable.
 It is not evidence that an artifact was downloaded or that every variable has
 the source's advertised overall coverage.
 
+The same file has a small `verticals` view used by the Sources page. It is an
+index over source IDs, not a second source registry. Each link states the
+source's role for that vertical and the exact immutable release IDs, if any,
+that are currently published. The UI derives three deliberately different
+signals:
+
+- **Acquired:** the registry says an exact data artifact is locally pinned;
+- **In release:** the vertical link names an ID in the active release manifest;
+- **Outstanding:** the source registry still has concrete blockers.
+
+A source can therefore be acquired but unpublished (UN WPP 2024), or published
+for a bounded role while broader use remains blocked (Cliopatria polygons are
+published as context but cannot yet support population allocation). This avoids
+one misleading catch-all “ingested” flag.
+
 ### 2. Source-native adapters
 
 `pipelines/atlas_etl/sources/` contains one narrow adapter per acquired source.
@@ -112,11 +127,34 @@ nonpositive source areas, geometry types, ring closure, and coordinate bounds.
 Repeated display names are counted rather than assumed to be errors. `RELATION`
 features remain excluded from the polity display layer.
 
-Polygon overlap, containment, disputed alternatives, and whether a source
-feature should be treated as an exclusive polity are **not yet topology- or
-historian-reviewed**. The manifest says so explicitly. These polygons must not
-be used for demographic totals until that review and a mass-conserving
-allocation contract exist.
+A reproducible 1500 CE Mediterranean pilot now uses an equal-area projection to
+measure candidate overlaps larger than 100 square kilometres. It found 28
+candidates among 57 active intersecting `POLITY` features: 12 near-containment
+candidates and two other material-overlap candidates. The artifact is
+`data/review/cliopatria-topology-pilot.json`.
+
+These are **not adjudications**. Overlap can encode hierarchy, disputed
+alternatives, composite context, or a genuine geometry problem. Every candidate
+is marked as awaiting historian review. The polygons still must not support
+demographic totals until source-aware review and a mass-conserving allocation
+contract exist.
+
+## Review artifacts are not release artifacts
+
+`data/review/` contains small reproducible findings that move a source toward a
+decision without pretending that it has passed publication review:
+
+- the Cliopatria bounded topology candidates;
+- 353 unreviewed city-identity candidates across Modelski Ancient, Chandler,
+  and Modelski Modern;
+- an 84,360-row UN WPP acquisition profile that keeps 1950–2023 estimates,
+  2024–2100 medium projections, and the file's 2101 boundary rows separate; and
+- the HYDE 3.5 ingestion contract, including its CC BY-NC 4.0 product gate and
+  mass-conservation requirements.
+
+Review artifacts can be regenerated from ignored raw files. They do not enter
+the browser's evidence release, metric list, or numerical summaries merely by
+existing.
 
 ## Adding one source or metric
 
@@ -145,12 +183,18 @@ creates a measured need.
 
 ## Current blockers and next evidence work
 
-- HYDE 3.5 remains blocked until an authorized archive, artifact terms,
-  variables, units, masks, dates, and scenarios are verified. The Census world
-  series is not a substitute population surface.
-- Companion Chandler and Modelski Modern city tables need a dated city-identity
-  crosswalk and a source-disagreement display before they are merged with the
-  current Modelski Ancient points.
+- HYDE 3.5's provider directory and CC BY-NC 4.0 license file are now profiled,
+  but no population artifact has been acquired. One baseline artifact, its
+  README, the product's compatibility with noncommercial terms, variables,
+  units, masks, dates, and scenarios remain gates. The Census world series is
+  not a substitute population surface.
+- Companion Chandler and Modelski Modern city tables now have conservative
+  candidate links, but all 353 require evidence-backed review. They also need a
+  source-disagreement display and resolution of two Chandler zero cells before
+  publication.
+- UN WPP 2024's medium demographic-indicators artifact is pinned and profiled.
+  Exact bulk-data terms and units, aggregate exclusion, territories, 2101
+  boundary rows, and overlap with World Bank remain unresolved.
 - Maddison Project Database can support a territorial GDP-per-capita context
   distribution, not individual income. Its workbook, source sheet, PPP basis,
   entity codes, and citations must be audited before publication.

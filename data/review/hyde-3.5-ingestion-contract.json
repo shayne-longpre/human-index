@@ -1,0 +1,68 @@
+{
+  "schema_version": "0.1.0",
+  "source_id": "hyde",
+  "candidate_release": "3.5",
+  "review_status": "directory_and_license_profiled_data_artifact_not_acquired",
+  "provider_directory": "https://geo.public.data.uu.nl/vault-hyde/hyde35_c9_apr2025%5B1749214444%5D/",
+  "access_findings": {
+    "interactive_directory_navigation": "successful",
+    "automated_http_download": "blocked_by_provider_anubis_challenge",
+    "visible_root_entries": [
+      "License.txt",
+      "Yoda metadata",
+      "original/"
+    ],
+    "visible_original_entries": [
+      "base/",
+      "lower/",
+      "upper/",
+      "general_files.zip"
+    ],
+    "visible_delivery_patterns": [
+      "large variable-level NetCDF downloads",
+      "smaller per-year population archives",
+      "baseline, lower, and upper scenario branches"
+    ]
+  },
+  "license_evidence": {
+    "filename": "License.txt",
+    "sha256": "3711f963c05d0be80d53e5923308a6dee31b203da23435c9cfb7c7b6e4dd5e19",
+    "license": "CC BY-NC 4.0",
+    "product_gate": "Confirm Atlas distribution and use are noncommercial or obtain permission before publishing derived HYDE data."
+  },
+  "first_artifact_strategy": {
+    "scope": "one baseline population artifact only",
+    "reason": "Validate semantics and conservation before acquiring multi-gigabyte variable bundles or alternate scenarios.",
+    "do_not_acquire_yet": [
+      "full baseline three-archive bundle",
+      "lower scenario bundle",
+      "upper scenario bundle"
+    ]
+  },
+  "required_source_metadata": [
+    "exact artifact filename, byte count, and SHA-256",
+    "source README and data dictionary",
+    "calendar convention for BCE and CE labels",
+    "grid CRS, cell registration, resolution, and coordinate order",
+    "population-count and population-density variable definitions and units",
+    "nodata, water, and uninhabited-cell meanings",
+    "scenario name and whether bounds are scenarios rather than confidence intervals"
+  ],
+  "normalization_invariants": [
+    "Never infer cell population by treating density as count.",
+    "Never turn nodata, masked water, absent, or not-applicable cells into zero.",
+    "Preserve the source grid and scenario identifiers on every normalized observation.",
+    "Record source-cell IDs and transformation version for every resampled cell.",
+    "Conserve total population within a declared numerical tolerance when resampling.",
+    "Do not allocate gridded population to historical polities until overlap and allocation rules are reviewed."
+  ],
+  "publication_gates": [
+    "authorized_data_artifact_acquired_and_hashed",
+    "readme_and_variable_metadata_acquired",
+    "license_product_compatibility_resolved",
+    "count_density_nodata_mask_and_scenario_semantics_verified",
+    "source_totals_reproduced",
+    "mass_conserving_resampling_tests_pass",
+    "historical_polity_allocation_remains_separate_or_reviewed"
+  ]
+}

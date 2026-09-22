@@ -1,6 +1,6 @@
 # Companion historical-city source audit
 
-Checked: 2026-09-20
+Checked: 2026-09-21
 
 The Reba et al. Figshare collection includes three source-authored series. Atlas
 currently publishes only Modelski Ancient v2. The companion Chandler and
@@ -36,14 +36,31 @@ and artifact hashes are recorded in `data/registry/sources.json`.
   `series_id` and source record locator and show alternatives rather than select
   or average one silently.
 
+## Candidate-generation result
+
+`pipelines.atlas_etl.review_city_crosswalk` now creates
+`data/review/historical-city-crosswalk-candidates.json`. It compares source rows
+only when normalized primary names match exactly or coordinates match after
+rounding to five decimal places. It generated 353 candidates:
+
+| Candidate basis | Count |
+|---|---:|
+| Exact normalized primary name and rounded coordinate | 290 |
+| Exact normalized primary name only | 58 |
+| Rounded coordinate only | 5 |
+
+Every record is labeled `unreviewed_candidate`. This pass does not use fuzzy
+matching, does not overwrite source names or coordinates, and does not merge any
+observations. Row locators, per-row canonical hashes, date spans, and zero-value
+counts are retained so a reviewer can make an evidence-backed decision.
+
 ## Minimal publication path
 
-1. Create a source-row identity for each series without changing native rows.
-2. Build a dated crosswalk with `matched`, `ambiguous`, and `unresolved` states;
-   store rationale and reviewer evidence.
-3. Decide how the UI exposes multiple estimates at one city/date. The default
+1. Review candidates into `matched`, `ambiguous`, and `unresolved` states;
+   store rationale, reviewer, and cited evidence.
+2. Decide how the UI exposes multiple estimates at one city/date. The default
    should show source alternatives, not a synthetic consensus.
-4. Resolve the two Chandler zero cells from source documentation.
-5. Add exact-date and disagreement tests, then publish a new immutable release.
+3. Resolve the two Chandler zero cells from source documentation.
+4. Add exact-date and disagreement tests, then publish a new immutable release.
 
 This bounded work is preferable to a generalized gazetteer service for the MVP.

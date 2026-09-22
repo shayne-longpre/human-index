@@ -1,6 +1,6 @@
 # Deep-time population and changing borders
 
-Updated: 2026-09-20
+Updated: 2026-09-21
 
 ## Implemented in release r4
 
@@ -22,8 +22,12 @@ Updated: 2026-09-20
   cannot change a population total.
 
 The unresolved part of the original plan is spatially resolved historical
-population. HYDE remains blocked pending authorized archive access and exact
-artifact-term verification.
+population. HYDE's directory and CC BY-NC 4.0 license are now known, but no data
+artifact has been acquired; product-license compatibility and artifact semantics
+remain blocked. UN WPP's official medium demographic-indicators file is now
+acquired and profiled as the modern population expansion candidate, but remains
+outside the release pending territory, unit, terms, boundary-row, and
+estimate-versus-projection review.
 
 ## Product outcome
 
@@ -208,17 +212,34 @@ nodata is distinct from zero; the UI states that the surface is reconstructed.
 - Measure reviewer time, disagreement, geometry error, and licensing friction
   before building broader infrastructure.
 
+## Evidence-quality work completed after r4
+
+- A 1500 CE Mediterranean pilot measured Cliopatria geometry in EPSG:6933 and
+  queued 28 overlaps larger than 100 square kilometres for historian review.
+  Twelve are near-containment candidates. This proves the review mechanism, not
+  the correctness or incorrectness of any feature.
+- A conservative three-series historical-city pass generated 353 identity
+  candidates while leaving every observation source-native and unmerged.
+- The UN WPP 2024 medium demographic-indicators artifact is pinned and profiled;
+  source estimates, projections, aggregates, and 2101 boundary rows remain
+  distinguishable.
+- The HYDE ingestion contract now records the smallest defensible first download
+  and the licensing, variable, nodata, scenario, and mass-conservation gates.
+
 ## Immediate next release
 
-The Cliopatria renderer and temporal-contract spike now passes. The next bounded
-increment should be an evidence-quality pass on a small region: profile overlap
-and nesting, validate geometry, expose disputed/approximate boundaries where the
-source supports that distinction, and compare recent snapshots with CShapes.
+Have a historian review the highest-impact Cliopatria near-containment pairs and
+encode explicit `intentional_hierarchy`, `alternative_claim`, `geometry_issue`,
+or `unresolved` decisions with citations. In parallel, review the strongest city
+identity candidates and design the multiple-source disagreement view before
+publishing Chandler or Modelski Modern.
 
-In parallel, seek authorized HYDE access and confirm its exact terms, variables,
-time steps, masks, scenarios, and conservation behavior. Do not build an
-annotation platform until a 5–10-date, evidence-rich regional pilot demonstrates
-that source-native data cannot cover the need.
+For population, acquire one HYDE baseline population artifact and its README
+through the provider's authorized route only after the CC BY-NC product decision.
+For UN WPP, pin the exact metadata/terms, select `Country/Area` rows through a
+reviewed territorial contract, and publish estimates separately from projections.
+Do not build an annotation platform until a 5–10-date, evidence-rich regional
+pilot demonstrates that source-native data cannot cover the need.
 
 ## Primary references
 

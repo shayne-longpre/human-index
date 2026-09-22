@@ -4,6 +4,7 @@ import { releaseRoot } from '../data';
 
 interface RegistrySource {
   id: string;
+  label: string;
   dossier: string;
   role: string;
   candidate_release: string;
@@ -20,7 +21,26 @@ interface RegistrySource {
   release_ready: boolean;
 }
 
-const catalog = sourceRegistry.sources as RegistrySource[];
+interface VerticalSource {
+  source_id: string;
+  role: string;
+  release_ids: string[];
+}
+
+interface DataVertical {
+  id: string;
+  label: string;
+  description: string;
+  sources: VerticalSource[];
+}
+
+const registry = sourceRegistry as {
+  sources: RegistrySource[];
+  verticals: DataVertical[];
+};
+const catalog = registry.sources;
+const verticals = registry.verticals;
+const catalogById = new Map(catalog.map((source) => [source.id, source]));
 
 function humanize(value: string): string {
   return value.replaceAll('_', ' ');
@@ -32,6 +52,18 @@ function releaseRole(id: string): string {
   if (id.startsWith('cliopatria')) return 'Historical political context geometry and names';
   if (id.startsWith('reba-modelski')) return 'Sparse exact-date ancient city population points';
   return 'Modern display geometry only';
+}
+
+function SourceStatus({ complete, label }: { complete: boolean; label: string }) {
+  return (
+    <span
+      className={`matrix-status ${complete ? 'matrix-status-complete' : 'matrix-status-open'}`}
+      aria-label={`${label}: ${complete ? 'yes' : 'no'}`}
+    >
+      <span aria-hidden="true">{complete ? '✓' : '—'}</span>
+      <small>{complete ? 'Yes' : 'No'}</small>
+    </span>
+  );
 }
 
 export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
@@ -52,6 +84,66 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
           <a className="secondary-link" href="?metric=population_total&year=2024">Return to atlas</a>
         </div>
       </header>
+
+      <section className="source-section" aria-labelledby="source-matrix-title">
+        <div className="section-intro">
+          <span className="eyebrow">Coverage ledger · {verticals.length} data verticals</span>
+          <h2 id="source-matrix-title">What is in—and what is still outstanding</h2>
+          <p>
+            Acquired means an exact source artifact is locally pinned. In release means at least one
+            reviewed slice is published in {manifest.release_id}. A published slice can still have
+            explicit blockers before the wider source is safe to use.
+          </p>
+        </div>
+        <div className="source-matrix-scroll" role="region" aria-label="Source ingestion status by data vertical" tabIndex={0}>
+          <table className="source-matrix">
+            <thead>
+              <tr>
+                <th scope="col">Data vertical</th>
+                <th scope="col">Source</th>
+                <th scope="col">Atlas role</th>
+                <th scope="col">Acquired</th>
+                <th scope="col">In release</th>
+                <th scope="col">Outstanding and why</th>
+              </tr>
+            </thead>
+            {verticals.map((vertical) => (
+              <tbody key={vertical.id}>
+                {vertical.sources.map((link, index) => {
+                  const source = catalogById.get(link.source_id);
+                  if (!source) throw new Error(`Unknown source registry ID: ${link.source_id}`);
+                  const published = link.release_ids.length > 0
+                    && link.release_ids.every((releaseId) => manifest.source_releases.some((item) => item.id === releaseId));
+                  return (
+                    <tr key={`${vertical.id}-${link.source_id}`}>
+                      {index === 0 ? (
+                        <th className="matrix-vertical" scope="rowgroup" rowSpan={vertical.sources.length}>
+                          <strong>{vertical.label}</strong>
+                          <span>{vertical.description}</span>
+                        </th>
+                      ) : null}
+                      <th className="matrix-source" scope="row">
+                        <a href={`#source-${source.id}`}>{source.label}</a>
+                        <small>{source.dossier} · {source.candidate_release}</small>
+                      </th>
+                      <td className="matrix-role">{link.role}</td>
+                      <td><SourceStatus complete={source.downloaded} label={`${source.id} acquired`} /></td>
+                      <td><SourceStatus complete={published} label={`${source.id} published`} /></td>
+                      <td className="matrix-outstanding">
+                        {source.blockers.length ? (
+                          <ul>{source.blockers.map((blocker) => <li key={blocker}>{humanize(blocker)}</li>)}</ul>
+                        ) : (
+                          <span className="matrix-clear">None for the published scope.</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            ))}
+          </table>
+        </div>
+      </section>
 
       <section className="source-section" aria-labelledby="published-sources-title">
         <div className="section-intro">
@@ -111,14 +203,21 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
         </div>
         <div className="source-catalog">
           {catalog.map((source) => {
-            const status = source.release_ready ? 'Ready' : source.downloaded ? 'Acquired / reviewing' : source.blockers.length ? 'Blocked / reviewing' : 'Documented';
+            const published = verticals.some((vertical) => vertical.sources.some(
+              (link) => link.source_id === source.id
+                && link.release_ids.some((releaseId) => manifest.source_releases.some((item) => item.id === releaseId)),
+            ));
+            const status = published
+              ? source.blockers.length ? 'Published / limited' : 'Published'
+              : source.downloaded ? 'Acquired / reviewing'
+                : source.blockers.length ? 'Blocked / reviewing' : 'Documented';
             return (
-              <article className="source-card" key={source.id}>
+              <article className="source-card" id={`source-${source.id}`} key={source.id}>
                 <div className="source-card-topline">
-                  <span className={`status-pill ${source.release_ready ? 'status-published' : 'status-research'}`}>{status}</span>
+                  <span className={`status-pill ${published ? 'status-published' : 'status-research'}`}>{status}</span>
                   <span>{source.dossier}</span>
                 </div>
-                <h3>{humanize(source.id)}</h3>
+                <h3>{source.label}</h3>
                 <p className="source-role">{humanize(source.role)}</p>
                 <dl>
                   <div><dt>Candidate</dt><dd>{source.candidate_release}</dd></div>

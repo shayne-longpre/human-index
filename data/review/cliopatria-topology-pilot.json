@@ -1,0 +1,828 @@
+{
+  "schema_version": "0.1.0",
+  "review_status": "bounded_automated_pilot_complete_historian_review_outstanding",
+  "source": {
+    "id": "cliopatria-v0.2.0",
+    "filename": "cliopatria_polities_only.geojson",
+    "sha256": "5df3b5868cfab8f76030853fa2346ed3cd71171ad807b6f72d783ee2dce6839e"
+  },
+  "pilot": {
+    "requested_source_year": 1500,
+    "bbox_wgs84": [
+      -12,
+      20,
+      45,
+      50
+    ],
+    "region_label": "Mediterranean and adjacent lands pilot",
+    "equal_area_crs": "EPSG:6933",
+    "minimum_reported_overlap_km2": 100.0,
+    "scope_warning": "Results cover one bounded year and region. Geometric overlap can represent source intent, hierarchy, disputed alternatives, or a geometry problem."
+  },
+  "summary": {
+    "active_intersecting_polity_features": 57,
+    "invalid_source_geometries": 0,
+    "geometries_repaired_for_measurement": 0,
+    "reported_overlap_candidates": 28,
+    "near_containment_candidates": 12,
+    "material_overlap_candidates": 2
+  },
+  "features": [
+    {
+      "source_feature_index": 6399,
+      "name": "County of Urgell",
+      "from_year": 1344,
+      "to_year": 1515,
+      "wikidata": "Q1514510",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 332.50452742783176
+    },
+    {
+      "source_feature_index": 6485,
+      "name": "Zayyanid dynasty",
+      "from_year": 1363,
+      "to_year": 1506,
+      "wikidata": "Q307697",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 126172.03510638671
+    },
+    {
+      "source_feature_index": 6983,
+      "name": "Makuria Kingdom",
+      "from_year": 1415,
+      "to_year": 1506,
+      "wikidata": "Q829356",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 134474.6431290077
+    },
+    {
+      "source_feature_index": 6999,
+      "name": "Principality of Wallachia",
+      "from_year": 1422,
+      "to_year": 1528,
+      "wikidata": "Q171393",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 74280.00536401021
+    },
+    {
+      "source_feature_index": 7055,
+      "name": "Republic of Ragusa",
+      "from_year": 1429,
+      "to_year": 1771,
+      "wikidata": "Q208169",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 1539.5201797082152
+    },
+    {
+      "source_feature_index": 7257,
+      "name": "Hafsid Dynasty",
+      "from_year": 1453,
+      "to_year": 1511,
+      "wikidata": "Q752662",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 224190.02432584643
+    },
+    {
+      "source_feature_index": 7270,
+      "name": "Republic of Genoa",
+      "from_year": 1453,
+      "to_year": 1525,
+      "wikidata": "Q174306",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 26048.74414807828
+    },
+    {
+      "source_feature_index": 7345,
+      "name": "Electorate of Trier",
+      "from_year": 1459,
+      "to_year": 1555,
+      "wikidata": "Q1794352",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 16441.30444484759
+    },
+    {
+      "source_feature_index": 7349,
+      "name": "Principality of Orange",
+      "from_year": 1459,
+      "to_year": 1563,
+      "wikidata": "Q2281221",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 140.52605969985626
+    },
+    {
+      "source_feature_index": 7350,
+      "name": "Duchy of Bavaria",
+      "from_year": 1459,
+      "to_year": 1506,
+      "wikidata": "Q47261",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 36100.41615771284
+    },
+    {
+      "source_feature_index": 7357,
+      "name": "Beylik of Dulkadir",
+      "from_year": 1463,
+      "to_year": 1511,
+      "wikidata": "Q1264808",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 30414.404688234095
+    },
+    {
+      "source_feature_index": 7400,
+      "name": "Kingdom of Imereti",
+      "from_year": 1468,
+      "to_year": 1578,
+      "wikidata": "Q1069959",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 11561.120123266423
+    },
+    {
+      "source_feature_index": 7401,
+      "name": "Principality of Abkhazia",
+      "from_year": 1468,
+      "to_year": 1571,
+      "wikidata": "Q1760473",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 6065.707175636779
+    },
+    {
+      "source_feature_index": 7402,
+      "name": "Samtskhe-Saatabago",
+      "from_year": 1468,
+      "to_year": 1501,
+      "wikidata": "Q2029317",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 42625.347117710735
+    },
+    {
+      "source_feature_index": 7404,
+      "name": "Kingdom of Georgia",
+      "from_year": 1468,
+      "to_year": 1506,
+      "wikidata": "Q154667",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 21945.07363879336
+    },
+    {
+      "source_feature_index": 7421,
+      "name": "Principality of Mingrelia",
+      "from_year": 1468,
+      "to_year": 1571,
+      "wikidata": "Q2907860",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 13250.735274701548
+    },
+    {
+      "source_feature_index": 7434,
+      "name": "Golden Horde",
+      "from_year": 1468,
+      "to_year": 1501,
+      "wikidata": "Q79965",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 164719.88553832658
+    },
+    {
+      "source_feature_index": 7436,
+      "name": "Mamluk Sultanate",
+      "from_year": 1468,
+      "to_year": 1515,
+      "wikidata": "Q282428",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 1407935.3505842788
+    },
+    {
+      "source_feature_index": 7438,
+      "name": "Ramadanid Emirate",
+      "from_year": 1468,
+      "to_year": 1511,
+      "wikidata": "Q2261321",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 24477.166662350934
+    },
+    {
+      "source_feature_index": 7439,
+      "name": "Kingdom of Kakheti",
+      "from_year": 1468,
+      "to_year": 1578,
+      "wikidata": "Q1209822",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 2786.290714510029
+    },
+    {
+      "source_feature_index": 7443,
+      "name": "Principality of Guria",
+      "from_year": 1468,
+      "to_year": 1506,
+      "wikidata": "Q2195101",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 4180.368261538125
+    },
+    {
+      "source_feature_index": 7477,
+      "name": "Astrakhan Khanate",
+      "from_year": 1475,
+      "to_year": 1501,
+      "wikidata": "Q210163",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 30048.135376085294
+    },
+    {
+      "source_feature_index": 7503,
+      "name": "Aq Qoyunlu",
+      "from_year": 1475,
+      "to_year": 1501,
+      "wikidata": "Q555994",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 392675.2909766961
+    },
+    {
+      "source_feature_index": 7526,
+      "name": "County of Nevers",
+      "from_year": 1482,
+      "to_year": 1518,
+      "wikidata": "Q2070440",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 13561.428188936436
+    },
+    {
+      "source_feature_index": 7544,
+      "name": "Comtat Venaissin",
+      "from_year": 1482,
+      "to_year": 1672,
+      "wikidata": "Q1122980",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 2319.0044556150337
+    },
+    {
+      "source_feature_index": 7557,
+      "name": "Papal States",
+      "from_year": 1487,
+      "to_year": 1506,
+      "wikidata": "Q170174",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 39617.45328801247
+    },
+    {
+      "source_feature_index": 7561,
+      "name": "Kingdom of England",
+      "from_year": 1487,
+      "to_year": 1501,
+      "wikidata": "Q179876",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 15.591123532563277
+    },
+    {
+      "source_feature_index": 7570,
+      "name": "(Kingdom of England)",
+      "from_year": 1487,
+      "to_year": 1501,
+      "wikidata": "Q179876",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 15.591123532563277
+    },
+    {
+      "source_feature_index": 7571,
+      "name": "Crimean Khanate",
+      "from_year": 1487,
+      "to_year": 1501,
+      "wikidata": "Q160440",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 136476.73542750636
+    },
+    {
+      "source_feature_index": 7584,
+      "name": "Principality of Moldavia",
+      "from_year": 1487,
+      "to_year": 1506,
+      "wikidata": "Q10957559",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 82069.12705600864
+    },
+    {
+      "source_feature_index": 7590,
+      "name": "Republic of Florence",
+      "from_year": 1487,
+      "to_year": 1506,
+      "wikidata": "Q148540",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 12064.764398012478
+    },
+    {
+      "source_feature_index": 7598,
+      "name": "House of Habsburg",
+      "from_year": 1492,
+      "to_year": 1501,
+      "wikidata": "Q65968",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 100454.35897088087
+    },
+    {
+      "source_feature_index": 7603,
+      "name": "Kingdom of Hungary",
+      "from_year": 1492,
+      "to_year": 1520,
+      "wikidata": "Q171150",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 337523.50083595695
+    },
+    {
+      "source_feature_index": 7614,
+      "name": "Kingdom of Bohemia",
+      "from_year": 1492,
+      "to_year": 1501,
+      "wikidata": "Q42585",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 55330.54311854403
+    },
+    {
+      "source_feature_index": 7619,
+      "name": "(Kingdom of Bohemia)",
+      "from_year": 1492,
+      "to_year": 1501,
+      "wikidata": "Q42585",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 55330.54311854403
+    },
+    {
+      "source_feature_index": 7629,
+      "name": "Ottoman Empire",
+      "from_year": 1492,
+      "to_year": 1501,
+      "wikidata": "Q12560",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 930754.8602209111
+    },
+    {
+      "source_feature_index": 7630,
+      "name": "Republic of Venice",
+      "from_year": 1492,
+      "to_year": 1501,
+      "wikidata": "Q4948",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 63607.19001820799
+    },
+    {
+      "source_feature_index": 7639,
+      "name": "Swiss Confederation",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q39",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 22745.37907362302
+    },
+    {
+      "source_feature_index": 7643,
+      "name": "Wattasid dynasty",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q970799",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 383923.531716104
+    },
+    {
+      "source_feature_index": 7644,
+      "name": "Kingdom of Portugal",
+      "from_year": 1497,
+      "to_year": 1506,
+      "wikidata": "Q45670",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 96452.41951164596
+    },
+    {
+      "source_feature_index": 7645,
+      "name": "Habsburg Monarchy",
+      "from_year": 1497,
+      "to_year": 1506,
+      "wikidata": "Q66504140",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 22341.216737487666
+    },
+    {
+      "source_feature_index": 7646,
+      "name": "Duchy of Milan",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q153529",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 33481.74949230159
+    },
+    {
+      "source_feature_index": 7647,
+      "name": "County of Savoy",
+      "from_year": 1497,
+      "to_year": 1511,
+      "wikidata": "Q1232887",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 35734.31399731068
+    },
+    {
+      "source_feature_index": 7649,
+      "name": "(Kingdom of France)",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q207162",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 461994.91918606113
+    },
+    {
+      "source_feature_index": 7650,
+      "name": "(Habsburg Monarchy)",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q66504140",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 122795.57570836853
+    },
+    {
+      "source_feature_index": 7651,
+      "name": "(Holy Roman Empire)",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q12548",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 130844.10160118347
+    },
+    {
+      "source_feature_index": 7652,
+      "name": "Duchy of Styria",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q580447",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 2003.6618093864524
+    },
+    {
+      "source_feature_index": 7653,
+      "name": "County of Foix",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q1481436",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 45120.676729801846
+    },
+    {
+      "source_feature_index": 7654,
+      "name": "House of Jagiellon",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q194355",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 196053.10669557747
+    },
+    {
+      "source_feature_index": 7655,
+      "name": "Crown of Aragon",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q204920",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 156544.94502301922
+    },
+    {
+      "source_feature_index": 7662,
+      "name": "Holy Roman Empire Minor States",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q12548",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 130844.10160118347
+    },
+    {
+      "source_feature_index": 7665,
+      "name": "Kingdom of Naples",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q173065",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 68688.52360996426
+    },
+    {
+      "source_feature_index": 7666,
+      "name": "Duchy of Lorraine",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q155019",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 17186.35938215028
+    },
+    {
+      "source_feature_index": 7667,
+      "name": "House of Bourbon",
+      "from_year": 1497,
+      "to_year": 1518,
+      "wikidata": "Q58389",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 43425.58552003659
+    },
+    {
+      "source_feature_index": 7671,
+      "name": "Kingdom of France",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q207162",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 360890.08602569206
+    },
+    {
+      "source_feature_index": 7673,
+      "name": "Timurid Empire",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q484195",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 94.81685796559883
+    },
+    {
+      "source_feature_index": 7674,
+      "name": "Crown of Castile",
+      "from_year": 1497,
+      "to_year": 1501,
+      "wikidata": "Q217196",
+      "source_geometry_valid": true,
+      "clipped_area_km2": 384611.3520397136
+    }
+  ],
+  "overlap_candidates": [
+    {
+      "left_source_feature_index": 7649,
+      "left_name": "(Kingdom of France)",
+      "right_source_feature_index": 7671,
+      "right_name": "Kingdom of France",
+      "overlap_km2": 360890.086,
+      "overlap_share_of_smaller_geometry": 1.0,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7651,
+      "left_name": "(Holy Roman Empire)",
+      "right_source_feature_index": 7662,
+      "right_name": "Holy Roman Empire Minor States",
+      "overlap_km2": 130844.102,
+      "overlap_share_of_smaller_geometry": 1.0,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7598,
+      "left_name": "House of Habsburg",
+      "right_source_feature_index": 7650,
+      "right_name": "(Habsburg Monarchy)",
+      "overlap_km2": 100454.359,
+      "overlap_share_of_smaller_geometry": 1.0,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7614,
+      "left_name": "Kingdom of Bohemia",
+      "right_source_feature_index": 7619,
+      "right_name": "(Kingdom of Bohemia)",
+      "overlap_km2": 55330.543,
+      "overlap_share_of_smaller_geometry": 1.0,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7649,
+      "left_name": "(Kingdom of France)",
+      "right_source_feature_index": 7653,
+      "right_name": "County of Foix",
+      "overlap_km2": 45120.677,
+      "overlap_share_of_smaller_geometry": 1.0,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7649,
+      "left_name": "(Kingdom of France)",
+      "right_source_feature_index": 7667,
+      "right_name": "House of Bourbon",
+      "overlap_km2": 43425.586,
+      "overlap_share_of_smaller_geometry": 1.0,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7645,
+      "left_name": "Habsburg Monarchy",
+      "right_source_feature_index": 7650,
+      "right_name": "(Habsburg Monarchy)",
+      "overlap_km2": 22341.217,
+      "overlap_share_of_smaller_geometry": 1.0,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7526,
+      "left_name": "County of Nevers",
+      "right_source_feature_index": 7649,
+      "right_name": "(Kingdom of France)",
+      "overlap_km2": 13496.078,
+      "overlap_share_of_smaller_geometry": 0.995181,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7270,
+      "left_name": "Republic of Genoa",
+      "right_source_feature_index": 7629,
+      "right_name": "Ottoman Empire",
+      "overlap_km2": 6140.886,
+      "overlap_share_of_smaller_geometry": 0.235746,
+      "classification": "material_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7270,
+      "left_name": "Republic of Genoa",
+      "right_source_feature_index": 7646,
+      "right_name": "Duchy of Milan",
+      "overlap_km2": 4338.504,
+      "overlap_share_of_smaller_geometry": 0.166553,
+      "classification": "material_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7544,
+      "left_name": "Comtat Venaissin",
+      "right_source_feature_index": 7649,
+      "right_name": "(Kingdom of France)",
+      "overlap_km2": 2319.004,
+      "overlap_share_of_smaller_geometry": 1.0,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7544,
+      "left_name": "Comtat Venaissin",
+      "right_source_feature_index": 7671,
+      "right_name": "Kingdom of France",
+      "overlap_km2": 2319.004,
+      "overlap_share_of_smaller_geometry": 1.0,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7270,
+      "left_name": "Republic of Genoa",
+      "right_source_feature_index": 7571,
+      "right_name": "Crimean Khanate",
+      "overlap_km2": 999.574,
+      "overlap_share_of_smaller_geometry": 0.038373,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7526,
+      "left_name": "County of Nevers",
+      "right_source_feature_index": 7671,
+      "right_name": "Kingdom of France",
+      "overlap_km2": 937.507,
+      "overlap_share_of_smaller_geometry": 0.06913,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7270,
+      "left_name": "Republic of Genoa",
+      "right_source_feature_index": 7651,
+      "right_name": "(Holy Roman Empire)",
+      "overlap_km2": 871.439,
+      "overlap_share_of_smaller_geometry": 0.033454,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7270,
+      "left_name": "Republic of Genoa",
+      "right_source_feature_index": 7662,
+      "right_name": "Holy Roman Empire Minor States",
+      "overlap_km2": 871.439,
+      "overlap_share_of_smaller_geometry": 0.033454,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7349,
+      "left_name": "Principality of Orange",
+      "right_source_feature_index": 7649,
+      "right_name": "(Kingdom of France)",
+      "overlap_km2": 140.526,
+      "overlap_share_of_smaller_geometry": 1.0,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7349,
+      "left_name": "Principality of Orange",
+      "right_source_feature_index": 7671,
+      "right_name": "Kingdom of France",
+      "overlap_km2": 140.526,
+      "overlap_share_of_smaller_geometry": 1.0,
+      "classification": "near_containment_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7650,
+      "left_name": "(Habsburg Monarchy)",
+      "right_source_feature_index": 7651,
+      "right_name": "(Holy Roman Empire)",
+      "overlap_km2": 127.488,
+      "overlap_share_of_smaller_geometry": 0.001038,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7650,
+      "left_name": "(Habsburg Monarchy)",
+      "right_source_feature_index": 7662,
+      "right_name": "Holy Roman Empire Minor States",
+      "overlap_km2": 127.488,
+      "overlap_share_of_smaller_geometry": 0.001038,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7645,
+      "left_name": "Habsburg Monarchy",
+      "right_source_feature_index": 7651,
+      "right_name": "(Holy Roman Empire)",
+      "overlap_km2": 121.282,
+      "overlap_share_of_smaller_geometry": 0.005429,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7645,
+      "left_name": "Habsburg Monarchy",
+      "right_source_feature_index": 7662,
+      "right_name": "Holy Roman Empire Minor States",
+      "overlap_km2": 121.282,
+      "overlap_share_of_smaller_geometry": 0.005429,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7350,
+      "left_name": "Duchy of Bavaria",
+      "right_source_feature_index": 7651,
+      "right_name": "(Holy Roman Empire)",
+      "overlap_km2": 107.186,
+      "overlap_share_of_smaller_geometry": 0.002969,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7350,
+      "left_name": "Duchy of Bavaria",
+      "right_source_feature_index": 7662,
+      "right_name": "Holy Roman Empire Minor States",
+      "overlap_km2": 107.186,
+      "overlap_share_of_smaller_geometry": 0.002969,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7651,
+      "left_name": "(Holy Roman Empire)",
+      "right_source_feature_index": 7671,
+      "right_name": "Kingdom of France",
+      "overlap_km2": 105.452,
+      "overlap_share_of_smaller_geometry": 0.000806,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7649,
+      "left_name": "(Kingdom of France)",
+      "right_source_feature_index": 7651,
+      "right_name": "(Holy Roman Empire)",
+      "overlap_km2": 105.452,
+      "overlap_share_of_smaller_geometry": 0.000806,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7649,
+      "left_name": "(Kingdom of France)",
+      "right_source_feature_index": 7662,
+      "right_name": "Holy Roman Empire Minor States",
+      "overlap_km2": 105.452,
+      "overlap_share_of_smaller_geometry": 0.000806,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    },
+    {
+      "left_source_feature_index": 7662,
+      "left_name": "Holy Roman Empire Minor States",
+      "right_source_feature_index": 7671,
+      "right_name": "Kingdom of France",
+      "overlap_km2": 105.452,
+      "overlap_share_of_smaller_geometry": 0.000806,
+      "classification": "small_overlap_candidate",
+      "review_status": "automated_candidate_historian_review_outstanding"
+    }
+  ],
+  "publication_gate": "No topology candidate is resolved and no polygon becomes statistical support without source-aware historical review and an explicit allocation contract."
+}

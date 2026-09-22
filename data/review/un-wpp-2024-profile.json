@@ -1,0 +1,64 @@
+{
+  "schema_version": "0.1.0",
+  "review_status": "acquired_and_profiled_not_published",
+  "source_id": "un-wpp-2024-medium-demographic-indicators",
+  "source_url": "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Demographic_Indicators_Medium.csv.gz",
+  "artifact": {
+    "filename": "WPP2024_Demographic_Indicators_Medium.csv.gz",
+    "bytes": 16557272,
+    "sha256": "286ac36bb1415e2e1ade03acfef0a29f0e4c087e2f78e38c48f50c5df89082bc"
+  },
+  "source_semantics": {
+    "estimate_years": [
+      1950,
+      2023
+    ],
+    "official_projection_years": [
+      2024,
+      2100
+    ],
+    "artifact_years": [
+      1950,
+      2101
+    ],
+    "variant": "Medium",
+    "population_column": "TPopulation1July",
+    "population_unit": "requires_exact_bulk_metadata_confirmation",
+    "official_dataset_page": "https://population.un.org/wpp/",
+    "official_dataset_description": "Estimates and projections are distinct source products and must remain visibly distinct in Atlas."
+  },
+  "profile": {
+    "rows": 84360,
+    "columns": 67,
+    "location_ids": 555,
+    "iso3_codes": 237,
+    "location_type_rows": {
+      "(blank)": 35568,
+      "Ad Hoc groups": 3496,
+      "Country/Area": 36024,
+      "Development group": 1064,
+      "Geographic region": 1064,
+      "Income group": 1368,
+      "SDG region": 1368,
+      "Special other": 1064,
+      "Subregion": 3192,
+      "World": 152
+    },
+    "rows_by_period": {
+      "estimates_1950_2023": 41070,
+      "projections_2024_2100": 42735,
+      "boundary_rows_2101": 555
+    },
+    "duplicate_location_year_variant_keys": 0,
+    "missing_population_values": 555,
+    "nonpositive_population_values": 0
+  },
+  "publication_gates": [
+    "verify_bulk_artifact_license_and_population_unit_from_source_metadata",
+    "select_country_area_rows_without_regional_or_special_aggregates",
+    "review_parent_dependent_territory_and_historical_entity_crosswalks",
+    "publish_estimates_and_projections_as_visibly_distinct evidence_states",
+    "define_overlap_policy_with_existing_world_bank_population_release",
+    "audit_2101_boundary_rows_against_each_selected_indicator_definition"
+  ]
+}

@@ -1,6 +1,6 @@
 # Source dossier
 
-**Checked: September 20, 2026.** This dossier mixes implemented release inputs
+**Checked: September 21, 2026.** This dossier mixes implemented release inputs
 with documentation-level candidates. Each section states its acquisition status.
 “Checked license” means the cited publisher page states that license;
 implementation must save the terms applying to the exact acquired artifact.
@@ -14,10 +14,15 @@ implementation must save the terms applying to the exact acquired artifact.
 - Intended use: optional historical context overlay; not the default statistical geography for modern indicator joins.
 - Acquisition result (2026-09-20): the exact tagged archive and license were
   acquired and hashed. The archive contains 13,765 records: 13,380 `POLITY` and
-  385 `RELATION`. Release r3 publishes 36 lazily loaded, simplified `POLITY`-only
+  385 `RELATION`. Release r4 publishes 36 lazily loaded, simplified `POLITY`-only
   snapshots. Six source year-zero endpoints are quarantined; no snapshot samples
   source year zero. Borders remain contestable context, not a population
   partition.
+- Topology pilot (2026-09-21): an equal-area audit of 57 active features in a
+  Mediterranean bounding box at 1500 CE reports 28 overlap candidates above 100
+  square kilometres, including 12 near-containment candidates. The result is a
+  review queue, not a claim that the source is wrong or that the features should
+  be forced into an exclusive partition.
 
 References: [release and DOI](https://zenodo.org/records/20274630), [pinned README](https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/README.md), [pinned license](https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/LICENSE.md).
 
@@ -32,8 +37,18 @@ populations are identical.
 
 - Current lab-listed candidate: **HYDE 3.5 (2025)**, **10,000 BCE–2025 CE**, **5 arc-minute** grid.
 - Discovery: [official version directory](https://landuse.sites.uu.nl/datasets/); [3.5 archive landing page](https://public.yoda.uu.nl/geo/UU01/F45D44.html); [interactive portal](https://hyde-portal.geo.uu.nl/).
-- The archive landing page was bot-protected in this research environment. Exact population files, available years, units, masks, scenario files, and archive license remain **unverified**.
-- Do not inherit the paper's license as the data license. If the candidate cannot be acquired through an authorized route, select an individually verified older release and disclose that change.
+- The provider's downloadable directory was navigated interactively. It exposes
+  baseline, lower, and upper branches, large variable-level files, and smaller
+  per-year population archives. Automated HTTP retrieval still receives the
+  provider's Anubis challenge.
+- The directory's `License.txt` was downloaded and hashed as
+  `3711f963c05d0be80d53e5923308a6dee31b203da23435c9cfb7c7b6e4dd5e19`.
+  It is **CC BY-NC 4.0**, so Atlas must confirm compatible noncommercial use or
+  obtain permission before publishing a HYDE-derived product.
+- No HYDE population data artifact has been acquired. Exact variables, years,
+  units, masks, and scenario semantics remain unverified. The first safe step is
+  one baseline population artifact plus its README, not a multi-gigabyte bulk
+  mirror. The contract is in `data/review/hyde-3.5-ingestion-contract.json`.
 
 The [HYDE 3.2 methods paper, §2.1](https://essd.copernicus.org/articles/9/927/2017/essd-9-927-2017.pdf) describes historical totals assigned to fixed contemporary administrative units, then spatially allocated. This warns against treating fine cells as direct archaeological observations or intrinsically boundary-neutral evidence. It is a methodological warning from 3.2, not proof that every 3.5 implementation detail is unchanged.
 
@@ -146,10 +161,17 @@ Period life expectancy is a synthetic life-table measure, not an observed distri
   projections to 2100, and single-year age/time detail.
 - Intended role: more detailed direct population expansion source after the
   modern World Bank MVP.
-- Status: documented, not ingested. Before publishing, pin the exact bulk
-  artifact and terms; separate estimates from projections and scenarios; audit
-  country/area definitions and parent/dependency relations; and create explicit
-  crosswalks rather than concatenating it with the current release.
+- Acquisition result (2026-09-21): the official medium demographic-indicators
+  CSV gzip is pinned at SHA-256
+  `286ac36bb1415e2e1ade03acfef0a29f0e4c087e2f78e38c48f50c5df89082bc`.
+  It contains 84,360 rows, 67 columns, 555 location IDs, 237 ISO3 codes, and no
+  duplicate location/year/variant keys. `Country/Area` accounts for 36,024 rows;
+  the file also includes regional and special aggregates.
+- Status: acquired and profiled, not published. Estimates for 1950–2023,
+  projections for 2024–2100, and 555 artifact boundary rows for 2101 are kept
+  separate. Exact bulk-data license and population units still need artifact
+  metadata; country/area selection, territories, and overlap with World Bank
+  require explicit policy before publication.
 
 ## S13 — CShapes 2.0: dated modern state geometry
 

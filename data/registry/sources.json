@@ -1,9 +1,10 @@
 {
-  "schema_version": "0.2.0",
+  "schema_version": "0.3.0",
   "status": "research_registry_not_ingestion_lockfile",
   "sources": [
     {
       "id": "cliopatria",
+      "label": "Cliopatria",
       "dossier": "S1",
       "role": "historical_context_geometry",
       "candidate_release": "v0.2.0",
@@ -16,9 +17,11 @@
         "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/README.md",
         "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/LICENSE.md"
       ],
-      "blockers": [],
-      "notes": "Pinned v0.2.0 archive acquired and profiled: 13,765 rows, including 13,380 POLITY and 385 RELATION records. Release r4 publishes 36 simplified POLITY-only context snapshots with duplicate-ID, area, ring-closure, coordinate-bound, and geometry-type checks. RELATION is excluded and no feature contributes to population accounting. Topology/overlap review is not yet computed. Six source year-zero endpoints remain quarantined; no snapshot samples source year zero.",
-      "checked_at": "2026-09-20",
+      "blockers": [
+        "historian_review_28_mediterranean_topology_candidates_before_statistical_use"
+      ],
+      "notes": "Pinned v0.2.0 archive acquired and profiled: 13,765 rows, including 13,380 POLITY and 385 RELATION records. Release r4 publishes 36 simplified POLITY-only context snapshots; RELATION is excluded and no feature contributes to population accounting. A reproducible 1500 CE Mediterranean pilot found 28 overlap candidates among 57 active intersecting polities, including 12 near-containment candidates. These are leads for source-aware historian review, not proof of errors. Six source year-zero endpoints remain quarantined; no snapshot samples source year zero.",
+      "checked_at": "2026-09-21",
       "verification_level": "artifact_acquired_profiled_and_fixture_published",
       "downloaded": true,
       "artifact_sha256": "d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370",
@@ -27,58 +30,64 @@
     },
     {
       "id": "hyde",
+      "label": "HYDE 3.5",
       "dossier": "S2",
       "role": "population_grid",
       "candidate_release": "3.5",
       "coverage_start": "10000 BCE",
       "coverage_end": "2025 CE",
-      "license": null,
-      "license_status": "artifact_terms_unverified",
+      "license": "CC-BY-NC-4.0",
+      "license_status": "provider_license_file_acquired_noncommercial_restriction_requires_product_review",
       "urls": [
         "https://landuse.sites.uu.nl/datasets/",
-        "https://public.yoda.uu.nl/geo/UU01/F45D44.html"
+        "https://public.yoda.uu.nl/geo/UU01/F45D44.html",
+        "https://geo.public.data.uu.nl/vault-hyde/hyde35_c9_apr2025%5B1749214444%5D/"
       ],
       "blockers": [
-        "authorized_archive_access",
-        "verify_artifact_license",
-        "verify_population_variables_units_years_masks_scenarios"
+        "acquire_readme_and_one_selected_population_artifact",
+        "confirm_atlas_use_is_compatible_with_noncommercial_terms_or_obtain_permission",
+        "verify_population_count_vs_density_units_years_nodata_masks_and_scenarios"
       ],
-      "notes": "Provider-listed range/resolution; not proof of all-variable coverage or direct local observations.",
-      "checked_at": "2026-09-19",
-      "verification_level": "documentation_only",
+      "notes": "The provider directory was navigated successfully and exposes baseline, lower, and upper branches plus per-variable and per-year downloads. Its downloaded License.txt is CC BY-NC 4.0 (SHA-256 recorded below). Automated curl access still receives the provider's Anubis challenge, and no HYDE population values have been acquired or published. The tracked ingestion contract records the exact remaining semantic and conservation gates.",
+      "checked_at": "2026-09-21",
+      "verification_level": "directory_and_license_profiled_data_artifact_not_acquired",
       "downloaded": false,
       "artifact_sha256": null,
-      "terms_snapshot_sha256": null,
+      "terms_snapshot_sha256": "3711f963c05d0be80d53e5923308a6dee31b203da23435c9cfb7c7b6e4dd5e19",
       "release_ready": false
     },
     {
       "id": "un_wpp_2024",
+      "label": "UN World Population Prospects 2024",
       "dossier": "S12",
       "role": "detailed_population_estimates_and_projections",
       "candidate_release": "2024",
       "coverage_start": "1950 CE",
       "coverage_end": "2100 CE",
       "license": null,
-      "license_status": "exact_bulk_artifact_terms_require_audit",
+      "license_status": "official_bulk_artifact_acquired_exact_dataset_terms_require_audit",
       "urls": [
         "https://population.un.org/wpp/",
-        "https://www.un.org/development/desa/pd/content/World-Population-Prospects-2024"
+        "https://www.un.org/development/desa/pd/content/World-Population-Prospects-2024",
+        "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Demographic_Indicators_Medium.csv.gz"
       ],
       "blockers": [
-        "pin_bulk_artifact_and_terms",
-        "separate_estimates_projections_and_scenarios",
-        "audit_territories_and_crosswalks"
+        "verify_bulk_artifact_license_and_population_unit_from_source_metadata",
+        "separate_estimates_1950_2023_from_medium_projections_2024_2100",
+        "audit_2101_boundary_rows_aggregates_territories_and_crosswalks",
+        "define_overlap_policy_with_world_bank_population"
       ],
-      "notes": "Preferred detailed direct population expansion source; documented but intentionally not merged into the World Bank MVP.",
-      "checked_at": "2026-09-20",
-      "verification_level": "documentation_only",
-      "downloaded": false,
-      "artifact_sha256": null,
+      "notes": "Official medium demographic-indicators CSV acquired and profiled: 84,360 rows, 67 columns, 555 location IDs, 237 ISO3 codes, and no duplicate location/year/variant keys. It contains 237 Country/Area series plus many aggregate series. Estimates (1950-2023), projections (2024-2100), and 555 boundary rows for 2101 remain explicitly separated. It is intentionally not merged into the World Bank release until units, terms, territorial support, and overlap policy pass review.",
+      "checked_at": "2026-09-21",
+      "verification_level": "artifact_acquired_and_profiled_not_published",
+      "downloaded": true,
+      "artifact_sha256": "286ac36bb1415e2e1ade03acfef0a29f0e4c087e2f78e38c48f50c5df89082bc",
       "terms_snapshot_sha256": null,
       "release_ready": false
     },
     {
       "id": "world_bank_electricity",
+      "label": "World Bank World Development Indicators",
       "dossier": "S3",
       "role": "population_person_prevalence_and_context_distribution",
       "candidate_release": "retrieval_snapshot_required",
@@ -108,6 +117,7 @@
     },
     {
       "id": "maddison",
+      "label": "Maddison Project Database 2023",
       "dossier": "S4",
       "role": "context_distribution",
       "candidate_release": "2023",
@@ -134,6 +144,7 @@
     },
     {
       "id": "seshat",
+      "label": "Seshat Global History Databank",
       "dossier": "S5",
       "role": "historical_context_facts",
       "candidate_release": "authorized_public_release_to_select",
@@ -162,6 +173,7 @@
     },
     {
       "id": "vdem",
+      "label": "V-Dem",
       "dossier": "S6",
       "role": "institutional_source_reference",
       "candidate_release": "16",
@@ -188,6 +200,7 @@
     },
     {
       "id": "clio_infra",
+      "label": "Clio Infra",
       "dossier": "S7",
       "role": "historical_context_series",
       "candidate_release": "per_indicator_snapshot_required",
@@ -214,6 +227,7 @@
     },
     {
       "id": "ucdp",
+      "label": "UCDP",
       "dossier": "S8",
       "role": "events",
       "candidate_release": "26.1",
@@ -239,6 +253,7 @@
     },
     {
       "id": "owid_life_expectancy",
+      "label": "Our World in Data life expectancy",
       "dossier": "S9",
       "role": "context_distribution",
       "candidate_release": "retrieval_snapshot_required",
@@ -265,6 +280,7 @@
     },
     {
       "id": "cshapes_2_0",
+      "label": "CShapes 2.0",
       "dossier": "S13",
       "role": "modern_historical_state_geometry",
       "candidate_release": "2.0",
@@ -291,6 +307,7 @@
     },
     {
       "id": "reba_historical_urban_population",
+      "label": "Modelski Ancient v2",
       "dossier": "S14",
       "role": "historical_city_population_points",
       "candidate_release": "Modelski Ancient Period Data v2",
@@ -313,6 +330,7 @@
     },
     {
       "id": "world_historical_gazetteer",
+      "label": "World Historical Gazetteer",
       "dossier": "S15",
       "role": "temporal_place_names_and_crosswalks",
       "candidate_release": "per_dataset_snapshot_required",
@@ -339,6 +357,7 @@
     },
     {
       "id": "reba_chandler_v2",
+      "label": "Chandler v2",
       "dossier": "S14-companion",
       "role": "historical_city_population_points_alternative_series",
       "candidate_release": "chandlerV2.csv from Figshare article 2059494",
@@ -353,11 +372,11 @@
       "blockers": [
         "review_two_zero_population_cells",
         "normalize_unicode_whitespace_in_coordinates",
-        "build_dated_city_identity_crosswalk",
+        "review_353_generated_cross_source_identity_candidates",
         "design_source_disagreement_display"
       ],
-      "notes": "Audited fixture has 1,597 city rows, 806 sparse source-date columns, and 9,438 populated cells. Two populated cells contain numeric zero and must not be assumed to mean a genuine city population of zero. Exact normalized names overlap the published Modelski Ancient table for 93 cities, but only 86 also share identical coordinate strings; names alone are not a safe merge key.",
-      "checked_at": "2026-09-20",
+      "notes": "Audited fixture has 1,597 city rows, 806 sparse source-date columns, and 9,438 populated cells. A conservative cross-source pass generated unreviewed candidates without merging observations. Across all three series there are 353 candidates: 290 match normalized primary name and rounded coordinate, 58 name only, and 5 coordinate only. Two Chandler cells contain numeric zero and remain unresolved.",
+      "checked_at": "2026-09-21",
       "verification_level": "artifact_acquired_and_profiled_not_published",
       "downloaded": true,
       "artifact_sha256": "5b8df64e46988b216988eef18b46ebc2cba57ecc1adc8a5c2e1e6d5b78068031",
@@ -366,6 +385,7 @@
     },
     {
       "id": "reba_modelski_modern_v2",
+      "label": "Modelski Modern v2",
       "dossier": "S14-companion",
       "role": "historical_city_population_points_alternative_series",
       "candidate_release": "modelskiModernV2.csv from Figshare article 2059500",
@@ -378,11 +398,11 @@
         "https://ndownloader.figshare.com/files/5407637"
       ],
       "blockers": [
-        "build_dated_city_identity_crosswalk",
+        "review_353_generated_cross_source_identity_candidates",
         "design_source_disagreement_display"
       ],
-      "notes": "Audited fixture has 293 city rows and 293 positive estimates at 2000 CE. Exact normalized names overlap Chandler for 224 cities, but only 184 also share identical coordinate strings; the two source series remain separate until a reviewed crosswalk exists.",
-      "checked_at": "2026-09-20",
+      "notes": "Audited fixture has 293 city rows and 293 positive estimates at 2000 CE. It participates in the 353 generated cross-source identity candidates, all explicitly unreviewed. The source series remain separate until identity, temporal meaning, and same-date disagreements receive evidence-backed review.",
+      "checked_at": "2026-09-21",
       "verification_level": "artifact_acquired_and_profiled_not_published",
       "downloaded": true,
       "artifact_sha256": "927ee6a9122be6aded1a2f71ff5bb6f36312aae6a778574af47f4e8c65265726",
@@ -391,6 +411,7 @@
     },
     {
       "id": "pleiades",
+      "label": "Pleiades",
       "dossier": "S16",
       "role": "ancient_place_names_and_locations",
       "candidate_release": "versioned_dataset_export_to_select",
@@ -416,6 +437,7 @@
     },
     {
       "id": "us_census_historical_world_population",
+      "label": "U.S. Census historical world population",
       "dossier": "S17",
       "role": "deep_time_global_population_estimate_ranges",
       "candidate_release": "retrieved_2026_09_20",
@@ -437,6 +459,7 @@
     },
     {
       "id": "natural_earth",
+      "label": "Natural Earth 5.1.2",
       "dossier": "S10",
       "role": "basemap",
       "candidate_release": "specific_artifact_to_pin",
@@ -455,6 +478,181 @@
       "artifact_sha256": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f",
       "terms_snapshot_sha256": null,
       "release_ready": true
+    }
+  ],
+  "verticals": [
+    {
+      "id": "population_over_time",
+      "label": "Population over time",
+      "description": "World totals, modern territorial series, future projections, and prospective gridded surfaces remain separate evidence products.",
+      "sources": [
+        {
+          "source_id": "us_census_historical_world_population",
+          "role": "Deep-time world estimate ranges",
+          "release_ids": ["us-census-historical-world-population-2026-09-20"]
+        },
+        {
+          "source_id": "world_bank_electricity",
+          "role": "Annual modern territorial population",
+          "release_ids": ["world-bank-wdi-2026-07-13"]
+        },
+        {
+          "source_id": "un_wpp_2024",
+          "role": "Detailed estimates and projections",
+          "release_ids": []
+        },
+        {
+          "source_id": "hyde",
+          "role": "Gridded population scenarios",
+          "release_ids": []
+        }
+      ]
+    },
+    {
+      "id": "political_borders_and_names",
+      "label": "Borders and political names over time",
+      "description": "Historical political context is kept distinct from modern basemap geometry and statistical territories.",
+      "sources": [
+        {
+          "source_id": "cliopatria",
+          "role": "Historical polity geometry and names",
+          "release_ids": ["cliopatria-v0.2.0"]
+        },
+        {
+          "source_id": "natural_earth",
+          "role": "Modern display coastline and boundaries",
+          "release_ids": ["natural-earth-v5.1.2"]
+        },
+        {
+          "source_id": "cshapes_2_0",
+          "role": "Modern historical state geometry candidate",
+          "release_ids": []
+        },
+        {
+          "source_id": "world_historical_gazetteer",
+          "role": "Temporal place names and reconciliation candidate",
+          "release_ids": []
+        }
+      ]
+    },
+    {
+      "id": "historical_cities",
+      "label": "Historical cities and urban population",
+      "description": "Sparse source-authored city estimates are not treated as a complete urban denominator or silently merged across series.",
+      "sources": [
+        {
+          "source_id": "reba_historical_urban_population",
+          "role": "Published Modelski Ancient exact-date points",
+          "release_ids": ["reba-modelski-ancient-v2"]
+        },
+        {
+          "source_id": "reba_chandler_v2",
+          "role": "Companion Chandler series",
+          "release_ids": []
+        },
+        {
+          "source_id": "reba_modelski_modern_v2",
+          "role": "Companion Modelski Modern series",
+          "release_ids": []
+        },
+        {
+          "source_id": "pleiades",
+          "role": "Ancient-place names and locations",
+          "release_ids": []
+        }
+      ]
+    },
+    {
+      "id": "economics_over_time",
+      "label": "Economics over time",
+      "description": "Territorial GDP and related historical context series require indicator-specific units, PPP bases, citations, and boundary support.",
+      "sources": [
+        {
+          "source_id": "maddison",
+          "role": "Historical territorial GDP per capita candidate",
+          "release_ids": []
+        },
+        {
+          "source_id": "clio_infra",
+          "role": "Historical economic and social indicator candidates",
+          "release_ids": []
+        }
+      ]
+    },
+    {
+      "id": "health_and_survival",
+      "label": "Health and survival over time",
+      "description": "Country-level life expectancy is contextual and must not be presented as an individual distribution or global life table.",
+      "sources": [
+        {
+          "source_id": "world_bank_electricity",
+          "role": "Published modern life-expectancy context",
+          "release_ids": ["world-bank-wdi-2026-07-13"]
+        },
+        {
+          "source_id": "owid_life_expectancy",
+          "role": "Alternative harmonized life-expectancy series",
+          "release_ids": []
+        },
+        {
+          "source_id": "clio_infra",
+          "role": "Historical life-expectancy candidate",
+          "release_ids": []
+        }
+      ]
+    },
+    {
+      "id": "infrastructure_access",
+      "label": "Infrastructure access over time",
+      "description": "Person-prevalence measures need exact denominators and explicit unknown coverage.",
+      "sources": [
+        {
+          "source_id": "world_bank_electricity",
+          "role": "Published electricity-access prevalence",
+          "release_ids": ["world-bank-wdi-2026-07-13"]
+        }
+      ]
+    },
+    {
+      "id": "institutions_and_governance",
+      "label": "Institutions and governance over time",
+      "description": "Atlas records documented institutional features; it does not create rankings or composite verdicts.",
+      "sources": [
+        {
+          "source_id": "seshat",
+          "role": "Historical institutional facts candidate",
+          "release_ids": []
+        },
+        {
+          "source_id": "vdem",
+          "role": "Modern and historical institutional variables candidate",
+          "release_ids": []
+        }
+      ]
+    },
+    {
+      "id": "conflict_and_security",
+      "label": "Conflict and security over time",
+      "description": "Event data require product-specific spatial, temporal, and final-versus-candidate status review.",
+      "sources": [
+        {
+          "source_id": "ucdp",
+          "role": "Conflict event candidate",
+          "release_ids": []
+        }
+      ]
+    },
+    {
+      "id": "land_use_and_settlement",
+      "label": "Land use and settlement over time",
+      "description": "Modeled gridded scenarios must preserve variables, masks, scenarios, and non-observation status.",
+      "sources": [
+        {
+          "source_id": "hyde",
+          "role": "Gridded land-use and settlement scenarios",
+          "release_ids": []
+        }
+      ]
     }
   ]
 }

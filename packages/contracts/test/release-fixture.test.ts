@@ -38,7 +38,51 @@ const lifeExpectancy = readJson<LifeExpectancyDataset>('life-expectancy.json');
 const entities = readJson<{ entities: AtlasEntity[] }>('entities.json').entities;
 const sourceRegistry = JSON.parse(
   readFileSync(resolve('data/registry/sources.json'), 'utf8'),
-) as { sources: Array<{ id: string; urls: string[]; blockers: string[]; release_ready: boolean }> };
+) as {
+  sources: Array<{
+    id: string;
+    label: string;
+    urls: string[];
+    blockers: string[];
+    downloaded: boolean;
+    release_ready: boolean;
+  }>;
+  verticals: Array<{
+    id: string;
+    sources: Array<{ source_id: string; release_ids: string[] }>;
+  }>;
+};
+const wppProfile = JSON.parse(
+  readFileSync(resolve('data/review/un-wpp-2024-profile.json'), 'utf8'),
+) as {
+  review_status: string;
+  artifact: { sha256: string };
+  profile: {
+    rows: number;
+    iso3_codes: number;
+    duplicate_location_year_variant_keys: number;
+    rows_by_period: Record<string, number>;
+  };
+};
+const cityCrosswalkReview = JSON.parse(
+  readFileSync(resolve('data/review/historical-city-crosswalk-candidates.json'), 'utf8'),
+) as {
+  review_status: string;
+  candidate_records: Record<string, unknown>;
+  candidates: Array<{
+    review_status: string;
+    candidate_basis: string;
+    left_record_id: string;
+    right_record_id: string;
+  }>;
+};
+const cliopatriaTopologyReview = JSON.parse(
+  readFileSync(resolve('data/review/cliopatria-topology-pilot.json'), 'utf8'),
+) as {
+  review_status: string;
+  summary: { active_intersecting_polity_features: number; reported_overlap_candidates: number };
+  overlap_candidates: Array<{ review_status: string }>;
+};
 
 const populationByYear = new Map<number, typeof population.observations>();
 for (const observation of population.observations) {
@@ -213,10 +257,82 @@ describe('genuine-data MVP release', () => {
       sourceRegistry.sources.length,
     );
     expect(sourceRegistry.sources.every((source) => source.urls.length > 0)).toBe(true);
+    expect(sourceRegistry.sources.every((source) => source.label.trim().length > 0)).toBe(true);
     expect(
       sourceRegistry.sources
         .filter((source) => !source.release_ready)
         .every((source) => source.blockers.length > 0),
+    ).toBe(true);
+
+    const registryIds = new Set(sourceRegistry.sources.map((source) => source.id));
+    const releaseIds = new Set(manifest.source_releases.map((source) => source.id));
+    expect(new Set(sourceRegistry.verticals.map((vertical) => vertical.id)).size).toBe(
+      sourceRegistry.verticals.length,
+    );
+    const referencedRegistryIds = new Set<string>();
+    const referencedReleaseIds = new Set<string>();
+    for (const vertical of sourceRegistry.verticals) {
+      const verticalSourceIds = vertical.sources.map((source) => source.source_id);
+      expect(new Set(verticalSourceIds).size).toBe(verticalSourceIds.length);
+      for (const source of vertical.sources) {
+        expect(registryIds.has(source.source_id)).toBe(true);
+        referencedRegistryIds.add(source.source_id);
+        for (const releaseId of source.release_ids) {
+          expect(releaseIds.has(releaseId)).toBe(true);
+          referencedReleaseIds.add(releaseId);
+        }
+        if (source.release_ids.length > 0) {
+          expect(sourceRegistry.sources.find((item) => item.id === source.source_id)?.downloaded).toBe(true);
+        }
+      }
+    }
+    expect(referencedRegistryIds).toEqual(registryIds);
+    expect(referencedReleaseIds).toEqual(releaseIds);
+  });
+
+  it('keeps audit progress separate from reviewed publication', () => {
+    expect(wppProfile.review_status).toBe('acquired_and_profiled_not_published');
+    expect(wppProfile.artifact.sha256).toBe(
+      '286ac36bb1415e2e1ade03acfef0a29f0e4c087e2f78e38c48f50c5df89082bc',
+    );
+    expect(wppProfile.profile).toMatchObject({
+      rows: 84_360,
+      iso3_codes: 237,
+      duplicate_location_year_variant_keys: 0,
+    });
+    expect(wppProfile.profile.rows_by_period).toEqual({
+      estimates_1950_2023: 41_070,
+      projections_2024_2100: 42_735,
+      boundary_rows_2101: 555,
+    });
+
+    expect(cityCrosswalkReview.review_status).toBe(
+      'candidate_generation_complete_human_review_outstanding',
+    );
+    expect(cityCrosswalkReview.candidates).toHaveLength(353);
+    expect(
+      cityCrosswalkReview.candidates.every(
+        (candidate) => candidate.review_status === 'unreviewed_candidate'
+          && candidate.left_record_id in cityCrosswalkReview.candidate_records
+          && candidate.right_record_id in cityCrosswalkReview.candidate_records,
+      ),
+    ).toBe(true);
+
+    expect(cliopatriaTopologyReview.review_status).toBe(
+      'bounded_automated_pilot_complete_historian_review_outstanding',
+    );
+    expect(cliopatriaTopologyReview.summary).toEqual({
+      active_intersecting_polity_features: 57,
+      invalid_source_geometries: 0,
+      geometries_repaired_for_measurement: 0,
+      reported_overlap_candidates: 28,
+      near_containment_candidates: 12,
+      material_overlap_candidates: 2,
+    });
+    expect(
+      cliopatriaTopologyReview.overlap_candidates.every(
+        (candidate) => candidate.review_status === 'automated_candidate_historian_review_outstanding',
+      ),
     ).toBe(true);
   });
 
