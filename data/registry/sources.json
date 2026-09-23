@@ -18,10 +18,10 @@
         "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/LICENSE.md"
       ],
       "blockers": [
-        "historian_review_28_mediterranean_topology_candidates_before_statistical_use"
+        "historian_review_20_unresolved_mediterranean_overlaps_before_statistical_use"
       ],
-      "notes": "Pinned v0.2.0 archive acquired and profiled: 13,765 rows, including 13,380 POLITY and 385 RELATION records. Release r4 publishes 36 simplified POLITY-only context snapshots; RELATION is excluded and no feature contributes to population accounting. A reproducible 1500 CE Mediterranean pilot found 28 overlap candidates among 57 active intersecting polities, including 12 near-containment candidates. These are leads for source-aware historian review, not proof of errors. Six source year-zero endpoints remain quarantined; no snapshot samples source year zero.",
-      "checked_at": "2026-09-21",
+      "notes": "Pinned v0.2.0 archive acquired and profiled: 13,765 rows, including 13,380 POLITY and 385 RELATION records. Release r6 publishes 36 simplified POLITY-only context snapshots; RELATION is excluded and no feature contributes to population accounting. Reconciliation v1 covers all 28 bounded 1500 CE overlap candidates: 8 are source-declared Components/MemberOf hierarchies rendered with composite outlines, while 20 remain visibly unresolved. Six source year-zero endpoints remain quarantined; no snapshot samples source year zero.",
+      "checked_at": "2026-09-22",
       "verification_level": "artifact_acquired_profiled_and_fixture_published",
       "downloaded": true,
       "artifact_sha256": "d01ae3a20d358cc5d54f69d9d725d390767d9c8759ac89ad6f90c58d106f3370",
@@ -319,8 +319,8 @@
         "https://doi.org/10.1038/sdata.2016.34"
       ],
       "blockers": [],
-      "notes": "Pinned Figshare V2 CSV: 154 cities, 41 sparse exact dates from 3700 BCE to 1000 CE, and 621 published estimates. Coordinates and source certainty codes are preserved. The layer is not a complete population surface or denominator; companion Chandler and Modelski Modern files remain unmerged alternatives.",
-      "checked_at": "2026-09-20",
+      "notes": "Pinned Figshare V2 CSV: 154 cities, 41 sparse exact dates from 3700 BCE to 1000 CE, and 621 published estimates. Coordinates and source certainty codes are preserved. Release r6 adds canonical place links from the versioned reconciliation set while keeping every population estimate source-native. The layer is not a complete population surface or denominator.",
+      "checked_at": "2026-09-22",
       "verification_level": "artifact_acquired_profiled_and_fixture_published",
       "downloaded": true,
       "artifact_sha256": "71beafaacbdeb8d8fc156951521e9a14e20d6704b0d77be5528511c52fad3e1d",
@@ -371,11 +371,11 @@
       "blockers": [
         "review_two_zero_population_cells",
         "normalize_unicode_whitespace_in_coordinates",
-        "review_353_generated_cross_source_identity_candidates",
+        "review_two_unresolved_coordinate_only_identity_pairs",
         "design_source_disagreement_display"
       ],
-      "notes": "Audited fixture has 1,597 city rows, 806 sparse source-date columns, and 9,438 populated cells. A conservative cross-source pass generated unreviewed candidates without merging observations. Across all three series there are 353 candidates: 290 match normalized primary name and rounded coordinate, 58 name only, and 5 coordinate only. Two Chandler cells contain numeric zero and remain unresolved.",
-      "checked_at": "2026-09-21",
+      "notes": "Audited fixture has 1,597 city rows, 806 sparse source-date columns, and 9,438 populated cells. Reconciliation v1 covers all 353 candidates: 336 accepted place links, 15 rejected distant homonyms, and 2 unresolved coordinate-only identities. Links never merge population values. Two Chandler cells and the multiple-source disagreement presentation remain unresolved.",
+      "checked_at": "2026-09-22",
       "verification_level": "artifact_acquired_and_profiled_not_published",
       "downloaded": true,
       "artifact_sha256": "5b8df64e46988b216988eef18b46ebc2cba57ecc1adc8a5c2e1e6d5b78068031",
@@ -397,11 +397,11 @@
         "https://ndownloader.figshare.com/files/5407637"
       ],
       "blockers": [
-        "review_353_generated_cross_source_identity_candidates",
+        "review_two_unresolved_coordinate_only_identity_pairs",
         "design_source_disagreement_display"
       ],
-      "notes": "Audited fixture has 293 city rows and 293 positive estimates at 2000 CE. It participates in the 353 generated cross-source identity candidates, all explicitly unreviewed. The source series remain separate until identity, temporal meaning, and same-date disagreements receive evidence-backed review.",
-      "checked_at": "2026-09-21",
+      "notes": "Audited fixture has 293 city rows and 293 positive estimates at 2000 CE. Reconciliation v1 records 336 accepted place links, 15 rejected distant homonyms, and 2 unresolved coordinate-only identities across all three series. The source observations remain separate until same-date disagreements have a truthful presentation.",
+      "checked_at": "2026-09-22",
       "verification_level": "artifact_acquired_and_profiled_not_published",
       "downloaded": true,
       "artifact_sha256": "927ee6a9122be6aded1a2f71ff5bb6f36312aae6a778574af47f4e8c65265726",

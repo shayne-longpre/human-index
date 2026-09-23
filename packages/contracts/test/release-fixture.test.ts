@@ -21,7 +21,7 @@ import {
   type LifeExpectancyDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-22-r5');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-22-r6');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -109,8 +109,36 @@ const reviewQueue = JSON.parse(
   readFileSync(resolve('apps/web/public/atlas/review/review-queue.json'), 'utf8'),
 ) as {
   status: string;
-  border_overlaps: { candidates: unknown[] };
-  city_identities: { candidates: unknown[] };
+  decision_set: { id: string; summary: Record<string, unknown> };
+  source_policies: unknown[];
+  border_overlaps: { candidates: Array<{ decision: { disposition: string } }> };
+  city_identities: { candidates: Array<{ decision: { disposition: string } }> };
+};
+const reconciliationDecisions = JSON.parse(
+  readFileSync(resolve('data/decisions/reconciliation-decisions-v1.json'), 'utf8'),
+) as {
+  decision_set_id: string;
+  status: string;
+  summary: {
+    city_candidates: number;
+    city_dispositions: Record<string, number>;
+    canonical_place_clusters: number;
+    border_candidates: number;
+    border_dispositions: Record<string, number>;
+    source_policies: number;
+  };
+  place_clusters: Array<{ canonical_place_id: string; source_record_ids: string[] }>;
+  city_identity_decisions: Array<{
+    candidate_id: string;
+    disposition: string;
+    canonical_place_id: string | null;
+    observation_policy: string;
+  }>;
+  border_overlap_decisions: Array<{
+    candidate_key: string;
+    disposition: string;
+    population_allocation: string;
+  }>;
 };
 
 const populationByYear = new Map<number, typeof population.observations>();
@@ -248,7 +276,7 @@ describe('genuine-data MVP release', () => {
     expect(
       historicalContext.snapshots.every(
         (snapshot) => snapshot.quality.topology_overlap_review
-          === 'not_computed_requires_topology_engine_and_historical_review',
+          === 'bounded_decision_set_applied_unresolved_overlaps_preserved',
       ),
     ).toBe(true);
     for (let index = 1; index < historicalContext.snapshots.length; index += 1) {
@@ -268,8 +296,35 @@ describe('genuine-data MVP release', () => {
     expect(new Set(ancient.features.map((feature) => feature.properties.name))).not.toEqual(
       new Set(medieval.features.map((feature) => feature.properties.name)),
     );
+    const reconciled = readJson<{
+      reconciliation_decision_set_id: string;
+      features: Array<{ properties: {
+        source_relation_role: string;
+        reconciliation_status: string;
+        unresolved_overlap_count: number;
+        overlap_decisions: Array<{
+          decision_id: string;
+          counterpart_name: string;
+          disposition: string;
+        }>;
+      } }>;
+    }>(historicalContext.snapshots.find((snapshot) => snapshot.source_year === 1500)?.file ?? '');
+    expect(reconciled.reconciliation_decision_set_id).toBe('atlas-reconciliation-2026-09-22-v1');
+    expect(reconciled.features.some((feature) => feature.properties.source_relation_role === 'composite'))
+      .toBe(true);
+    expect(reconciled.features.some((feature) => feature.properties.unresolved_overlap_count > 0))
+      .toBe(true);
+    expect(
+      reconciled.features
+        .filter((feature) => feature.properties.unresolved_overlap_count > 0)
+        .every((feature) => feature.properties.overlap_decisions.some(
+          (decision) => decision.disposition === 'unresolved_overlap'
+            && decision.counterpart_name.length > 0
+            && decision.decision_id.startsWith('border:'),
+        )),
+    ).toBe(true);
     const transformation = manifest.transformations.find(
-      (candidate) => candidate.id === 'cliopatria-display-snapshots-v1',
+      (candidate) => candidate.id === 'cliopatria-display-snapshots-v2',
     );
     expect(transformation?.parameters.archive_member).toBe('cliopatria_polities_only.geojson');
     expect(transformation?.parameters.archive_member_sha256).toMatch(/^[a-f0-9]{64}$/);
@@ -324,7 +379,7 @@ describe('genuine-data MVP release', () => {
     expect(referencedReleaseIds).toEqual(releaseIds);
   });
 
-  it('keeps automated review candidates separate from reviewed publication', () => {
+  it('covers every candidate with a versioned decision without inventing unresolved history', () => {
     expect(wppProfile.review_status).toBe('acquired_profiled_and_fixture_published');
     expect(wppProfile.artifact.sha256).toBe(
       '286ac36bb1415e2e1ade03acfef0a29f0e4c087e2f78e38c48f50c5df89082bc',
@@ -369,9 +424,74 @@ describe('genuine-data MVP release', () => {
       ),
     ).toBe(true);
 
-    expect(reviewQueue.status).toBe('read_only_candidates_human_review_outstanding');
+    expect(reconciliationDecisions.status).toBe(
+      'complete_for_all_current_candidates_with_unresolved_history_preserved',
+    );
+    expect(reconciliationDecisions.summary).toEqual({
+      city_candidates: 353,
+      city_dispositions: {
+        accepted_same_place: 336,
+        rejected_distinct_place: 15,
+        unresolved_identity: 2,
+      },
+      canonical_place_clusters: 300,
+      border_candidates: 28,
+      border_dispositions: {
+        source_declared_hierarchy: 8,
+        unresolved_overlap: 20,
+      },
+      source_policies: 6,
+    });
+    expect(new Set(reconciliationDecisions.city_identity_decisions.map((decision) => decision.candidate_id)).size)
+      .toBe(353);
+    expect(
+      reconciliationDecisions.city_identity_decisions
+        .filter((decision) => decision.disposition === 'accepted_same_place')
+        .every((decision) => decision.canonical_place_id !== null
+          && decision.observation_policy === 'keep_source_values_and_locators_separate'),
+    ).toBe(true);
+    expect(
+      reconciliationDecisions.city_identity_decisions
+        .filter((decision) => decision.disposition !== 'accepted_same_place')
+        .every((decision) => decision.canonical_place_id === null),
+    ).toBe(true);
+    expect(new Set(reconciliationDecisions.border_overlap_decisions.map((decision) => decision.candidate_key)).size)
+      .toBe(28);
+    expect(
+      reconciliationDecisions.border_overlap_decisions
+        .every((decision) => decision.population_allocation === 'prohibited'),
+    ).toBe(true);
+    expect(manifest.reconciliation).toMatchObject({
+      decision_set_id: reconciliationDecisions.decision_set_id,
+      city_candidates: 353,
+      border_candidates: 28,
+      unresolved_city_identities: 2,
+      unresolved_border_overlaps: 20,
+    });
+    expect(historicalCities.reconciliation_decision_set_id).toBe(reconciliationDecisions.decision_set_id);
+    expect(
+      historicalCities.cities.some(
+        (city) => city.reconciliation_status === 'linked_across_sources'
+          && city.canonical_place_id !== null
+          && city.linked_source_record_count >= 2,
+      ),
+    ).toBe(true);
+
+    expect(reviewQueue.status).toBe('versioned_decisions_applied_unresolved_evidence_preserved');
+    expect(reviewQueue.decision_set.id).toBe(reconciliationDecisions.decision_set_id);
+    expect(reviewQueue.source_policies).toHaveLength(6);
     expect(reviewQueue.border_overlaps.candidates).toHaveLength(28);
     expect(reviewQueue.city_identities.candidates).toHaveLength(353);
+    expect(
+      reviewQueue.border_overlaps.candidates.filter(
+        (candidate) => candidate.decision.disposition === 'source_declared_hierarchy',
+      ),
+    ).toHaveLength(8);
+    expect(
+      reviewQueue.city_identities.candidates.filter(
+        (candidate) => candidate.decision.disposition === 'unresolved_identity',
+      ),
+    ).toHaveLength(2);
   });
 
   it('records bounded source acquisition findings without promoting blocked data', () => {

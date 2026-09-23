@@ -2,7 +2,7 @@
 
 Updated: 2026-09-22
 
-## Implemented through release r5
+## Implemented through release r6
 
 - All 39 dates in the U.S. Census Bureau historical world-population comparison
   table are published from 10,000 BCE through 1950 CE. Summary bounds are shown
@@ -25,7 +25,7 @@ The unresolved part of the original plan is spatially resolved historical
 population. A HYDE 10,000 BCE baseline bundle and README are now acquired, but
 the root license and README conflict and the grid has not passed mask/scenario
 mass reconciliation. UN WPP's official medium demographic-indicators file is
-published separately in r5: its 1950–2023 estimates and 2024–2100 Medium
+published separately in r6: its 1950–2023 estimates and 2024–2100 Medium
 projections remain visibly distinct and never replace World Bank silently.
 
 ## Product outcome
@@ -211,14 +211,16 @@ nodata is distinct from zero; the UI states that the surface is reconstructed.
 - Measure reviewer time, disagreement, geometry error, and licensing friction
   before building broader infrastructure.
 
-## Evidence-quality work completed after r4
+## Evidence-quality work completed through r6
 
 - A 1500 CE Mediterranean pilot measured Cliopatria geometry in EPSG:6933 and
-  queued 28 overlaps larger than 100 square kilometres for historian review.
-  Twelve are near-containment candidates. This proves the review mechanism, not
-  the correctness or incorrectness of any feature.
-- A conservative three-series historical-city pass generated 353 identity
-  candidates while leaving every observation source-native and unmerged.
+  queued 28 overlaps larger than 100 square kilometres. The decision layer
+  identifies eight source-declared hierarchy relations and preserves twenty as
+  unresolved. This is a bounded display review, not an exclusive partition.
+- A conservative three-series historical-city pass records decisions for all
+  353 identity candidates: 336 accepted same-place links, 15 rejected distant
+  homonyms, and two unresolved coordinate-only pairs. Every observation remains
+  source-native and unmerged.
 - UN WPP 2024 is now a parallel published metric with a 237-Country/Area universe,
   explicit estimate/projection states, aggregate exclusion, and a preserved
   World-reference rounding residual.
@@ -228,14 +230,13 @@ nodata is distinct from zero; the UI states that the surface is reconstructed.
 - CShapes 2.0 Gleditsch–Ward is pinned and profiled as a comparison source, not
   silently layered over Cliopatria.
 - The generated read-only Review page exposes all 28 topology and 353 city
-  identity candidates without recording them as accepted decisions.
+  identity decisions, their versioned rules, and the remaining uncertainty.
 
 ## Immediate next release
 
-Have a historian review the highest-impact Cliopatria near-containment pairs and
-encode explicit `intentional_hierarchy`, `alternative_claim`, `geometry_issue`,
-or `unresolved` decisions with citations. In parallel, review the strongest city
-identity candidates and design the multiple-source disagreement view before
+Have a historian review the twenty unresolved Cliopatria pairs and replace only
+those dispositions supported by citations. Resolve or preserve the two ambiguous
+city identities and design the multiple-source disagreement view before
 publishing Chandler or Modelski Modern.
 
 For population, ask Utrecht to resolve the HYDE license conflict, then acquire

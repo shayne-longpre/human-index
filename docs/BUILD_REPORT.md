@@ -1,4 +1,4 @@
-# Build report: evidence-aware temporal-map MVP, release r5
+# Build report: evidence-aware temporal-map MVP, release r6
 
 Date: 2026-09-22
 
@@ -28,9 +28,18 @@ independently resolved effective dates for measures, cities, and borders, a
 MapLibre/deck.gl choropleth, evidence-aware summaries, inspectors with original
 record locators, accessible tables, full-series CSVs, and URL-shareable state.
 Names appear on hover or click instead of as a dense label field. The Sources
-page exposes publication and acquisition status by data vertical. A new Review
-page exposes the 28 border-overlap and 353 cross-source city-identity candidates
-as read-only queues; it cannot silently merge or approve them.
+page exposes publication and acquisition status by data vertical. The Review
+page exposes the versioned disposition for all 28 border-overlap and 353
+cross-source city-identity candidates; it cannot mutate source evidence.
+
+Reconciliation v1 classifies 336 city pairs as same-place links, rejects 15
+distant homonyms, and preserves two coordinate-only identity candidates as
+unresolved. These links form 300 canonical place clusters for navigation while
+every source estimate and locator remains separate. Of the 28 bounded
+Cliopatria overlaps, eight are source-declared hierarchy relations and twenty
+remain unresolved. Composite features receive outline treatment; unresolved
+features remain simultaneously visible in coral, and inspectors name their
+counterparts. Every border decision prohibits population allocation.
 
 This remains a development release. Early Census values have global support
 only; they are not local density, country totals, household locations, or
@@ -106,8 +115,10 @@ WPP demonstrates the intended multi-source pattern: a new source release,
 population universe, transformation, observation artifact, summary artifact,
 and metric definition are added without changing World Bank observations or
 pretending their territorial systems are interchangeable. The review queue is
-a generated projection of immutable audit artifacts, not a source-of-truth
-decision store.
+a generated projection joining immutable audit artifacts to the checksummed
+reconciliation decision set. The separate policy declares rules, dispositions,
+the semantic boundary, and six cross-source merge policies. The builder fails
+on missing candidate coverage or rule/result drift.
 
 Large raw responses remain ignored. The tracked, redistributable release and
 small review artifacts are sufficient for install, tests, builds, and local
@@ -127,15 +138,17 @@ Results:
 
 - Strict TypeScript: pass.
 - Vitest: 2 files, 26 tests, all pass.
-- Python unittest: 3 tests, all pass.
-- Published release artifact checksums: pass for all 51 artifacts.
-- Production build: pass. Main application JavaScript is 311.11 kB
-  uncompressed / 93.74 kB gzip; the 1,961.30 kB map renderer remains a separate
-  lazy chunk (540.52 kB gzip).
-- Browser checks: WPP 2023 renders as an estimate; 2024 renders as a Medium
-  projection with the non-observation warning; its map, evidence table, and
-  inspector render; Sources reports WPP as published; Review reports 28 border
-  and 353 city candidates and filters between queues.
+- Python unittest: 5 tests, all pass.
+- Published release artifact checksums: pass for all 52 artifacts.
+- Production build: pass. Main application JavaScript is 315.53 kB
+  uncompressed / 94.57 kB gzip; the 1,962.03 kB map renderer remains a separate
+  lazy chunk (540.70 kB gzip).
+- Browser checks: the 1500 political map renders 137 changing polity features;
+  the 2024 electricity view renders its percentage scale and non-gray
+  choropleth; Review reports 336 linked, 15 rejected, and two unresolved city
+  pairs plus eight hierarchy and twenty unresolved border decisions. Filters
+  expose the ambiguous Shangqi/Shanghai pairs, rejected Perth homonym, and the
+  policy prohibiting statistical/political geography merges.
 - Existing mass-conservation, missingness, original-locator, boundary-geometry,
   and checksum tests continue to pass.
 
@@ -146,8 +159,11 @@ Natural Earth omits small supports at 1:110m. WPP projections are one source
 scenario, not observed history or uncertainty bounds. HYDE cannot enter a release
 until its license conflict, full artifact set, grid semantics, and conservation
 checks are resolved. CShapes cannot enter the public map until licensing and
-geometry/field defects are resolved. Review decisions need their own versioned,
-human-authored artifact before they can alter city identities or border display.
+geometry/field defects are resolved. Twenty border overlaps and two city
+identities still require evidence-based adjudication; deterministic unresolved
+rendering does not resolve the historical claim.
 
 See `MVP_SOURCE_SELECTION.md`, `CITY_SOURCE_AUDIT.md`,
 `EVIDENCE_INTEGRATION.md`, and `DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.
+The priority-ranked gap analysis against the original vision is in
+`ORIGINAL_VISION_GAP_PRIORITIES.md`.

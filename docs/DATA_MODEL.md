@@ -13,6 +13,8 @@ Maintain these logical tables, even if several are initially stored in one small
 - `spatial_supports`: geography over which an observation applies, independent of visual map geometry.
 - `geometry_versions`: geometry, CRS, dates, simplification level, parent canonical geometry, and source.
 - `crosswalks`: reviewed source identifier mappings with dates, rationale, and ambiguity state.
+- `reconciliation_decision_sets`: immutable candidate dispositions, input
+  hashes, versioned rules, evidence limits, and explicit unresolved states.
 - `metric_definitions`: meaning, unit, denominator, aggregation contract, scale, and availability policy.
 - `observations`: original or derived values with precise evidence and temporal support.
 - `population_surfaces`: cell counts and actual areas, population universe, source release, date, model/scenario.
@@ -189,3 +191,30 @@ Do not assume independent cell errors or combine bounds as though they were inde
 Every derived artifact records source-release IDs, crosswalk and algorithm versions, input checksums, parameters, output checksum, source licenses, effective dates, and validation results. Every download includes the view manifest, metric definition, data, citation list, and applicable licenses.
 
 Production manifests cannot contain guessed artifact URLs, fake checksums, or placeholder provenance. The research registry intentionally has null acquisition checksums until real files are obtained.
+
+## 9. Reconciliation decisions
+
+Reconciliation is a derived, versioned evidence layer between immutable source
+records and published presentation. It is not an editable flag on a source row.
+Each decision set records:
+
+- checksums for the candidate artifacts, policy, and source evidence it used;
+- an ordered rule ID and declared result for every disposition;
+- exact source record or feature IDs and their evidence hashes;
+- one of an accepted, rejected, source-declared, or unresolved state; and
+- the permitted page effect and prohibited statistical effects.
+
+The current city contract may link source records to a stable canonical place
+ID for navigation. It does not make their dates, urban extents, definitions, or
+population estimates interchangeable. A canonical place cluster therefore
+contains source record IDs, not a synthesized population series.
+
+The current border contract can distinguish a source-declared composite/member
+relationship from an unexplained geometric overlap. Its only allowed effects
+are display treatment and disclosure. Every historical polygon remains outside
+the population-allocation graph, including polygons with a resolved hierarchy.
+
+Rules may automate a disposition only when their inputs are auditable and their
+semantic boundary is declared. A deterministic rule is not relabeled as an
+independent historian judgment. Candidates without sufficient evidence remain
+explicitly unresolved while still receiving a deterministic render policy.

@@ -23,6 +23,7 @@ export type CountryFeatureCollection = FeatureCollection<Geometry, CountryProper
 export interface HistoricalProperties {
   name: string;
   feature_kind: 'polity';
+  source_feature_index: number;
   source_feature_id: string;
   source_release_id: string;
   source_from_year: number;
@@ -31,6 +32,23 @@ export interface HistoricalProperties {
   wikipedia: string | null;
   wikidata: string | null;
   seshat_id: string | null;
+  source_components: string[];
+  source_member_of: string | null;
+  source_relation_role: 'composite' | 'member' | 'unspecified';
+  reconciliation_decision_set_id: string;
+  reconciliation_status:
+    | 'source_declared_hierarchy'
+    | 'unresolved_overlap'
+    | 'mixed_source_hierarchy_and_unresolved_overlap'
+    | 'not_in_review_pilot';
+  reconciliation_decision_ids: string[];
+  overlap_decisions: Array<{
+    decision_id: string;
+    counterpart_source_feature_index: number;
+    counterpart_name: string;
+    disposition: 'source_declared_hierarchy' | 'unresolved_overlap';
+  }>;
+  unresolved_overlap_count: number;
   evidence_status: 'published_contestable_reconstruction';
   precision_class: string;
   label_position: [number, number];
@@ -45,6 +63,7 @@ export type HistoricalFeatureCollection = FeatureCollection<Geometry, Historical
   excluded_feature_types: string[];
   dating_status: string;
   geometry_method: string;
+  reconciliation_decision_set_id: string;
   quality: HistoricalSnapshotQuality;
 };
 export type MetricDataset =
@@ -63,7 +82,7 @@ export interface ReleaseBase {
   historicalCities: HistoricalCityDataset;
 }
 
-export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-22-r5';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-22-r6';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {

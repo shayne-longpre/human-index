@@ -19,7 +19,7 @@ from .catalog import (
     taxonomy_catalog,
     validate_release_manifest,
 )
-from .core import InputArtifact, ValidationError, artifact_record, write_json
+from .core import InputArtifact, ValidationError, artifact_record, load_json, sha256, write_json
 from .geography import (
     DISPLAY_CROSSWALKS,
     NATURAL_EARTH_URL,
@@ -66,7 +66,7 @@ from .sources.un_wpp import (
 RETRIEVED_ON = "2026-09-20"
 PUBLISHED_ON = "2026-09-22"
 WPP_RETRIEVED_ON = "2026-09-21"
-RELEASE_ID = "atlas-mvp-2026-09-22-r5"
+RELEASE_ID = "atlas-mvp-2026-09-22-r6"
 CLIOPATRIA_GEOMETRY_MEMBER = "cliopatria_polities_only.geojson"
 
 
@@ -171,6 +171,11 @@ def build(args: argparse.Namespace) -> None:
             raise ValidationError(f"Missing input artifact: {artifact.path}")
     if not args.cliopatria_geometry.is_file():
         raise ValidationError(f"Missing extracted Cliopatria geometry: {args.cliopatria_geometry}")
+    if not args.reconciliation_decisions.is_file():
+        raise ValidationError(f"Missing reconciliation decisions: {args.reconciliation_decisions}")
+    reconciliation = load_json(args.reconciliation_decisions)
+    if reconciliation.get("status") != "complete_for_all_current_candidates_with_unresolved_history_preserved":
+        raise ValidationError("Reconciliation decision set is not complete for current candidates")
     with args.cliopatria_geometry.open("rb") as handle:
         cliopatria_geometry_sha256 = _stream_sha256(handle)
     with zipfile.ZipFile(args.cliopatria_archive) as archive:
@@ -182,6 +187,8 @@ def build(args: argparse.Namespace) -> None:
             cliopatria_archive_member_sha256 = _stream_sha256(handle)
     if cliopatria_geometry_sha256 != cliopatria_archive_member_sha256:
         raise ValidationError("Extracted Cliopatria geometry does not match the pinned archive member")
+    if reconciliation["inputs"]["cliopatria"]["sha256"] != cliopatria_geometry_sha256:
+        raise ValidationError("Reconciliation decisions target a different Cliopatria artifact")
 
     adapter = WorldBankAdapter(
         population=args.population,
@@ -192,7 +199,7 @@ def build(args: argparse.Namespace) -> None:
     historical_population_adapter = UsCensusHistoricalPopulationAdapter(
         args.historical_population
     )
-    cliopatria_adapter = CliopatriaAdapter(args.cliopatria_geometry)
+    cliopatria_adapter = CliopatriaAdapter(args.cliopatria_geometry, reconciliation)
     cities_adapter = ModelskiAncientCitiesAdapter(
         args.historical_cities, args.historical_cities_metadata
     )
@@ -434,6 +441,7 @@ def build(args: argparse.Namespace) -> None:
     historical_cities_csv_path = args.output / "historical-cities.csv"
     population_outlook_path = args.output / "population-outlook.json"
     population_outlook_csv_path = args.output / "population-outlook.csv"
+    reconciliation_path = args.output / "reconciliation.json"
 
     write_json(entities_path, {"schema_version": "0.2.0", "entities": entities})
     write_json(
@@ -543,6 +551,25 @@ def build(args: argparse.Namespace) -> None:
     )
 
     historical_cities = cities_adapter.dataset()
+    place_by_record = {
+        record_id: cluster["canonical_place_id"]
+        for cluster in reconciliation["place_clusters"]
+        for record_id in cluster["source_record_ids"]
+    }
+    cluster_size = {
+        cluster["canonical_place_id"]: len(cluster["source_record_ids"])
+        for cluster in reconciliation["place_clusters"]
+    }
+    for city in historical_cities["cities"]:
+        canonical_place_id = place_by_record.get(city["source_record_id"])
+        city["canonical_place_id"] = canonical_place_id
+        city["reconciliation_status"] = (
+            "linked_across_sources" if canonical_place_id else "source_record_only"
+        )
+        city["linked_source_record_count"] = (
+            cluster_size[canonical_place_id] if canonical_place_id else 1
+        )
+    historical_cities["reconciliation_decision_set_id"] = reconciliation["decision_set_id"]
     write_json(historical_cities_path, historical_cities)
     cities_by_id = {city["id"]: city for city in historical_cities["cities"]}
     historical_cities_csv_path.write_bytes(
@@ -556,6 +583,10 @@ def build(args: argparse.Namespace) -> None:
                     "latitude": cities_by_id[observation["city_id"]]["latitude"],
                     "longitude": cities_by_id[observation["city_id"]]["longitude"],
                     "geocode_certainty_code": cities_by_id[observation["city_id"]]["geocode_certainty_code"],
+                    "source_record_id": cities_by_id[observation["city_id"]]["source_record_id"],
+                    "canonical_place_id": cities_by_id[observation["city_id"]]["canonical_place_id"],
+                    "reconciliation_status": cities_by_id[observation["city_id"]]["reconciliation_status"],
+                    "linked_source_record_count": cities_by_id[observation["city_id"]]["linked_source_record_count"],
                 }
                 for observation in historical_cities["observations"]
             ],
@@ -567,6 +598,10 @@ def build(args: argparse.Namespace) -> None:
                 "latitude",
                 "longitude",
                 "geocode_certainty_code",
+                "source_record_id",
+                "canonical_place_id",
+                "reconciliation_status",
+                "linked_source_record_count",
                 "year",
                 "population",
                 "status",
@@ -575,6 +610,7 @@ def build(args: argparse.Namespace) -> None:
         )
     )
     write_json(population_outlook_path, wpp_dataset)
+    write_json(reconciliation_path, reconciliation)
     population_outlook_csv_path.write_bytes(
         _csv_bytes(
             wpp_dataset["observations"],
@@ -618,6 +654,7 @@ def build(args: argparse.Namespace) -> None:
             "feature_kind": "political_context_not_statistical_support",
             "selection_policy": "latest published snapshot not after requested date",
             "source_profile": cliopatria_adapter.profile(),
+            "reconciliation_decision_set_id": reconciliation["decision_set_id"],
             "snapshots": historical_snapshots,
         },
     )
@@ -638,6 +675,7 @@ def build(args: argparse.Namespace) -> None:
             historical_cities_csv_path,
             population_outlook_path,
             population_outlook_csv_path,
+            reconciliation_path,
             *historical_snapshot_paths,
     ]
 
@@ -793,6 +831,7 @@ def build(args: argparse.Namespace) -> None:
             "snapshot_count": len(historical_snapshots),
             "selection_policy": "latest published snapshot not after requested date",
             "excluded_feature_types": ["RELATION"],
+            "reconciliation_decision_set_id": reconciliation["decision_set_id"],
         },
         "historical_cities": {
             "data_file": historical_cities_path.name,
@@ -802,6 +841,16 @@ def build(args: argparse.Namespace) -> None:
             "temporal_policy": "exact_only",
             "spatial_support": "source geocoded city points, not urban extents",
             "interpretation": "published city estimates; not a complete urban census or world-population denominator",
+            "reconciliation_decision_set_id": reconciliation["decision_set_id"],
+        },
+        "reconciliation": {
+            "decision_set_id": reconciliation["decision_set_id"],
+            "data_file": reconciliation_path.name,
+            "status": reconciliation["status"],
+            "city_candidates": reconciliation["summary"]["city_candidates"],
+            "border_candidates": reconciliation["summary"]["border_candidates"],
+            "unresolved_city_identities": reconciliation["summary"]["city_dispositions"].get("unresolved_identity", 0),
+            "unresolved_border_overlaps": reconciliation["summary"]["border_dispositions"].get("unresolved_overlap", 0),
         },
         "source_releases": [
             {
@@ -864,11 +913,27 @@ def build(args: argparse.Namespace) -> None:
                 "role": "additional historical city population series",
                 "status": "documented_not_ingested",
                 "coverage": "2250 BCE to 2000 CE across companion tables",
-                "reason_deferred": "MVP uses one source table first; merging alternative estimates needs explicit city identity and disagreement handling",
+                "reason_deferred": "Identity decisions are recorded, but publishing companion estimates still requires a same-date disagreement view, two zero-cell decisions, and review of two unresolved identity pairs",
                 "url": "https://doi.org/10.1038/sdata.2016.34",
             },
         ],
         "transformations": [
+            {
+                "id": "atlas-reconciliation-decisions-v1",
+                "version": "1.0.0",
+                "input_artifact_ids": ["atlas_reconciliation_decisions_v1"],
+                "parameters": {
+                    "decision_set_id": reconciliation["decision_set_id"],
+                    "decision_source_sha256": sha256(args.reconciliation_decisions),
+                    "source_input_hashes": reconciliation["inputs"],
+                    "observation_merge": "none",
+                    "population_allocation": "none",
+                },
+                "output_artifacts": {
+                    artifact_key(reconciliation_path): artifacts[artifact_key(reconciliation_path)],
+                },
+                "validation": reconciliation["summary"],
+            },
             {
                 "id": "world-bank-mvp-normalize-v1",
                 "version": "1.0.0",
@@ -908,11 +973,12 @@ def build(args: argparse.Namespace) -> None:
                 "validation": historical_population_adapter.profile(),
             },
             {
-                "id": "cliopatria-display-snapshots-v1",
-                "version": "1.0.0",
+                "id": "cliopatria-display-snapshots-v2",
+                "version": "2.0.0",
                 "input_artifact_ids": [
                     "cliopatria_v0_2_0_archive",
                     "cliopatria_v0_2_0_license",
+                    "atlas_reconciliation_decisions_v1",
                 ],
                 "parameters": {
                     "feature_types": ["POLITY"],
@@ -923,6 +989,9 @@ def build(args: argparse.Namespace) -> None:
                     "simplification_tolerance_degrees": 0.08,
                     "population_assignment": "none",
                     "source_year_zero": "quarantined_not_sampled",
+                    "reconciliation_decision_set_id": reconciliation["decision_set_id"],
+                    "source_declared_composites_render_as_outlines": True,
+                    "unresolved_overlaps_preserved": True,
                 },
                 "output_artifacts": {
                     artifact_key(path): artifacts[artifact_key(path)]
@@ -937,11 +1006,12 @@ def build(args: argparse.Namespace) -> None:
                 },
             },
             {
-                "id": "modelski-ancient-city-points-v1",
-                "version": "1.0.0",
+                "id": "modelski-ancient-city-points-v2",
+                "version": "2.0.0",
                 "input_artifact_ids": [
                     "modelski_ancient_v2_csv",
                     "modelski_ancient_v2_metadata",
+                    "atlas_reconciliation_decisions_v1",
                 ],
                 "parameters": {
                     "date_conversion": "BC/AD columns to astronomical years",
@@ -949,6 +1019,9 @@ def build(args: argparse.Namespace) -> None:
                     "no_interpolation": True,
                     "spatial_support": "source point coordinates",
                     "population_assignment_to_polities": "none",
+                    "reconciliation_decision_set_id": reconciliation["decision_set_id"],
+                    "cross_source_identity_only": True,
+                    "source_observation_merge": "none",
                 },
                 "output_artifacts": {
                     artifact_key(historical_cities_path): artifacts[artifact_key(historical_cities_path)],
@@ -1045,9 +1118,14 @@ def build(args: argparse.Namespace) -> None:
             "Ancient-city points appear only at exact published dates; coordinates are source geocodes, modern-country labels are descriptive metadata, and city estimates are not summed as total urban or world population.",
             "UN WPP values are modeled population estimates through 2023 and Medium projections from 2024; projection scenarios are not confidence intervals.",
             "WPP Country/Area supports are shown on available modern Natural Earth display geometry and are not claims about historical political borders.",
+            "The reconciliation decision set links source records and annotates source-declared hierarchy but never merges observations, edits source geometry, or assigns population to political features.",
+            "Twenty bounded 1500 CE border overlaps and two coordinate-only city identities remain explicitly unresolved because current source evidence does not adjudicate them.",
         ],
     }
-    validate_release_manifest(manifest, {artifact.id for artifact in inputs})
+    validate_release_manifest(
+        manifest,
+        {artifact.id for artifact in inputs} | {"atlas_reconciliation_decisions_v1"},
+    )
     write_json(args.output / "manifest.json", manifest)
     print(
         json.dumps(
@@ -1063,6 +1141,8 @@ def build(args: argparse.Namespace) -> None:
                 "historical_city_observations": len(historical_cities["observations"]),
                 "wpp_population_years": [wpp_dataset["years"][0], wpp_dataset["years"][-1]],
                 "wpp_country_area_entities": len(wpp_dataset["entities"]),
+                "reconciliation_city_decisions": reconciliation["summary"]["city_candidates"],
+                "reconciliation_border_decisions": reconciliation["summary"]["border_candidates"],
                 "artifacts_bytes": sum(record["bytes"] for record in artifacts.values()),
             },
             indent=2,
@@ -1084,6 +1164,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--historical-cities", type=Path, required=True)
     parser.add_argument("--historical-cities-metadata", type=Path, required=True)
     parser.add_argument("--un-wpp", type=Path, required=True)
+    parser.add_argument("--reconciliation-decisions", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--lockfile", type=Path, required=True)
     return parser.parse_args()

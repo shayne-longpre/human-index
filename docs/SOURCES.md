@@ -14,15 +14,16 @@ implementation must save the terms applying to the exact acquired artifact.
 - Intended use: optional historical context overlay; not the default statistical geography for modern indicator joins.
 - Acquisition result (2026-09-20): the exact tagged archive and license were
   acquired and hashed. The archive contains 13,765 records: 13,380 `POLITY` and
-  385 `RELATION`. Release r4 publishes 36 lazily loaded, simplified `POLITY`-only
+  385 `RELATION`. Release r6 publishes 36 lazily loaded, simplified `POLITY`-only
   snapshots. Six source year-zero endpoints are quarantined; no snapshot samples
   source year zero. Borders remain contestable context, not a population
   partition.
 - Topology pilot (2026-09-21): an equal-area audit of 57 active features in a
   Mediterranean bounding box at 1500 CE reports 28 overlap candidates above 100
-  square kilometres, including 12 near-containment candidates. The result is a
-  review queue, not a claim that the source is wrong or that the features should
-  be forced into an exclusive partition.
+  square kilometres. A versioned decision pass identifies eight relations
+  explicitly declared by the source and preserves twenty as unresolved. The
+  result is a display policy, not a claim that the source is wrong or that the
+  features form an exclusive partition.
 
 References: [release and DOI](https://zenodo.org/records/20274630), [pinned README](https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/README.md), [pinned license](https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.0/LICENSE.md).
 
@@ -169,7 +170,7 @@ Period life expectancy is a synthetic life-table measure, not an observed distri
   It contains 84,360 rows, 67 columns, 555 location IDs, 237 ISO3 codes, and no
   duplicate location/year/variant keys. `Country/Area` accounts for 36,024 rows;
   the file also includes regional and special aggregates.
-- Published status (release r5): the official download page states that July
+- Published status (release r6): the official download page states that July
   population is in thousands and makes WPP 2024 available under CC BY 3.0 IGO.
   Atlas publishes only the 237 `Country/Area` series from 1950–2100, converts
   exactly to people, excludes all aggregates and 2101 boundary rows, and labels

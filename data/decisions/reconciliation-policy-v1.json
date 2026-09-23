@@ -1,0 +1,99 @@
+{
+  "schema_version": "0.1.0",
+  "policy_id": "atlas-reconciliation-policy-v1",
+  "authored_on": "2026-09-22",
+  "authorization": "Project owner requested a deterministic reconciliation layer covering all current candidates.",
+  "semantic_boundary": "Identity decisions link source records to a place cluster but never merge, average, interpolate, or choose between source observations. Border decisions affect context rendering only and never allocate population.",
+  "city_identity_rules": [
+    {
+      "id": "city-exact-primary-name-and-rounded-coordinate-v1",
+      "priority": 1,
+      "result": "accepted_same_place",
+      "meaning": "Primary names normalize identically and source coordinates agree at five decimal places."
+    },
+    {
+      "id": "city-exact-primary-name-within-10km-v1",
+      "priority": 2,
+      "maximum_distance_km": 10,
+      "result": "accepted_same_place",
+      "meaning": "Primary names normalize identically and source points are within ten kilometres; this links a place, not an unchanged settlement extent."
+    },
+    {
+      "id": "city-rounded-coordinate-and-source-alias-v1",
+      "priority": 3,
+      "result": "accepted_same_place",
+      "meaning": "Source coordinates agree at five decimal places and a primary or alternate source name matches across records."
+    },
+    {
+      "id": "city-distant-homonym-v1",
+      "priority": 4,
+      "minimum_distance_km_exclusive": 10,
+      "result": "rejected_distinct_place",
+      "meaning": "Primary names normalize identically but source points are more than ten kilometres apart; the candidate is retained as a documented homonym rejection."
+    },
+    {
+      "id": "city-coordinate-only-unresolved-v1",
+      "priority": 5,
+      "result": "unresolved_identity",
+      "meaning": "Source coordinates agree but neither primary nor alternate names match exactly. Preserve the candidate for source-aware review rather than treating coordinate reuse as identity."
+    }
+  ],
+  "border_overlap_rules": [
+    {
+      "id": "border-source-declared-hierarchy-v1",
+      "priority": 1,
+      "result": "source_declared_hierarchy",
+      "meaning": "The pinned Cliopatria record explicitly links the pair through Components or MemberOf. Render the composite as an outline and retain each member feature."
+    },
+    {
+      "id": "border-preserve-unresolved-overlap-v1",
+      "priority": 2,
+      "result": "unresolved_overlap",
+      "meaning": "The current source does not establish why the geometries overlap. Preserve both, disclose the ambiguity, and prohibit population allocation."
+    }
+  ],
+  "source_policies": [
+    {
+      "id": "population-world-bank-vs-un-wpp",
+      "topic": "Modern population",
+      "disposition": "keep_separate",
+      "reason": "The releases use different source-native territorial universes and WPP includes modeled projections.",
+      "page_effect": "Expose separate metrics; never concatenate or substitute observations."
+    },
+    {
+      "id": "population-census-vs-un-wpp",
+      "topic": "Long-run population",
+      "disposition": "keep_separate",
+      "reason": "The Census comparison table is global-only and sparse, while WPP is annual Country/Area evidence beginning in 1950.",
+      "page_effect": "Use the Census table only for the deep-time global summary and WPP only in its own metric."
+    },
+    {
+      "id": "population-census-vs-hyde",
+      "topic": "Deep-time spatial population",
+      "disposition": "blocked_source_not_substituted",
+      "reason": "HYDE licensing, masks, scenarios, and mass reconciliation remain unresolved.",
+      "page_effect": "Do not turn the Census global series into a spatial surface."
+    },
+    {
+      "id": "political-cliopatria-vs-cshapes",
+      "topic": "Historical borders",
+      "disposition": "blocked_comparison_not_merged",
+      "reason": "CShapes product-use terms, invalid geometries, omitted fields, and precedence rules remain unresolved.",
+      "page_effect": "Publish Cliopatria as contestable context; retain CShapes as an audit-only candidate."
+    },
+    {
+      "id": "statistical-vs-political-geography",
+      "topic": "Geographic support",
+      "disposition": "never_merge",
+      "reason": "Historical political geometry is not the geography on which World Bank, WPP, or Census values were measured.",
+      "page_effect": "Changing borders never reallocates or changes a population or condition total."
+    },
+    {
+      "id": "historical-city-series",
+      "topic": "Historical cities",
+      "disposition": "link_identity_keep_observations_separate",
+      "reason": "Place identity can be resolved from source names and coordinates, but population estimates retain source-specific definitions and disagreements.",
+      "page_effect": "Use canonical place IDs for navigation while preserving every source observation and locator."
+    }
+  ]
+}

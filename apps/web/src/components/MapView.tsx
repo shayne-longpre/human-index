@@ -173,11 +173,22 @@ export function MapView({
           highlightColor: [255, 239, 189, 75],
           lineWidthUnits: 'pixels',
           getLineWidth: (feature) =>
-            feature.properties.source_feature_id === selectedHistoricalId ? 2.4 : 0.9,
-          getLineColor: (feature) =>
             feature.properties.source_feature_id === selectedHistoricalId
-              ? [255, 243, 204, 255]
-              : [236, 204, 125, 205],
+              ? 2.4
+              : feature.properties.unresolved_overlap_count > 0
+                ? 1.7
+                : feature.properties.source_relation_role === 'composite' ? 1.3 : 0.9,
+          getLineColor: (feature) => {
+            if (feature.properties.source_feature_id === selectedHistoricalId) {
+              return [255, 243, 204, 255];
+            }
+            if (feature.properties.unresolved_overlap_count > 0) {
+              return [232, 132, 105, 235];
+            }
+            return feature.properties.source_relation_role === 'composite'
+              ? [244, 210, 128, 235]
+              : [236, 204, 125, 205];
+          },
           getFillColor: (feature) => {
             const seed = Array.from(feature.properties.name).reduce(
               (sum, character) => sum + character.charCodeAt(0),
@@ -190,7 +201,12 @@ export function MapView({
               [129, 91, 69],
             ];
             const color = colors[seed % colors.length];
-            return [color[0], color[1], color[2], territorialValuesAvailable ? 30 : 90];
+            const opacity = feature.properties.source_relation_role === 'composite'
+              ? 7
+              : feature.properties.unresolved_overlap_count > 0
+                ? territorialValuesAvailable ? 42 : 105
+                : territorialValuesAvailable ? 30 : 90;
+            return [color[0], color[1], color[2], opacity];
           },
           onClick: ({ object }) => {
             if (object?.properties) onHistoricalSelect(object.properties);
@@ -238,7 +254,15 @@ export function MapView({
         }
         if (layer.id.startsWith('historical-polities-')) {
           const feature = object as { properties?: HistoricalProperties };
-          return feature.properties ? { text: `${feature.properties.name}\nCliopatria political context` } : null;
+          if (!feature.properties) return null;
+          const reconciliation = feature.properties.unresolved_overlap_count > 0
+            ? `${feature.properties.unresolved_overlap_count} unresolved overlap${feature.properties.unresolved_overlap_count === 1 ? '' : 's'}`
+            : feature.properties.source_relation_role === 'composite'
+              ? 'Source-declared composite · outline treatment'
+              : feature.properties.source_member_of
+                ? `Source-declared member of ${feature.properties.source_member_of}`
+                : 'No overlap decision in the bounded pilot';
+          return { text: `${feature.properties.name}\n${reconciliation}\nCliopatria political context` };
         }
         if (layer.id.startsWith('atlas-')) {
           const feature = object as { properties?: CountryProperties };

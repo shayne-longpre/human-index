@@ -124,6 +124,7 @@ export interface AtlasReleaseManifest {
     snapshot_count: number;
     selection_policy: string;
     excluded_feature_types: string[];
+    reconciliation_decision_set_id: string;
   };
   historical_cities: {
     data_file: string;
@@ -133,6 +134,16 @@ export interface AtlasReleaseManifest {
     temporal_policy: 'exact_only';
     spatial_support: string;
     interpretation: string;
+    reconciliation_decision_set_id: string;
+  };
+  reconciliation: {
+    decision_set_id: string;
+    data_file: string;
+    status: string;
+    city_candidates: number;
+    border_candidates: number;
+    unresolved_city_identities: number;
+    unresolved_border_overlaps: number;
   };
   source_releases: PublishedSourceRelease[];
   alternative_sources: AlternativeSource[];
@@ -246,7 +257,9 @@ export interface HistoricalSnapshotQuality {
   ring_count: number;
   unclosed_rings: number;
   invalid_coordinate_positions: number;
-  topology_overlap_review: 'not_computed_requires_topology_engine_and_historical_review';
+  topology_overlap_review: 'bounded_decision_set_applied_unresolved_overlaps_preserved';
+  source_declared_composite_features: number;
+  unresolved_overlap_features: number;
 }
 
 export interface HistoricalContextIndex {
@@ -255,6 +268,7 @@ export interface HistoricalContextIndex {
   feature_kind: 'political_context_not_statistical_support';
   selection_policy: string;
   source_profile: Record<string, unknown>;
+  reconciliation_decision_set_id: string;
   snapshots: HistoricalContextSnapshotReference[];
 }
 
@@ -316,12 +330,16 @@ export interface LifeExpectancyDataset {
 
 export interface HistoricalCity {
   id: string;
+  source_record_id: string;
   name: string;
   other_name: string | null;
   modern_country_label: string;
   latitude: number;
   longitude: number;
   geocode_certainty_code: '1' | '2' | '3';
+  canonical_place_id: string | null;
+  reconciliation_status: 'linked_across_sources' | 'source_record_only';
+  linked_source_record_count: number;
 }
 
 export interface HistoricalCityObservation {
@@ -338,6 +356,7 @@ export interface HistoricalCityDataset {
   source_release_id: string;
   temporal_policy: 'exact_only';
   spatial_support: 'source_geocoded_city_point_not_extent';
+  reconciliation_decision_set_id: string;
   years: number[];
   cities: HistoricalCity[];
   observations: HistoricalCityObservation[];
@@ -483,9 +502,16 @@ export function validateAtlasReleaseManifest(manifest: AtlasReleaseManifest): vo
     manifest.historical_context.index_file,
     manifest.historical_cities.data_file,
     manifest.historical_cities.download_file,
+    manifest.reconciliation.data_file,
   ];
   for (const file of requiredArtifacts) {
     if (!(file in manifest.artifacts)) throw new Error(`Published layer references missing artifact ${file}`);
+  }
+  if (
+    manifest.historical_context.reconciliation_decision_set_id !== manifest.reconciliation.decision_set_id
+    || manifest.historical_cities.reconciliation_decision_set_id !== manifest.reconciliation.decision_set_id
+  ) {
+    throw new Error('Published layers disagree on the reconciliation decision set');
   }
 
   for (const [file, artifact] of Object.entries(manifest.artifacts)) {

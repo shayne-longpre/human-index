@@ -96,12 +96,13 @@ class ModelskiAncientCitiesAdapter:
     def dataset(self) -> dict[str, Any]:
         cities: list[dict[str, Any]] = []
         observations: list[dict[str, Any]] = []
-        for row in self._rows:
+        for source_row, row in enumerate(self._rows, start=2):
             city_id = self._city_id(row)
             city_name = row["City"].strip()
             cities.append(
                 {
                     "id": city_id,
+                    "source_record_id": f"modelski_ancient_v2:row-{source_row}",
                     "name": city_name,
                     "other_name": row["OtherName"].strip() or None,
                     "modern_country_label": row["Country"].strip(),

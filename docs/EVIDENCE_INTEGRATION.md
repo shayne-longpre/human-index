@@ -95,6 +95,31 @@ harmonization transformation establishes compatible units, geography, time,
 and series meaning. Source disagreement is retained as disagreement, not turned
 into a confidence interval or averaged away by default.
 
+## The reconciliation decision layer
+
+`data/decisions/reconciliation-policy-v1.json` declares the ordered rules and
+their allowed semantic effects. The deterministic builder checksums that policy,
+both candidate artifacts, and the exact Cliopatria source file before writing
+`reconciliation-decisions-v1.json`. A build fails if a candidate lacks a
+disposition, a decision invokes an undeclared rule, or a rule's declared result
+and emitted result differ.
+
+The current set covers every known candidate:
+
+| Candidate set | Recorded disposition |
+|---|---|
+| 353 city pairs | 336 accepted same-place links; 15 rejected distant homonyms; 2 unresolved coordinate-only identities |
+| 28 Cliopatria overlaps | 8 source-declared hierarchy relations; 20 unresolved overlaps |
+| 6 cross-source policy conflicts | Each has a keep-separate, never-merge, or blocked policy and a page effect |
+
+“Complete” here means complete disposition coverage, not that the historical
+record has become certain. The two city identities and twenty border overlaps
+remain explicitly unresolved. The Review page exposes every decision and its
+rule. Accepted city links create navigation-only canonical place IDs while all
+source values and locators remain separate. Border hierarchy decisions change
+only styling; unresolved polygons both remain visible with a warning. No border
+decision may allocate population.
+
 ## One requested date, independent layer dates
 
 The UI has one requested-date control. Each layer resolves that date under its
@@ -132,17 +157,18 @@ nonpositive source areas, geometry types, ring closure, and coordinate bounds.
 Repeated display names are counted rather than assumed to be errors. `RELATION`
 features remain excluded from the polity display layer.
 
-A reproducible 1500 CE Mediterranean pilot now uses an equal-area projection to
+A reproducible 1500 CE Mediterranean pilot uses an equal-area projection to
 measure candidate overlaps larger than 100 square kilometres. It found 28
-candidates among 57 active intersecting `POLITY` features: 12 near-containment
-candidates and two other material-overlap candidates. The artifact is
-`data/review/cliopatria-topology-pilot.json`.
+candidates among 57 active intersecting `POLITY` features. Eight are now
+classified as source-declared composite/member hierarchy because the pinned
+records explicitly name the relation; twenty remain unresolved. The artifact is
+`data/review/cliopatria-topology-pilot.json`, and its decisions are in the
+versioned reconciliation set.
 
-These are **not adjudications**. Overlap can encode hierarchy, disputed
-alternatives, composite context, or a genuine geometry problem. Every candidate
-is marked as awaiting historian review. The polygons still must not support
-demographic totals until source-aware review and a mass-conserving allocation
-contract exist.
+These are display adjudications, not a mutually exclusive political partition.
+Overlap can still encode disputed alternatives, composite context, or geometry
+problems. The polygons must not support demographic totals until source-aware
+review and a separate mass-conserving allocation contract exist.
 
 ## Review artifacts are not release artifacts
 
@@ -150,8 +176,9 @@ contract exist.
 decision without pretending that it has passed publication review:
 
 - the Cliopatria bounded topology candidates;
-- 353 unreviewed city-identity candidates across Modelski Ancient, Chandler,
-  and Modelski Modern;
+- 353 city-identity candidates across Modelski Ancient, Chandler, and Modelski
+  Modern, each paired with a versioned accepted, rejected, or unresolved
+  decision;
 - an 84,360-row UN WPP acquisition profile supporting the separately published
   WPP metric while retaining its excluded aggregates and 2101 boundary rows;
 - a HYDE 3.5 README and 10,000 BCE baseline sample profile that exposes a
@@ -159,10 +186,10 @@ decision without pretending that it has passed publication review:
 - a CShapes 2.0 Gleditsch–Ward profile that records 710 features, 11 invalid
   geometries, omitted codebook fields, and its noncommercial/share-alike gate.
 
-Review artifacts can be regenerated from ignored raw files. A generated subset
-is exposed on the read-only Review page; it still does not alter any release
-observation or geometry. Publication requires a separate reviewed decision or
-release transformation.
+Review artifacts can be regenerated from ignored raw files. The read-only
+Review page joins them to the immutable decision set. Decisions may add identity
+metadata or rendering annotations to a release, but do not mutate any source
+observation or raw geometry.
 
 ## Adding one source or metric
 
@@ -195,10 +222,10 @@ creates a measured need.
   profiled. The archive `License.txt` says CC BY-NC 4.0 while the README says
   CC BY 3.0; Utrecht clarification, product-use review, general masks, scenario
   samples, and population mass reconciliation remain gates.
-- Companion Chandler and Modelski Modern city tables now have conservative
-  candidate links, but all 353 require evidence-backed review. They also need a
-  source-disagreement display and resolution of two Chandler zero cells before
-  publication.
+- Companion Chandler and Modelski Modern city tables now have 336 accepted
+  same-place links, 15 rejected homonyms, and two unresolved identity pairs.
+  They still need a source-disagreement display and resolution of two Chandler
+  zero cells before publication.
 - UN WPP 2024 is now published separately: the official page establishes
   thousand-person July units and CC BY 3.0 IGO; 237 Country/Area series exclude
   aggregates and 2101, and every observation is labeled estimate or Medium
@@ -206,5 +233,6 @@ creates a measured need.
 - Maddison Project Database can support a territorial GDP-per-capita context
   distribution, not individual income. Its workbook, source sheet, PPP basis,
   entity codes, and citations must be audited before publication.
-- Cliopatria requires a bounded topology and historical-review pilot before its
-  polygons can support any population allocation.
+- Cliopatria's bounded pilot records eight source-declared hierarchies and
+  preserves twenty unresolved overlaps. Its polygons remain categorically
+  ineligible for population allocation.

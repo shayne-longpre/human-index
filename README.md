@@ -46,8 +46,10 @@ coverage, and limitations are recorded in the release manifest and
 The application also includes a dedicated **Sources** page covering both the
 inputs published in the current release and the wider research registry. Atlas
 state is shareable through `metric`, `year`, and `place` URL parameters. A
-read-only **Review** page exposes the current border-overlap and city-identity
-candidates without treating them as accepted edits.
+read-only **Review** page exposes the versioned reconciliation decisions for
+every current border-overlap and city-identity candidate, including the rule,
+evidence boundary, and unresolved cases. Identity links never merge source
+observations, and border decisions never allocate population.
 
 The early population view preserves the Census table's disagreement range and
 underlying named estimates; it is not a confidence interval or a gridded
@@ -84,6 +86,8 @@ The proposed deep-time population and historical-boundary sequence is in
 `docs/DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`. The deliberately small source,
 taxonomy, transformation, and release architecture is documented in
 `docs/EVIDENCE_INTEGRATION.md`.
+The ranked gap analysis against the original vision is in
+`docs/ORIGINAL_VISION_GAP_PRIORITIES.md`.
 
 ## Research brief
 

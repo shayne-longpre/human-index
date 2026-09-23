@@ -23,11 +23,20 @@ export function HistoricalCityInspector({ city, observation, onClose }: Historic
         <div><dt>Modern label</dt><dd>{city.modern_country_label} (source metadata only)</dd></div>
         <div><dt>Spatial support</dt><dd>Source geocoded point, not a city extent</dd></div>
         <div><dt>Certainty code</dt><dd>{city.geocode_certainty_code} (preserved source code)</dd></div>
+        <div>
+          <dt>Cross-source identity</dt>
+          <dd>
+            {city.canonical_place_id
+              ? `${city.canonical_place_id} · ${city.linked_source_record_count} linked source records`
+              : 'Source record only; no accepted cross-source link'}
+          </dd>
+        </div>
+        <div><dt>Source identity record</dt><dd>{city.source_record_id}</dd></div>
         <div><dt>Source record</dt><dd>{observation.original_record_locator}</dd></div>
       </dl>
       <div className="inspector-caution">
         <strong>Do not add these points into a world total.</strong>
-        <p>The source is sparse, and its estimates were compiled rather than validated or corrected by the Atlas.</p>
+        <p>Identity links never average or replace estimates. Each source value and locator remains separate.</p>
       </div>
     </aside>
   );

@@ -183,6 +183,11 @@ def _feature_id(properties: dict[str, Any], geometry: dict[str, Any]) -> str:
     return f"cliopatria-{digest[:20]}"
 
 
+def _feature_sha256(feature: dict[str, Any]) -> str:
+    canonical = json.dumps(feature, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
 def _snapshot_quality(features: list[dict[str, Any]]) -> dict[str, Any]:
     identifiers = [feature["properties"]["source_feature_id"] for feature in features]
     names = [feature["properties"]["name"].casefold().strip() for feature in features]
@@ -203,18 +208,37 @@ def _snapshot_quality(features: list[dict[str, Any]]) -> dict[str, Any]:
         "ring_count": len(rings),
         "unclosed_rings": sum(ring[0] != ring[-1] for ring in rings),
         "invalid_coordinate_positions": invalid_coordinates,
-        "topology_overlap_review": "not_computed_requires_topology_engine_and_historical_review",
+        "topology_overlap_review": "bounded_decision_set_applied_unresolved_overlaps_preserved",
+        "source_declared_composite_features": sum(
+            feature["properties"]["source_relation_role"] == "composite"
+            for feature in features
+        ),
+        "unresolved_overlap_features": sum(
+            feature["properties"]["unresolved_overlap_count"] > 0
+            for feature in features
+        ),
     }
 
 
 class CliopatriaAdapter:
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, reconciliation: dict[str, Any]) -> None:
         with path.open(encoding="utf-8") as handle:
             payload = json.load(handle)
         if payload.get("type") != "FeatureCollection" or not isinstance(payload.get("features"), list):
             raise ValidationError("Cliopatria artifact is not a GeoJSON FeatureCollection")
         self.path = path
         self._features: list[dict[str, Any]] = payload["features"]
+        self._decision_set_id = reconciliation["decision_set_id"]
+        self._decisions_by_feature: dict[int, list[dict[str, Any]]] = {}
+        for decision in reconciliation["border_overlap_decisions"]:
+            left_index = int(decision["left_source_feature_index"])
+            right_index = int(decision["right_source_feature_index"])
+            if _feature_sha256(self._features[left_index]) != decision["left_feature_sha256"]:
+                raise ValidationError(f"Border decision left feature changed: {decision['decision_id']}")
+            if _feature_sha256(self._features[right_index]) != decision["right_feature_sha256"]:
+                raise ValidationError(f"Border decision right feature changed: {decision['decision_id']}")
+            self._decisions_by_feature.setdefault(left_index, []).append(decision)
+            self._decisions_by_feature.setdefault(right_index, []).append(decision)
         self._validate()
 
     def _validate(self) -> None:
@@ -250,19 +274,64 @@ class CliopatriaAdapter:
     def snapshot(self, source_year: int, tolerance: float = 0.08) -> dict[str, Any]:
         atlas_year = source_year_to_astronomical(source_year)
         eligible = [
-            feature
-            for feature in self._features
+            (source_index, feature)
+            for source_index, feature in enumerate(self._features)
             if feature["properties"]["Type"] == "POLITY"
             and feature["properties"]["FromYear"] <= source_year <= feature["properties"]["ToYear"]
         ]
         published: list[dict[str, Any]] = []
-        for feature in sorted(
-            eligible, key=lambda item: float(item["properties"]["Area"]), reverse=True
+        for source_index, feature in sorted(
+            eligible, key=lambda item: float(item[1]["properties"]["Area"]), reverse=True
         ):
             source_properties = feature["properties"]
             geometry = _simplify_geometry(feature["geometry"], tolerance)
             label = _label_position(geometry)
             source_feature_id = _feature_id(source_properties, feature["geometry"])
+            decisions = sorted(
+                self._decisions_by_feature.get(source_index, []),
+                key=lambda decision: decision["decision_id"],
+            )
+            overlap_decisions = []
+            for decision in decisions:
+                counterpart_index = (
+                    int(decision["right_source_feature_index"])
+                    if int(decision["left_source_feature_index"]) == source_index
+                    else int(decision["left_source_feature_index"])
+                )
+                overlap_decisions.append(
+                    {
+                        "decision_id": decision["decision_id"],
+                        "counterpart_source_feature_index": counterpart_index,
+                        "counterpart_name": self._features[counterpart_index]["properties"]["Name"],
+                        "disposition": decision["disposition"],
+                    }
+                )
+            hierarchy_count = sum(
+                decision["disposition"] == "source_declared_hierarchy"
+                for decision in decisions
+            )
+            unresolved_count = sum(
+                decision["disposition"] == "unresolved_overlap"
+                for decision in decisions
+            )
+            source_components = [
+                component.strip()
+                for component in str(source_properties.get("Components") or "").split(";")
+                if component.strip()
+            ]
+            source_member_of = source_properties.get("MemberOf") or None
+            source_relation_role = (
+                "composite" if source_components else "member" if source_member_of else "unspecified"
+            )
+            reconciliation_status = (
+                "mixed_source_hierarchy_and_unresolved_overlap"
+                if hierarchy_count and unresolved_count
+                else "source_declared_hierarchy"
+                if hierarchy_count
+                else "unresolved_overlap"
+                if unresolved_count
+                else "not_in_review_pilot"
+            )
             published.append(
                 {
                     "type": "Feature",
@@ -270,6 +339,7 @@ class CliopatriaAdapter:
                     "properties": {
                         "name": source_properties["Name"],
                         "feature_kind": "polity",
+                        "source_feature_index": source_index,
                         "source_feature_id": source_feature_id,
                         "source_release_id": SOURCE_ID,
                         "source_from_year": source_properties["FromYear"],
@@ -278,6 +348,16 @@ class CliopatriaAdapter:
                         "wikipedia": source_properties.get("Wikipedia") or None,
                         "wikidata": source_properties.get("Wikidata") or None,
                         "seshat_id": source_properties.get("SeshatID") or None,
+                        "source_components": source_components,
+                        "source_member_of": source_member_of,
+                        "source_relation_role": source_relation_role,
+                        "reconciliation_decision_set_id": self._decision_set_id,
+                        "reconciliation_status": reconciliation_status,
+                        "reconciliation_decision_ids": [
+                            decision["decision_id"] for decision in decisions
+                        ],
+                        "overlap_decisions": overlap_decisions,
+                        "unresolved_overlap_count": unresolved_count,
                         "evidence_status": "published_contestable_reconstruction",
                         "precision_class": f"source_native_simplified_{tolerance}_degree_display",
                         "label_position": [round(label[0], 4), round(label[1], 4)],
@@ -308,6 +388,7 @@ class CliopatriaAdapter:
             "excluded_feature_types": ["RELATION"],
             "dating_status": "snapshot_year_verified; source year-zero endpoints quarantined",
             "geometry_method": f"source native with Douglas-Peucker {tolerance} degree display simplification",
+            "reconciliation_decision_set_id": self._decision_set_id,
             "quality": _snapshot_quality(published),
             "features": published,
         }

@@ -260,6 +260,17 @@ def validate_release_manifest(
     if not {layer["source_release_id"] for layer in layers}.issubset(source_ids):
         raise ValidationError("A published layer has an unknown source release")
 
+    reconciliation = manifest["reconciliation"]
+    if reconciliation["data_file"] not in artifacts:
+        raise ValidationError("Reconciliation decision set is not a published artifact")
+    if (
+        manifest["historical_context"]["reconciliation_decision_set_id"]
+        != reconciliation["decision_set_id"]
+        or manifest["historical_cities"]["reconciliation_decision_set_id"]
+        != reconciliation["decision_set_id"]
+    ):
+        raise ValidationError("Published layers disagree on reconciliation decision set")
+
     for transformation in manifest["transformations"]:
         if not set(transformation["input_artifact_ids"]).issubset(input_artifact_ids):
             raise ValidationError(

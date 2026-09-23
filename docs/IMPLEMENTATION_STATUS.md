@@ -4,7 +4,7 @@ Updated: 2026-09-22
 
 ## MVP release
 
-Release r5 publishes four separately defined measures:
+Release r6 publishes four separately defined measures:
 
 - World Bank population totals, 1960–2025;
 - UN World Population Prospects 2024 population outlook, 1950–2100;
@@ -21,8 +21,10 @@ resolves that date independently and reports its effective source date or
 unavailability. The map changes historical polygons and names without using
 them as statistical supports. Dense names are available on hover and click. A
 Sources page groups the acquisition/publication ledger by data vertical. A
-read-only Review page exposes 28 border-overlap and 353 city-identity candidates
-without approving, merging, or mutating source observations.
+read-only Review page exposes versioned decisions for all 28 border-overlap and
+353 city-identity candidates without merging or mutating source observations.
+The map applies the allowed display effects and names the relevant counterpart
+polities in the click inspector.
 
 ## Scientific separation
 
@@ -53,11 +55,13 @@ without approving, merging, or mutating source observations.
 - Natural Earth v5.1.2 remains display geometry only. Its 1:110m layer cannot
   place every small territory.
 - Cliopatria v0.2.0 remains a context source. Six year-zero endpoints are
-  quarantined. A bounded Mediterranean audit produced 28 review candidates;
-  these are leads, not proof of errors.
-- Modelski Ancient remains the only published city series. Chandler v2 and
-  Modelski Modern v2 remain separate while 353 generated identity candidates
-  and two Chandler numeric-zero cells await human review.
+  quarantined. Of 28 bounded Mediterranean overlap candidates, eight are
+  source-declared hierarchy relations and twenty remain explicitly unresolved.
+  The decision layer only changes styling and disclosure.
+- Modelski Ancient remains the only published city series. Across it, Chandler
+  v2, and Modelski Modern v2, 336 candidate pairs are linked as the same place,
+  15 distant homonyms are rejected, and two coordinate-only identities remain
+  unresolved. The two Chandler numeric-zero cells also remain unresolved.
 - CShapes 2.0 is acquired and profiled: 710 dated GeoJSON features spanning
   1886–2019, including 11 invalid geometries. It is not published because its
   CC BY-NC-SA terms need a product-use decision, the download omits codebook
@@ -86,34 +90,36 @@ without approving, merging, or mutating source observations.
 - WPP demonstrates source addition without concatenating releases: it has its
   own source release, universe, transformation, summaries, CSV, and presentation
   metadata.
-- The generated review queue is a read-only UI projection. Any accepted identity
-  or boundary judgment must be recorded later in a separate, versioned,
-  human-authored decision artifact.
+- The reconciliation policy and generated decision set are separate, versioned,
+  checksummed artifacts. Every candidate has an explicit disposition; rules
+  cannot drift from their declared results. Accepted place identity never
+  combines population observations, and border decisions prohibit population
+  allocation.
 - Map dependencies remain in a lazy chunk, and nearby boundary snapshots are
   prefetched after the active snapshot resolves.
 
 ## Verified state
 
-`npm run typecheck`, 26 Vitest tests, 3 Python unit tests, and the production
-build pass. Desktop browser checks cover the WPP estimate/projection transition,
-map and evidence-table rendering, Sources status, and both Review queues. See
-`BUILD_REPORT.md` for exact commands, artifact counts, build sizes, and remaining
-limits.
+The final r6 verification counts are recorded in `BUILD_REPORT.md` after strict
+type checking, unit tests, the production build, and desktop browser checks.
 
 ## Immediate next work
 
-1. Resolve HYDE licensing and acquire a matched baseline/lower/upper subset plus
-   masks before designing any gridded population layer.
-2. Decide whether CShapes' noncommercial/share-alike license is compatible with
-   the intended product, then repair and document its invalid geometries before
-   any comparison or publication.
-3. Add a versioned reviewed-decision artifact and controlled accept/reject
-   workflow for candidate identities and boundary relations.
-4. Obtain the Maddison workbook through the normal official flow and preserve
-   its source-sheet citations before any economic layer is designed.
+1. Resolve HYDE licensing and validate one matched baseline/lower/upper gridded
+   population slice with masks and mass conservation.
+2. Add a reproducible view bundle and automated browser/accessibility regression
+   coverage while HYDE access is blocked.
+3. Calibrate one condition layer onto the validated population universe without
+   losing unplaced or unknown population.
+4. Broaden the boundary decision process beyond the 1500 Mediterranean pilot
+   and obtain evidence for the twenty unresolved pairs.
+5. Publish companion city estimates with their disagreements intact, then add
+   the next condition vertical only after the spatial core is complete.
 
 The full sequence and acceptance gates are in
 `DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md` and `EVIDENCE_INTEGRATION.md`.
+The ranked comparison with the original vision is in
+`ORIGINAL_VISION_GAP_PRIORITIES.md`.
 
 ## Renderer spike note
 
