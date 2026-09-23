@@ -15,6 +15,7 @@ export function DataTable({ rows, metric, onSelect }: DataTableProps) {
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [descending, setDescending] = useState(false);
+  const showPopulationWeight = metric.aggregation_kind !== 'population_total';
 
   const visibleRows = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase();
@@ -77,13 +78,16 @@ export function DataTable({ rows, metric, onSelect }: DataTableProps) {
                 <button type="button" onClick={() => chooseSort('name')}>Place</button>
               </th>
               <th scope="col">Region</th>
-              <th scope="col" className="numeric">
-                <button type="button" onClick={() => chooseSort('population')}>Population</button>
-              </th>
+              {showPopulationWeight ? (
+                <th scope="col" className="numeric">
+                  <button type="button" onClick={() => chooseSort('population')}>Population</button>
+                </th>
+              ) : null}
               <th scope="col" className="numeric">
                 <button type="button" onClick={() => chooseSort('metric')}>{metric.label}</button>
               </th>
               <th scope="col">Map</th>
+              {metric.id === 'population_outlook' ? <th scope="col">Evidence</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -95,11 +99,16 @@ export function DataTable({ rows, metric, onSelect }: DataTableProps) {
                   </button>
                 </th>
                 <td>{row.entity.region}</td>
-                <td className="numeric">
-                  {row.population?.value === null || !row.population ? 'Unknown' : formatInteger(row.population.value)}
-                </td>
+                {showPopulationWeight ? (
+                  <td className="numeric">
+                    {row.population?.value === null || !row.population ? 'Unknown' : formatInteger(row.population.value)}
+                  </td>
+                ) : null}
                 <td className="numeric">{formatMetricValue(metric, row.metricValue)}</td>
                 <td>{row.entity.map_status === 'placed' ? 'Placed' : 'Unplaced'}</td>
+                {metric.id === 'population_outlook' ? (
+                  <td>{row.metricEvidenceState === 'medium_projection' ? 'Medium projection' : 'Estimate'}</td>
+                ) : null}
               </tr>
             ))}
           </tbody>

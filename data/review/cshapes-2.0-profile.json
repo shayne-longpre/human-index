@@ -1,0 +1,88 @@
+{
+  "schema_version": "0.1.0",
+  "review_status": "acquired_profiled_comparison_only_not_published",
+  "source": {
+    "id": "cshapes-2.0-gleditsch-ward",
+    "url": "https://icr.ethz.ch/data/cshapes/CShapes-2.0.geojson",
+    "codebook_url": "https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf",
+    "license": "CC BY-NC-SA 4.0",
+    "coding_universe": "Gleditsch-Ward"
+  },
+  "artifacts": {
+    "geojson": {
+      "filename": "CShapes-2.0.geojson",
+      "bytes": 26344671,
+      "sha256": "384b1ea90b9419f30a858d7ec237c85a22c60d1b35b5f85f215a1204f9989d42"
+    },
+    "codebook": {
+      "filename": "CShapes-2.0_Codebook.pdf",
+      "bytes": 120346,
+      "sha256": "e132b84d6df02b58eef3c10845ca2b87b1816fa18c5b4a64104cc124afa3ebbd"
+    }
+  },
+  "profile": {
+    "features": 710,
+    "fields": [
+      "area",
+      "cap_geom",
+      "caplat",
+      "caplong",
+      "capname",
+      "cntry_name",
+      "gwcode",
+      "gwedate",
+      "gweday",
+      "gwemonth",
+      "gweyear",
+      "gwsdate",
+      "gwsday",
+      "gwsmonth",
+      "gwsyear"
+    ],
+    "unique_gw_codes": 252,
+    "unique_names": 252,
+    "start_date": "1886-01-01",
+    "end_date": "2019-12-31",
+    "geometry_types": {
+      "MultiPolygon": 353,
+      "Polygon": 357
+    },
+    "invalid_geometries": 11,
+    "nonpositive_source_areas": 0,
+    "inverted_periods": 0,
+    "snapshot_spike": [
+      {
+        "date": "1886-01-01",
+        "active_features": 128,
+        "active_gw_codes": 128
+      },
+      {
+        "date": "1900-01-01",
+        "active_features": 149,
+        "active_gw_codes": 149
+      },
+      {
+        "date": "1950-01-01",
+        "active_features": 172,
+        "active_gw_codes": 172
+      },
+      {
+        "date": "2000-01-01",
+        "active_features": 177,
+        "active_gw_codes": 177
+      },
+      {
+        "date": "2019-01-01",
+        "active_features": 181,
+        "active_gw_codes": 181
+      }
+    ]
+  },
+  "publication_blockers": [
+    "confirm_product_use_is_compatible_with_noncommercial_sharealike_terms_or_obtain_permission",
+    "repair_or_explicitly_exclude_11_invalid_geometries_with_recorded_provenance",
+    "audit_dates_names_and_undefined_borders_against_the_codebook_and_cited_sources",
+    "the_downloaded_GeoJSON_omits_status_ruledby_border_definition_and_feature_ids_described_in_the_codebook",
+    "compare_1886_2019_coverage_and_overlaps_with_Cliopatria_before_any_layer_precedence_decision"
+  ]
+}

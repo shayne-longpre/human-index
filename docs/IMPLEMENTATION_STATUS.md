@@ -1,127 +1,123 @@
 # Implementation status
 
-Updated: 2026-09-21
+Updated: 2026-09-22
 
 ## MVP release
 
-The runnable MVP publishes U.S. Census Bureau world-population estimate ranges at
-39 dates from 10,000 BCE through 1950 CE, World Bank population totals for every
-year from 1960 through 2025, and electricity access for every observed year from
-1990 through 2024. It also publishes World Bank life expectancy for 1960–2024
-as national/territorial context with population-conserving fixed bins. Modern statistics use the same 217-entity nonaggregate
-metadata universe. Deep-time population has world support only and is never
-assigned to a historical polity.
+Release r5 publishes four separately defined measures:
 
-The UI has a metric switcher, one requested-date timeline and playback,
-choropleth, metric-specific population summary, modern and historical inspectors,
-accessible tables, and full-series CSVs. A toggleable Cliopatria v0.2.0 context
-layer switches among 36 genuine source snapshots spanning 3400 BCE–2024 CE. The
-single slider combines evidence-change dates, while a status row reports each
-layer's independently resolved effective date or unavailability. `RELATION` features are
-excluded. A separate Modelski Ancient v2 layer publishes 621 exact-date city
-estimates for 154 source-geocoded points from 3700 BCE–1000 CE. Metric, year, and selected modern place are retained in the URL. A
-dedicated Sources page separates published release inputs
-from candidate and blocked research sources. Its grouped source matrix separates
-artifact acquisition, publication in the active release, and unresolved work
-for nine data verticals.
+- World Bank population totals, 1960–2025;
+- UN World Population Prospects 2024 population outlook, 1950–2100;
+- World Bank electricity access, 1990–2024; and
+- World Bank life expectancy at birth, 1960–2024.
 
-The statistical universe is the set of World Bank API entities whose country
-metadata does not mark the entity as an aggregate and that have a 2024 population
-weight. It is called **covered population**, not world population or humanity,
-until parent/territory reconciliation is complete. Annual entity sums are checked
-against the separate World Bank `WLD` reference. The nonnegative residual and
-population that cannot be placed in the coarse geometry remain explicit.
+It also publishes U.S. Census global historical-population ranges at 39 source
+dates from 10,000 BCE through 1950 CE, 36 Cliopatria political-context
+snapshots from 3400 BCE through 2024 CE, and 621 exact-date Modelski Ancient
+city observations from 3700 BCE through 1000 CE.
+
+The UI has one requested-date timeline. Each statistical, border, and city layer
+resolves that date independently and reports its effective source date or
+unavailability. The map changes historical polygons and names without using
+them as statistical supports. Dense names are available on hover and click. A
+Sources page groups the acquisition/publication ledger by data vertical. A
+read-only Review page exposes 28 border-overlap and 353 city-identity candidates
+without approving, merging, or mutating source observations.
+
+## Scientific separation
+
+- World Bank and WPP remain separate metrics because they have distinct
+  territorial universes, releases, and temporal meanings.
+- WPP rows through 2023 are estimates. Rows from 2024 through 2100 are explicitly
+  labeled `medium_projection`; they are neither observations nor confidence
+  intervals.
+- WPP excludes aggregate regions and 2101 boundary rows. Counts are converted
+  exactly from the source's thousands unit, and each annual selected-entity sum
+  is compared with the separate World row. The signed rounding residual is
+  retained.
+- Census deep-time totals have world support only and are never assigned to
+  historical polities or treated as a spatial surface.
+- Cliopatria polygons and Modelski points are historical context. Neither affects
+  metric aggregation or population conservation.
+- Missing, unplaced, unsupported, estimated, and projected states stay distinct.
 
 ## Source audit decisions
 
-- World Bank API responses for `EG.ELC.ACCS.ZS`, `SP.POP.TOTL`,
-  `SP.DYN.LE00.IN`, and country
-  metadata were acquired successfully on 2026-09-20. Each response reports one
-  page for the requested page size and a source update date of 2026-07-13 for the
-  indicator series.
-- Population has exact annual data from 1960–2025. Electricity has actual source
-  observations from 1990–2024; the API has no 2025 electricity values in this
-  retrieval, and the UI displays that year as unsupported rather than carrying
-  2024 forward.
-- Life expectancy has actual source observations from 1960–2024. The map shows
-  territorial means; its summary groups population by fixed territorial-mean
-  bins and preserves unknown condition and missing population weights.
-- Natural Earth vector release v5.1.2 is the pinned display geometry. Its
-  1:110m country layer is intentionally too coarse to show every small territory.
-- The U.S. Census Bureau historical world-population table was acquired and
-  parsed at all 39 published dates. Its lower and upper summaries are preserved
-  as disagreement among cited estimates, not statistical confidence bounds. A
-  missing upper entry denotes a point estimate according to the table note.
-- The pinned Cliopatria v0.2.0 archive contains 13,765 features: 13,380 `POLITY`
-  and 385 `RELATION` records. The release publishes 36 lazily loaded, simplified
-  `POLITY`-only snapshots; no geometry contributes to numerical accounting.
-  Source year-zero endpoints are quarantined and no published snapshot samples
-  them.
-- The pinned Figshare Modelski Ancient v2 table is CC BY 4.0 and contains 154
-  cities, 41 sparse source dates, and 621 estimates. Coordinates, modern-country
-  labels, and geocode certainty codes are preserved as source metadata; no
-  interpolation or polity assignment is performed. Companion Chandler v2 and
-  Modelski Modern v2 files are now acquired and profiled, but remain unpublished
-  pending human review of 353 generated cross-source identity candidates, a
-  disagreement UI, and review of two numeric-zero Chandler cells.
-- The official Maddison Project Database 2023 page verifies its CC BY 4.0 terms,
-  169-country coverage through 2022, and source-sheet citation requirement for
-  graphical use. Its DataverseNL workbook download is blocked by an anti-bot
-  challenge, so no workbook was acquired or bypassed and no income layer was
-  published.
-- UN World Population Prospects 2024's official medium demographic-indicators
-  artifact is acquired and profiled. It remains unpublished pending exact
-  artifact terms/units, aggregate and territory selection, an explicit
-  estimate/projection presentation contract, 2101 boundary-row review, and a
-  source-overlap policy with World Bank.
-- The HYDE 3.5 downloadable directory and its CC BY-NC 4.0 license were inspected.
-  Automated artifact retrieval remains blocked by the provider's anti-bot gate,
-  and no data artifact or variable metadata is acquired. The ingestion contract
-  now makes licensing, count/density, nodata, scenario, and conservation gates
-  explicit. The Census global series is not presented as a substitute surface.
-- A bounded 1500 CE Mediterranean Cliopatria topology pilot found 28 overlap
-  candidates among 57 active features. All remain queued for historian review;
-  no polygon is promoted from context geometry to statistical support.
-
-Exact input URLs, hashes, byte counts, output hashes, exclusions, and crosswalks
-are recorded by the fixture builder in `data/registry/source-lock.json` and the
-published view manifest.
+- The three World Bank indicator responses and country metadata are pinned with
+  URLs, retrieval dates, byte counts, and hashes. Modern published metrics use
+  the nonaggregate World Bank metadata universe appropriate to each year.
+- The official UN WPP 2024 Medium demographic-indicators CSV is pinned and now
+  published as `population_outlook` in its source-native 237-country/area
+  universe. The source describes total population on 1 July in thousands and
+  makes WPP 2024 available under CC BY 3.0 IGO.
+- Natural Earth v5.1.2 remains display geometry only. Its 1:110m layer cannot
+  place every small territory.
+- Cliopatria v0.2.0 remains a context source. Six year-zero endpoints are
+  quarantined. A bounded Mediterranean audit produced 28 review candidates;
+  these are leads, not proof of errors.
+- Modelski Ancient remains the only published city series. Chandler v2 and
+  Modelski Modern v2 remain separate while 353 generated identity candidates
+  and two Chandler numeric-zero cells await human review.
+- CShapes 2.0 is acquired and profiled: 710 dated GeoJSON features spanning
+  1886–2019, including 11 invalid geometries. It is not published because its
+  CC BY-NC-SA terms need a product-use decision, the download omits codebook
+  fields required for defensible dependency/border rendering, and geometry
+  repair and comparison policy are unresolved.
+- A HYDE 3.5 10,000 BCE sample archive, README, and license are acquired. The
+  archive exposes count, density, rural, urban, and urban-other grids, but it is
+  not published: the license file and README disagree (CC BY-NC 4.0 versus CC
+  BY 3.0), latest-year descriptions conflict, and full masks/scenarios plus
+  conservation checks are still needed.
+- Maddison Project Database 2023 remains unacquired. The official page verifies
+  169-country coverage through 2022, CC BY 4.0, and source-sheet attribution;
+  the official download currently returns DataverseNL's Anubis page. No bypass
+  was attempted.
 
 ## Implemented architecture
 
-- Narrow source adapters parse source-native artifacts; World Bank, U.S. Census,
-  Cliopatria, and Modelski each have their own adapter.
-- The release builder owns statistical-universe validation, summaries, lineage,
-  and artifact hashes.
-- Display geometry is built separately and contributes no numerical totals.
-- Shared TypeScript contracts define metrics, taxonomies, supported years, value
-  states, and release shapes.
-- A small declarative catalog owns taxonomy families and metric contracts;
-  build-time and browser-side validators reject dangling taxonomy, source,
-  universe, transformation, and artifact references. Metrics name their source
-  releases directly; taxonomy never stands in for lineage.
-- The client joins entity, population, and selected metric observations by exact
-  code and year. Metric presentation is a small configuration layer rather than
-  duplicated application screens.
-- Map dependencies load in a separate lazy chunk, and adjacent boundary snapshots
-  are prefetched after the active snapshot resolves.
-- Historical names are available on hover and click instead of being painted as
-  dense static labels. Boundary snapshots now carry basic geometry/identity QA;
-  topology overlap review remains explicitly not computed.
+- Narrow Python adapters parse source-native artifacts and emit validated,
+  immutable observations.
+- A declarative catalog owns metric, taxonomy, population-universe, and
+  aggregation contracts; it does not stand in for provenance.
+- The release builder owns transformations, summaries, conservation checks,
+  lineage, and output hashes.
+- Statistical geography, historical political geography, and display geometry
+  use independent contracts and loaders.
+- WPP demonstrates source addition without concatenating releases: it has its
+  own source release, universe, transformation, summaries, CSV, and presentation
+  metadata.
+- The generated review queue is a read-only UI projection. Any accepted identity
+  or boundary judgment must be recorded later in a separate, versioned,
+  human-authored decision artifact.
+- Map dependencies remain in a lazy chunk, and nearby boundary snapshots are
+  prefetched after the active snapshot resolves.
 
-The next expansion should add a source only after its release, universe, temporal
-policy, and aggregation meaning are audited. The immediate population gap is a
-licensed gridded historical reconstruction; the immediate geography gap is
-reviewing overlapping or nested Cliopatria features and adding source-specific
-precision/dispute metadata. The full source and annotation sequence is specified
-in `DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.
+## Verified state
+
+`npm run typecheck`, 26 Vitest tests, 3 Python unit tests, and the production
+build pass. Desktop browser checks cover the WPP estimate/projection transition,
+map and evidence-table rendering, Sources status, and both Review queues. See
+`BUILD_REPORT.md` for exact commands, artifact counts, build sizes, and remaining
+limits.
+
+## Immediate next work
+
+1. Resolve HYDE licensing and acquire a matched baseline/lower/upper subset plus
+   masks before designing any gridded population layer.
+2. Decide whether CShapes' noncommercial/share-alike license is compatible with
+   the intended product, then repair and document its invalid geometries before
+   any comparison or publication.
+3. Add a versioned reviewed-decision artifact and controlled accept/reject
+   workflow for candidate identities and boundary relations.
+4. Obtain the Maddison workbook through the normal official flow and preserve
+   its source-sheet citations before any economic layer is designed.
+
+The full sequence and acceptance gates are in
+`DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md` and `EVIDENCE_INTEGRATION.md`.
 
 ## Renderer spike note
 
-MapLibre GL JS 6.10.0 with deck.gl 9.4.0 was tested in the in-app Chromium
-browser. `MapboxOverlay` interleaved mode failed at runtime because deck.gl read
-an internal MapLibre viewport field that is absent in this version. The release
-therefore uses overlaid mode, which avoids that internal coupling while retaining
-GeoJSON rendering, camera synchronization, picking, and selection highlighting.
-Interleaved depth ordering and a globe remain out of scope until a compatible
-combination passes the same browser test.
+MapLibre GL JS 6.10.0 with deck.gl 9.4.0 runs in overlaid mode. Interleaved mode
+failed because deck.gl relied on a MapLibre internal viewport field absent in
+this version. Globe rendering and interleaved depth ordering remain out of scope
+until a compatible, tested renderer combination is available.

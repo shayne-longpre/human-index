@@ -14,6 +14,7 @@ from typing import Any, BinaryIO
 from .catalog import (
     LIFE_EXPECTANCY_BINS,
     WORLD_BANK_UNIVERSE_ID,
+    WPP_UNIVERSE_ID,
     metric_definition,
     taxonomy_catalog,
     validate_release_manifest,
@@ -53,10 +54,19 @@ from .sources.us_census_population import (
     SOURCE_URL as HISTORICAL_POPULATION_URL,
     UsCensusHistoricalPopulationAdapter,
 )
+from .sources.un_wpp import (
+    SOURCE_ID as WPP_SOURCE_ID,
+    SOURCE_LICENSE as WPP_SOURCE_LICENSE,
+    SOURCE_TERMS_URL as WPP_SOURCE_TERMS_URL,
+    SOURCE_URL as WPP_SOURCE_URL,
+    Wpp2024MediumAudit,
+)
 
 
 RETRIEVED_ON = "2026-09-20"
-RELEASE_ID = "atlas-mvp-2026-09-20-r4"
+PUBLISHED_ON = "2026-09-22"
+WPP_RETRIEVED_ON = "2026-09-21"
+RELEASE_ID = "atlas-mvp-2026-09-22-r5"
 CLIOPATRIA_GEOMETRY_MEMBER = "cliopatria_polities_only.geojson"
 
 
@@ -148,6 +158,13 @@ def build(args: argparse.Namespace) -> None:
             RETRIEVED_ON,
             "CC-BY-4.0",
         ),
+        InputArtifact(
+            "un_wpp_2024_medium_demographic_indicators",
+            args.un_wpp,
+            WPP_SOURCE_URL,
+            WPP_RETRIEVED_ON,
+            WPP_SOURCE_LICENSE,
+        ),
     ]
     for artifact in inputs:
         if not artifact.path.is_file():
@@ -179,12 +196,15 @@ def build(args: argparse.Namespace) -> None:
     cities_adapter = ModelskiAncientCitiesAdapter(
         args.historical_cities, args.historical_cities_metadata
     )
+    wpp_adapter = Wpp2024MediumAudit(args.un_wpp)
+    wpp_profile = wpp_adapter.profile()
     codes = adapter.nonaggregate_codes()
     metadata = adapter.entities()
     entity_names = {code: metadata[code]["name"] for code in codes}
     geometry, placed_codes = build_display_geometry(
         args.geometry, valid_codes=codes, entity_names=entity_names
     )
+    wpp_dataset = wpp_adapter.dataset(placed_codes)
 
     entities = [
         {
@@ -412,6 +432,8 @@ def build(args: argparse.Namespace) -> None:
     historical_context_index_path = args.output / "historical-context.json"
     historical_cities_path = args.output / "historical-cities.json"
     historical_cities_csv_path = args.output / "historical-cities.csv"
+    population_outlook_path = args.output / "population-outlook.json"
+    population_outlook_csv_path = args.output / "population-outlook.csv"
 
     write_json(entities_path, {"schema_version": "0.2.0", "entities": entities})
     write_json(
@@ -552,6 +574,21 @@ def build(args: argparse.Namespace) -> None:
             ],
         )
     )
+    write_json(population_outlook_path, wpp_dataset)
+    population_outlook_csv_path.write_bytes(
+        _csv_bytes(
+            wpp_dataset["observations"],
+            [
+                "code",
+                "year",
+                "value",
+                "status",
+                "evidence_state",
+                "source_location_id",
+                "original_record_locator",
+            ],
+        )
+    )
 
     history_directory = args.output / "history"
     history_directory.mkdir(parents=True, exist_ok=True)
@@ -599,6 +636,8 @@ def build(args: argparse.Namespace) -> None:
             historical_context_index_path,
             historical_cities_path,
             historical_cities_csv_path,
+            population_outlook_path,
+            population_outlook_csv_path,
             *historical_snapshot_paths,
     ]
 
@@ -640,7 +679,7 @@ def build(args: argparse.Namespace) -> None:
         "schema_version": "0.5.0",
         "release_id": RELEASE_ID,
         "status": "genuine_data_development_release",
-        "published_on": RETRIEVED_ON,
+        "published_on": PUBLISHED_ON,
         "default_view": {"metric_id": "population_total", "year": 2024},
         "taxonomies": taxonomy_catalog(),
         "metrics": [
@@ -653,6 +692,13 @@ def build(args: argparse.Namespace) -> None:
                     HISTORICAL_POPULATION_SOURCE_ID,
                     f"world-bank-wdi-{WORLD_BANK_LAST_UPDATED}",
                 ],
+            ),
+            metric_definition(
+                "population_outlook",
+                wpp_dataset["years"],
+                population_outlook_path.name,
+                population_outlook_csv_path.name,
+                [WPP_SOURCE_ID],
             ),
             metric_definition(
                 "access_to_electricity",
@@ -700,6 +746,25 @@ def build(args: argparse.Namespace) -> None:
                     "The support is the world as a whole, not historical or modern territories.",
                     "Lower and upper values are disagreement among published sources, not confidence intervals.",
                     "No interpolation or population-by-polity allocation is published.",
+                ],
+            },
+            {
+                "id": WPP_UNIVERSE_ID,
+                "label": "UN WPP 2024 Country/Area series, Medium variant",
+                "entity_count": len(wpp_dataset["entities"]),
+                "inclusion_rule": "LocTypeName equals Country/Area; regional and special aggregates excluded",
+                "excluded_aggregate_count": wpp_profile["profile"]["location_ids"] - len(wpp_dataset["entities"]),
+                "reference_aggregate": "World",
+                "review_status": "source_native_country_area_partition_with_rounding_residual_preserved",
+                "reference_residual_range": [
+                    min(summary["world_reference_rounding_residual"] for summary in wpp_dataset["summaries"]),
+                    max(summary["world_reference_rounding_residual"] for summary in wpp_dataset["summaries"]),
+                ],
+                "scope_label": "UN Country/Area population",
+                "notes": [
+                    "The World row is a reconciliation reference and is never added to Country/Area totals.",
+                    "The signed residual is only source rounding from thousand-person values and is preserved.",
+                    "This source-native universe is not merged with the World Bank universe or historical polities.",
                 ],
             },
         ],
@@ -778,16 +843,15 @@ def build(args: argparse.Namespace) -> None:
                 "license": "CC BY 4.0",
                 "profile": cities_adapter.profile(),
             },
+            {
+                "id": WPP_SOURCE_ID,
+                "publisher": "United Nations, Department of Economic and Social Affairs, Population Division",
+                "retrieved_on": WPP_RETRIEVED_ON,
+                "license": WPP_SOURCE_LICENSE,
+                "profile": wpp_profile,
+            },
         ],
         "alternative_sources": [
-            {
-                "id": "un-wpp-2024",
-                "role": "more detailed direct population expansion source",
-                "status": "documented_not_ingested",
-                "coverage": "1950-2100 estimates and projections; age/sex detail available",
-                "reason_deferred": "requires a separate release, scenario, license, and territory crosswalk audit before merging",
-                "url": "https://population.un.org/wpp/",
-            },
             {
                 "id": "hyde-3.5",
                 "role": "deep-time gridded population candidate",
@@ -892,6 +956,34 @@ def build(args: argparse.Namespace) -> None:
                 },
                 "validation": cities_adapter.profile(),
             },
+            {
+                "id": "un-wpp-2024-medium-population-v1",
+                "version": "1.0.0",
+                "input_artifact_ids": ["un_wpp_2024_medium_demographic_indicators"],
+                "parameters": {
+                    "location_type": "Country/Area",
+                    "indicator": "TPopulation1July",
+                    "source_unit": "thousands of people",
+                    "published_unit": "people",
+                    "published_years": [1950, 2100],
+                    "estimate_years": [1950, 2023],
+                    "medium_projection_years": [2024, 2100],
+                    "excluded_artifact_boundary_year": 2101,
+                    "no_cross_source_splice": True,
+                    "no_interpolation": True,
+                },
+                "output_artifacts": {
+                    artifact_key(population_outlook_path): artifacts[artifact_key(population_outlook_path)],
+                    artifact_key(population_outlook_csv_path): artifacts[artifact_key(population_outlook_csv_path)],
+                },
+                "validation": {
+                    "country_area_entities": len(wpp_dataset["entities"]),
+                    "annual_observations": len(wpp_dataset["observations"]),
+                    "annual_summaries": len(wpp_dataset["summaries"]),
+                    "country_area_plus_rounding_residual_equals_world": "passed_all_years",
+                    "mapped_plus_unplaced_equals_country_area_total": "passed_all_years",
+                },
+            },
         ],
         "artifacts": artifacts,
         "citations": [
@@ -935,6 +1027,11 @@ def build(args: argparse.Namespace) -> None:
                 "url": MODELSKI_ARTICLE_URL,
                 "license": "CC BY 4.0",
             },
+            {
+                "label": "UN World Population Prospects 2024, Online Edition",
+                "url": WPP_SOURCE_TERMS_URL,
+                "license": WPP_SOURCE_LICENSE,
+            },
         ],
         "limitations": [
             "Population color represents a territorial total, not local density or a gridded settlement reconstruction.",
@@ -946,6 +1043,8 @@ def build(args: argparse.Namespace) -> None:
             "Cliopatria polygons and labels are contestable historical context, simplified for display, and never used as population supports.",
             "Only selected Cliopatria snapshot years are published; the effective boundary date is shown separately from the requested date.",
             "Ancient-city points appear only at exact published dates; coordinates are source geocodes, modern-country labels are descriptive metadata, and city estimates are not summed as total urban or world population.",
+            "UN WPP values are modeled population estimates through 2023 and Medium projections from 2024; projection scenarios are not confidence intervals.",
+            "WPP Country/Area supports are shown on available modern Natural Earth display geometry and are not claims about historical political borders.",
         ],
     }
     validate_release_manifest(manifest, {artifact.id for artifact in inputs})
@@ -962,6 +1061,8 @@ def build(args: argparse.Namespace) -> None:
                 "life_expectancy_years": [life_expectancy_years[0], life_expectancy_years[-1]],
                 "historical_context_snapshots": len(historical_snapshots),
                 "historical_city_observations": len(historical_cities["observations"]),
+                "wpp_population_years": [wpp_dataset["years"][0], wpp_dataset["years"][-1]],
+                "wpp_country_area_entities": len(wpp_dataset["entities"]),
                 "artifacts_bytes": sum(record["bytes"] for record in artifacts.values()),
             },
             indent=2,
@@ -982,6 +1083,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cliopatria-license", type=Path, required=True)
     parser.add_argument("--historical-cities", type=Path, required=True)
     parser.add_argument("--historical-cities-metadata", type=Path, required=True)
+    parser.add_argument("--un-wpp", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--lockfile", type=Path, required=True)
     return parser.parse_args()

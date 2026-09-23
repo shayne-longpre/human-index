@@ -1,108 +1,124 @@
-# Build report: evidence-aware temporal-map MVP, release r4
+# Build report: evidence-aware temporal-map MVP, release r5
 
-Date: 2026-09-20
+Date: 2026-09-22
 
 ## Verified result
 
-The repository contains a static React/TypeScript Atlas with genuine-data
+The repository contains a static React/TypeScript Atlas with four genuine-data
 measures and independent historical context layers:
 
 - U.S. Census Bureau historical world-population estimate ranges at 39 source
   dates from 10,000 BCE through 1950 CE;
 - World Bank population totals, annually from 1960 through 2025;
+- UN World Population Prospects 2024 population outlook, annually from 1950
+  through 2100, kept in its source-native 237-country/area universe and clearly
+  separated into estimates through 2023 and the Medium projection from 2024;
 - World Bank electricity access, annually from 1990 through 2024, with annual
-  matching population accounting;
+  matching population accounting; and
 - World Bank life expectancy, annually from 1960 through 2024, shown as a
-  territorial mean and population-conserving context distribution; and
-- Modelski Ancient v2 city estimates: 621 sparse exact-date observations for 154
-  source-geocoded cities from 3700 BCE through 1000 CE.
+  territorial mean and population-conserving context distribution.
 
-The UI supports metric switching, exact-year selection and playback, a MapLibre
-and deck.gl choropleth, a place inspector with original record locators, metric-
-appropriate summaries, searchable accessible tables, and downloadable
-full-series CSV files. A Cliopatria context layer supplies 36 discrete,
-lazily-loaded historical border/name snapshots from 3400 BCE through 2024 CE.
-A single requested-date control combines 136 evidence-change dates. Measures,
-historical city points, and political geometry resolve that date independently
-and report their exact or effective dates. The map changes its polygons without
-painting dense static names; hover and click expose the feature name, and click
-opens its evidence inspector. A dedicated Sources page exposes published inputs
-and the wider research registry. Metric, year, and modern place state are
-shareable in the URL. Missing observations and unsupported years remain visible.
+Modelski Ancient v2 contributes 621 sparse exact-date observations for 154
+source-geocoded cities from 3700 BCE through 1000 CE. Cliopatria contributes 36
+discrete, lazily loaded historical border/name snapshots from 3400 BCE through
+2024 CE. Neither context layer contributes to statistical accounting.
 
-This remains a development release. Its early population values have global
-support only; they are not local density, country totals, household locations,
-or population assigned to historical polities. The historical polygons are
-contestable political context, not a fully reviewed world partition.
+The UI supports metric switching, a single requested-date slider and playback,
+independently resolved effective dates for measures, cities, and borders, a
+MapLibre/deck.gl choropleth, evidence-aware summaries, inspectors with original
+record locators, accessible tables, full-series CSVs, and URL-shareable state.
+Names appear on hover or click instead of as a dense label field. The Sources
+page exposes publication and acquisition status by data vertical. A new Review
+page exposes the 28 border-overlap and 353 cross-source city-identity candidates
+as read-only queues; it cannot silently merge or approve them.
+
+This remains a development release. Early Census values have global support
+only; they are not local density, country totals, household locations, or
+population assigned to historical polities. WPP uses modern source geography
+and Natural Earth only as display geometry. Historical polygons remain
+contestable political context rather than a reviewed, mutually exclusive world
+partition.
 
 ## Acquired sources and release profile
 
-All indicator inputs were retrieved from public World Bank API endpoints on
-2026-09-20. Exact URLs, byte counts, retrieval dates, and SHA-256 hashes are in
-`data/registry/source-lock.json`.
+Exact URLs, byte counts, retrieval dates, SHA-256 hashes, and publication roles
+are in `data/registry/source-lock.json`, the source registry, and the release
+manifest.
 
 | Input | Audited result |
 |---|---|
 | World Bank `SP.POP.TOTL` | 17,490 API rows for 1960–2025; publisher update 2026-07-13 |
 | World Bank `EG.ELC.ACCS.ZS` | 9,540 API rows for 1990–2025; actual non-null observation years end in 2024 |
 | World Bank `SP.DYN.LE00.IN` | 17,490 API rows for 1960–2025; actual non-null observation years end in 2024 |
-| World Bank country metadata | 295 entities; 217 remain after excluding the API's `Aggregates` region |
+| UN WPP 2024 Medium demographic indicators | 237 source-native countries/areas; 1950–2023 estimates and 2024–2100 Medium projections; aggregate rows and 2101 boundary rows excluded |
 | Natural Earth admin 0 | v5.1.2, 1:110m, 170 matched supports including explicit `KOS` → `XKX`; modern display only |
 | U.S. Census historical world-population table | 39 dates, 10,000 BCE–1950 CE; global source ranges and named estimates |
-| Cliopatria | v0.2.0; 13,765 source records (13,380 `POLITY`, 385 `RELATION`); 36 published display snapshots |
+| Cliopatria | v0.2.0; 13,765 source records; 36 published `POLITY`-only context snapshots |
 | Modelski Ancient Period Data | Figshare v2, CC BY 4.0; 154 city points, 41 sparse dates, 621 estimates |
 
-Population has 216 known entities from 1960–1989 and 217 from 1990 onward.
-Electricity coverage grows from 98 known entities in 1990 to 215 in 2024. No
-interpolation, extrapolation, rebasing, or carry-forward is used. The historical
-population adapter similarly publishes only dates present in the Census table.
-The Cliopatria resolver selects the latest snapshot at or before the requested
-date within the source's coverage; it does not interpolate geometry or extend
-the first/last snapshot outside 3400 BCE–2024 CE.
+No interpolation, extrapolation, rebasing, cross-release concatenation, or
+carry-forward is used. The WPP series is deliberately a parallel metric rather
+than a continuation of the World Bank series. Each WPP record is marked as an
+estimate or Medium projection, and the interface states that the projection is
+not an observation or confidence interval.
 
-For each population year, the release stores the covered-entity total, the
-separate `WLD` reference, their nonnegative unassigned residual, and unplaced-map
-population. For every electricity year, automated tests recompute with, without,
-and unknown access and prove they sum to the matching covered population.
-For every life-expectancy year, tests prove that the fixed-bin populations plus
-unknown condition equal the covered population; missing weights remain explicit.
+For every WPP year, tests compare the sum of the 237 selected country/area rows
+with the separate source `World` row and preserve the signed rounding residual.
+For every electricity year, tests recompute with, without, and unknown access
+and prove they sum to the matching covered population. For every life-expectancy
+year, tests prove the fixed-bin populations plus unknown condition equal the
+covered population. Missing values remain distinct from zero.
 
-In 2024 the release reports:
+The 2024 WPP outlook contains 8,161,972,586 people across the selected
+country/area rows. The separate source World row differs by -14 people after
+exact conversion from thousands, which is retained as the rounding residual;
+approximately 49.1 million people remain unplaced on the coarse modern display
+geometry. These are accounting facts, not corrections to the source.
 
-- covered population: 8,117,484,624;
-- estimated with electricity access: 7,460,609,613.284;
-- estimated without electricity access: 655,233,892.716;
-- population with unknown electricity condition: 1,641,118; and
-- population retained in summaries but unplaced on the 1:110m map: 23,205,807.
+## Candidate-source work
+
+- CShapes 2.0's official GeoJSON and codebook are pinned and profiled for
+  comparison only: 710 dated features, 1886–2019, and 11 invalid geometries.
+  Publication remains blocked by geometry repair/provenance work, omitted
+  codebook fields in the download, comparison with Cliopatria, and a product-use
+  decision for CC BY-NC-SA 4.0.
+- A genuine HYDE 3.5 10,000 BCE baseline archive, README, and license were
+  acquired through the provider's normal directory flow. The sample contains
+  population-count, density, rural, urban, and urban-other grids. It remains
+  unpublished because the archive license says CC BY-NC 4.0 while the README
+  says CC BY 3.0, the README's latest-year descriptions conflict, and the full
+  masks/scenarios and conservation checks are not yet acquired.
+- The official Maddison Project Database 2023 page and terms were rechecked.
+  The workbook remains unavailable because the official Dataverse request
+  returns an Anubis challenge page. No bypass was attempted and no income layer
+  was published.
 
 ## Architecture boundary
 
-The implementation retains three extension seams: source adapters, release
-contracts, and metric presentation metadata. Source parsing is isolated in
-`pipelines/atlas_etl/sources`; display geometry is independent of numerical
-accounting; historical political geometry has a separate typed contract and lazy
-loader; and the client performs one code/year join for modern published metrics.
-`pipelines/atlas_etl/catalog.py` keeps taxonomy families and metric contracts
-declarative. Build-time and browser-side manifest validators reject dangling
-taxonomy, population-universe, source-release, transformation, and artifact
-references. Each metric directly names its source releases. Population's
-changing support is represented by explicit period mappings and a null primary
-universe, rather than an undeclared pseudo-universe.
-The heavy map renderer is a separate lazy chunk, and neighboring political
-snapshots are prefetched after the active snapshot resolves.
-The release manifest carries taxonomy membership, population universe, supported
-years, display scale, interpretation limits, source releases, transformations,
-and output checksums.
+The implementation keeps source adapters, release contracts, and presentation
+metadata as small separate seams. Source parsing lives in
+`pipelines/atlas_etl/sources`; the catalog declares metric taxonomy, universe,
+and aggregation contracts; the release builder validates lineage and emits
+checksummed artifacts. Statistical geography, historical political geography,
+and display geometry are typed and loaded separately.
 
-Large raw responses remain ignored. The tracked, redistributable release is
-sufficient for install, tests, builds, and local development. Acquisition is an
-explicit command.
+WPP demonstrates the intended multi-source pattern: a new source release,
+population universe, transformation, observation artifact, summary artifact,
+and metric definition are added without changing World Bank observations or
+pretending their territorial systems are interchangeable. The review queue is
+a generated projection of immutable audit artifacts, not a source-of-truth
+decision store.
+
+Large raw responses remain ignored. The tracked, redistributable release and
+small review artifacts are sufficient for install, tests, builds, and local
+development. Full acquisition stays an explicit command.
 
 ## Checks actually run
 
 ```text
 npm run typecheck
 npm test
+python3 -m unittest discover -s pipelines/tests
 npm run build
 in-app browser desktop render and interaction checks
 ```
@@ -110,48 +126,28 @@ in-app browser desktop render and interaction checks
 Results:
 
 - Strict TypeScript: pass.
-- Vitest: 2 files, 23 tests, all pass.
-- Published release artifact checksums: pass for all 49 artifacts.
-- Population summaries: 66/66 recomputed; all reference residuals nonnegative.
-- Electricity summaries: 35/35 recomputed; all conserve population mass.
-- Life-expectancy summaries: 65/65 recomputed; all conserve the declared
-  population denominator across fixed bins plus unknown condition.
-- Electricity CSV: all 7,595 observation rows include their exact population
-  denominator value and both original record locators.
-- Production build: pass. Largest initial application JavaScript chunk 291.83 kB
-  uncompressed / 88.49 kB gzip; the 1,961.30 kB map renderer remains a separate
-  lazy chunk. CSS is 106.75 kB uncompressed / 15.91 kB gzip.
-- Desktop app: population, electricity, and life-expectancy views, deep-time
-  global ranges, one timeline, independent effective-date states, changing
-  historical borders/names, click/hover labels, 8 exact-date city estimates at
-  1000 BCE, unsupported-year state, tables, inspectors,
-  original record locators, shareable state, and the 18-entry Sources page
-  verified. The 1990 electricity map rendered known values with the intended
-  gold-to-green scale rather than a uniform gray. A 390 × 844 narrow-frame
-  browser check verified the mobile map controls and stacked timeline status.
-- Boundary QA: every one of the 36 snapshots has zero duplicate source feature
-  IDs, nonpositive source areas, unclosed rings, and invalid coordinate
-  positions. Topology/overlap review remains explicitly not computed.
-- Source expansion audit: official CC BY 4.0 Chandler v2 and Modelski Modern v2
-  CSVs were acquired and profiled. They remain unpublished because name and
-  coordinate overlaps do not supply a defensible city-identity crosswalk, and
-  Chandler contains two unresolved numeric-zero cells.
+- Vitest: 2 files, 26 tests, all pass.
+- Python unittest: 3 tests, all pass.
+- Published release artifact checksums: pass for all 51 artifacts.
+- Production build: pass. Main application JavaScript is 311.11 kB
+  uncompressed / 93.74 kB gzip; the 1,961.30 kB map renderer remains a separate
+  lazy chunk (540.52 kB gzip).
+- Browser checks: WPP 2023 renders as an estimate; 2024 renders as a Medium
+  projection with the non-observation warning; its map, evidence table, and
+  inspector render; Sources reports WPP as published; Review reports 28 border
+  and 353 city candidates and filters between queues.
+- Existing mass-conservation, missingness, original-locator, boundary-geometry,
+  and checksum tests continue to pass.
 
 ## Known limits and next source work
 
-The World Bank country API does not encode the parent/dependent-territory
-relationships needed to call the covered universe a fully reconciled world
-partition. Natural Earth omits small supports at this scale. The renderer is
-split from the initial application bundle, but remains large and should be
-monitored as map layers expand.
+The World Bank universe still requires parent/dependent-territory reconciliation.
+Natural Earth omits small supports at 1:110m. WPP projections are one source
+scenario, not observed history or uncertainty bounds. HYDE cannot enter a release
+until its license conflict, full artifact set, grid semantics, and conservation
+checks are resolved. CShapes cannot enter the public map until licensing and
+geometry/field defects are resolved. Review decisions need their own versioned,
+human-authored artifact before they can alter city identities or border display.
 
-UN World Population Prospects 2024 is the next detailed modern population-source
-candidate; it is documented but not ingested until its exact artifact terms,
-estimate/projection scenarios, and geography crosswalks are audited. HYDE remains
-blocked for gridded deep-time population. The next Cliopatria work is overlap,
-nesting, geometry-validity, and disputed-boundary review—not assigning the Census
-world total to its polygons. The official Maddison 2023 workbook download is
-currently blocked by DataverseNL's anti-bot challenge; no bypass was attempted,
-and no GDP-per-capita layer was published without its required source-sheet
-citations. See `MVP_SOURCE_SELECTION.md`, `CITY_SOURCE_AUDIT.md`,
+See `MVP_SOURCE_SELECTION.md`, `CITY_SOURCE_AUDIT.md`,
 `EVIDENCE_INTEGRATION.md`, and `DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.

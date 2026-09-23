@@ -1,6 +1,6 @@
 # Source dossier
 
-**Checked: September 21, 2026.** This dossier mixes implemented release inputs
+**Checked: September 22, 2026.** This dossier mixes implemented release inputs
 with documentation-level candidates. Each section states its acquisition status.
 “Checked license” means the cited publisher page states that license;
 implementation must save the terms applying to the exact acquired artifact.
@@ -45,10 +45,12 @@ populations are identical.
   `3711f963c05d0be80d53e5923308a6dee31b203da23435c9cfb7c7b6e4dd5e19`.
   It is **CC BY-NC 4.0**, so Atlas must confirm compatible noncommercial use or
   obtain permission before publishing a HYDE-derived product.
-- No HYDE population data artifact has been acquired. Exact variables, years,
-  units, masks, and scenario semantics remain unverified. The first safe step is
-  one baseline population artifact plus its README, not a multi-gigabyte bulk
-  mirror. The contract is in `data/review/hyde-3.5-ingestion-contract.json`.
+- The README and `10000BC_pop.zip` baseline sample are now acquired and profiled.
+  Its population-count grid sums to about 4.487 million modeled inhabitants
+  before source-total/mask reconciliation. The archive `License.txt` says CC
+  BY-NC 4.0, while the README says CC BY 3.0; this conflict blocks publication.
+  The README also mentions a 2025 extension while its coverage sentence ends in
+  2023. See `data/review/hyde-3.5-sample-profile.json`.
 
 The [HYDE 3.2 methods paper, §2.1](https://essd.copernicus.org/articles/9/927/2017/essd-9-927-2017.pdf) describes historical totals assigned to fixed contemporary administrative units, then spatially allocated. This warns against treating fine cells as direct archaeological observations or intrinsically boundary-neutral evidence. It is a methodological warning from 3.2, not proof that every 3.5 implementation detail is unchanged.
 
@@ -167,11 +169,13 @@ Period life expectancy is a synthetic life-table measure, not an observed distri
   It contains 84,360 rows, 67 columns, 555 location IDs, 237 ISO3 codes, and no
   duplicate location/year/variant keys. `Country/Area` accounts for 36,024 rows;
   the file also includes regional and special aggregates.
-- Status: acquired and profiled, not published. Estimates for 1950–2023,
-  projections for 2024–2100, and 555 artifact boundary rows for 2101 are kept
-  separate. Exact bulk-data license and population units still need artifact
-  metadata; country/area selection, territories, and overlap with World Bank
-  require explicit policy before publication.
+- Published status (release r5): the official download page states that July
+  population is in thousands and makes WPP 2024 available under CC BY 3.0 IGO.
+  Atlas publishes only the 237 `Country/Area` series from 1950–2100, converts
+  exactly to people, excludes all aggregates and 2101 boundary rows, and labels
+  1950–2023 estimates separately from 2024–2100 Medium projections. The signed
+  World-row rounding residual is retained. WPP remains a parallel source-native
+  metric and is not spliced into World Bank population.
 
 ## S13 — CShapes 2.0: dated modern state geometry
 
@@ -180,8 +184,12 @@ Period life expectancy is a synthetic life-table measure, not an observed distri
   capitals from 1886–2019 globally, with European coverage from 1816.
 - Two alternative international-system universes are supplied: Gleditsch–Ward
   and Correlates of War. Atlas must select and label one rather than merge them.
-- Status: candidate comparison layer. Pin the exact artifact and license, then
-  audit dependent territories and undefined or disputed boundary handling.
+- Status: the official Gleditsch–Ward GeoJSON and codebook are pinned for a
+  comparison-only audit. The profile finds 710 dated features, 252 GW codes,
+  coverage from 1886-01-01 through 2019-12-31, and 11 invalid geometries. The
+  GeoJSON omits status, ruler, border-definition, and feature-ID fields described
+  by the codebook. CC BY-NC-SA 4.0 product-use review, geometry repair policy,
+  and Cliopatria precedence remain publication gates.
 
 CShapes can validate recent historical transitions but is not a universal
 ontology of political belonging, and it does not solve ancient geometry.

@@ -51,6 +51,7 @@ function releaseRole(id: string): string {
   if (id.startsWith('us-census')) return 'Deep-time global population estimates and source ranges';
   if (id.startsWith('cliopatria')) return 'Historical political context geometry and names';
   if (id.startsWith('reba-modelski')) return 'Sparse exact-date ancient city population points';
+  if (id.startsWith('un-wpp')) return 'Separate annual population estimates and Medium projections';
   return 'Modern display geometry only';
 }
 

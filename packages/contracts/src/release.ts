@@ -1,6 +1,10 @@
 import type { AggregationKind, ValueStatus } from './types';
 
-export type MvpMetricId = 'population_total' | 'access_to_electricity' | 'life_expectancy_at_birth';
+export type MvpMetricId =
+  | 'population_total'
+  | 'population_outlook'
+  | 'access_to_electricity'
+  | 'life_expectancy_at_birth';
 
 export interface AtlasEntity {
   code: string;
@@ -164,6 +168,47 @@ export interface PopulationDataset {
   summaries: PopulationSummary[];
 }
 
+export type PopulationEvidenceState = 'estimate' | 'medium_projection';
+
+export interface PopulationOutlookEntity extends AtlasEntity {
+  source_location_id: string;
+}
+
+export interface PopulationOutlookObservation extends PopulationObservation {
+  value: number;
+  status: 'known';
+  evidence_state: PopulationEvidenceState;
+  source_location_id: string;
+}
+
+export interface PopulationOutlookSummary {
+  year: number;
+  evidence_state: PopulationEvidenceState;
+  source_country_area_count: number;
+  total_population: number;
+  world_reference_population: number;
+  world_reference_rounding_residual: number;
+  mapped_population: number;
+  unplaced_population: number;
+}
+
+export interface PopulationOutlookDataset {
+  schema_version: string;
+  metric_id: 'population_outlook';
+  source_release_id: string;
+  population_universe_id: string;
+  variant: 'Medium';
+  reference_date: '1 July';
+  source_unit: 'thousands of people';
+  published_unit: 'people';
+  estimate_years: [number, number];
+  projection_years: [number, number];
+  years: number[];
+  entities: PopulationOutlookEntity[];
+  observations: PopulationOutlookObservation[];
+  summaries: PopulationOutlookSummary[];
+}
+
 export interface HistoricalPopulationObservation {
   year: number;
   source_year_label: string;
@@ -305,6 +350,7 @@ export interface ViewRow {
   metricValue: number | null;
   metricStatus: Extract<ValueStatus, 'known' | 'unknown'>;
   metricRecordLocator: string | null;
+  metricEvidenceState?: PopulationEvidenceState;
 }
 
 export function assertSupportedYear(metric: PublishedMetric, year: number): void {

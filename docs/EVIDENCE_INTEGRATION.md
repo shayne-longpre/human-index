@@ -25,7 +25,7 @@ signals:
 - **In release:** the vertical link names an ID in the active release manifest;
 - **Outstanding:** the source registry still has concrete blockers.
 
-A source can therefore be acquired but unpublished (UN WPP 2024), or published
+A source can therefore be acquired but unpublished (the CShapes comparison artifact), or published
 for a bounded role while broader use remains blocked (Cliopatria polygons are
 published as context but cannot yet support population allocation). This avoids
 one misleading catch-all “ingested” flag.
@@ -85,6 +85,10 @@ and checksummed outputs. There are three common patterns:
 3. **Reviewed crosswalk.** A future source with different entity or territorial
    units needs an explicit dated crosswalk with unresolved and ambiguous states.
    It cannot be admitted by fuzzy name matching.
+4. **Parallel source-native metric.** UN WPP uses its own 237-Country/Area
+   universe, date semantics, and reconciliation reference. It is publishable
+   beside World Bank population without asserting that the two territorial
+   universes or series definitions are interchangeable.
 
 Multiple sources for the same concept remain distinguishable until a reviewed
 harmonization transformation establishes compatible units, geography, time,
@@ -99,6 +103,7 @@ own published policy:
 | Layer | Policy | UI behavior |
 |---|---|---|
 | Population and condition measures | `exact_only` | No value at an unsupported year; offer a clearly labeled nearest-date action. |
+| UN population outlook | exact annual source dates plus per-observation evidence state | Label 1950–2023 as estimates and 2024–2100 as the Medium projection; never call projections observations or confidence intervals. |
 | Historical city estimates | `exact_only` | Show points only at the source date. |
 | Political context | latest published snapshot not after the request, within source coverage | Show the effective snapshot date; never extend before the first or after the last snapshot. |
 | Future modeled surfaces | `explicit_model` only | Show model/scenario and effective date; never present a model as an observation. |
@@ -147,14 +152,17 @@ decision without pretending that it has passed publication review:
 - the Cliopatria bounded topology candidates;
 - 353 unreviewed city-identity candidates across Modelski Ancient, Chandler,
   and Modelski Modern;
-- an 84,360-row UN WPP acquisition profile that keeps 1950–2023 estimates,
-  2024–2100 medium projections, and the file's 2101 boundary rows separate; and
-- the HYDE 3.5 ingestion contract, including its CC BY-NC 4.0 product gate and
-  mass-conservation requirements.
+- an 84,360-row UN WPP acquisition profile supporting the separately published
+  WPP metric while retaining its excluded aggregates and 2101 boundary rows;
+- a HYDE 3.5 README and 10,000 BCE baseline sample profile that exposes a
+  provider license conflict and the remaining mass/mask gates; and
+- a CShapes 2.0 Gleditsch–Ward profile that records 710 features, 11 invalid
+  geometries, omitted codebook fields, and its noncommercial/share-alike gate.
 
-Review artifacts can be regenerated from ignored raw files. They do not enter
-the browser's evidence release, metric list, or numerical summaries merely by
-existing.
+Review artifacts can be regenerated from ignored raw files. A generated subset
+is exposed on the read-only Review page; it still does not alter any release
+observation or geometry. Publication requires a separate reviewed decision or
+release transformation.
 
 ## Adding one source or metric
 
@@ -183,18 +191,18 @@ creates a measured need.
 
 ## Current blockers and next evidence work
 
-- HYDE 3.5's provider directory and CC BY-NC 4.0 license file are now profiled,
-  but no population artifact has been acquired. One baseline artifact, its
-  README, the product's compatibility with noncommercial terms, variables,
-  units, masks, dates, and scenarios remain gates. The Census world series is
-  not a substitute population surface.
+- HYDE 3.5's README and one 10,000 BCE baseline population bundle are now
+  profiled. The archive `License.txt` says CC BY-NC 4.0 while the README says
+  CC BY 3.0; Utrecht clarification, product-use review, general masks, scenario
+  samples, and population mass reconciliation remain gates.
 - Companion Chandler and Modelski Modern city tables now have conservative
   candidate links, but all 353 require evidence-backed review. They also need a
   source-disagreement display and resolution of two Chandler zero cells before
   publication.
-- UN WPP 2024's medium demographic-indicators artifact is pinned and profiled.
-  Exact bulk-data terms and units, aggregate exclusion, territories, 2101
-  boundary rows, and overlap with World Bank remain unresolved.
+- UN WPP 2024 is now published separately: the official page establishes
+  thousand-person July units and CC BY 3.0 IGO; 237 Country/Area series exclude
+  aggregates and 2101, and every observation is labeled estimate or Medium
+  projection. It remains intentionally unmerged with World Bank.
 - Maddison Project Database can support a territorial GDP-per-capita context
   distribution, not individual income. Its workbook, source sheet, PPP basis,
   entity codes, and citations must be audited before publication.

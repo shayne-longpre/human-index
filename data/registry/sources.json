@@ -36,23 +36,25 @@
       "candidate_release": "3.5",
       "coverage_start": "10000 BCE",
       "coverage_end": "2025 CE",
-      "license": "CC-BY-NC-4.0",
-      "license_status": "provider_license_file_acquired_noncommercial_restriction_requires_product_review",
+      "license": null,
+      "license_status": "provider_archive_license_conflicts_with_dataset_readme_requires_clarification",
       "urls": [
         "https://landuse.sites.uu.nl/datasets/",
         "https://public.yoda.uu.nl/geo/UU01/F45D44.html",
         "https://geo.public.data.uu.nl/vault-hyde/hyde35_c9_apr2025%5B1749214444%5D/"
       ],
       "blockers": [
-        "acquire_readme_and_one_selected_population_artifact",
-        "confirm_atlas_use_is_compatible_with_noncommercial_terms_or_obtain_permission",
-        "verify_population_count_vs_density_units_years_nodata_masks_and_scenarios"
+        "resolve_archive_license_CC_BY_NC_4_0_vs_readme_CC_BY_3_0_conflict_with_provider",
+        "confirm_atlas_use_if_noncommercial_restriction_controls",
+        "reconcile_readme_2023_coverage_sentence_with_directory_and_extension_to_2025",
+        "acquire_general_masks_country_codes_and_selected_baseline_lower_upper_series",
+        "validate_grid_population_totals_nodata_land_masks_and_scenario_semantics"
       ],
-      "notes": "The provider directory was navigated successfully and exposes baseline, lower, and upper branches plus per-variable and per-year downloads. Its downloaded License.txt is CC BY-NC 4.0 (SHA-256 recorded below). Automated curl access still receives the provider's Anubis challenge, and no HYDE population values have been acquired or published. The tracked ingestion contract records the exact remaining semantic and conservation gates.",
-      "checked_at": "2026-09-21",
-      "verification_level": "directory_and_license_profiled_data_artifact_not_acquired",
-      "downloaded": false,
-      "artifact_sha256": null,
+      "notes": "The official README and one 10,000 BCE baseline population bundle were acquired through the provider's normal browser flow. The sample contains five 5-arc-minute grids; the population-count grid has 4,487,003.996 modeled inhabitants across 2,215,829 non-NODATA cells. Nothing is published: the archive License.txt says CC BY-NC 4.0 while the README says CC BY 3.0, and the README simultaneously mentions a 2025 extension and a coverage sentence ending in 2023. Provider clarification, masks, scenario samples, and mass reconciliation remain required.",
+      "checked_at": "2026-09-22",
+      "verification_level": "documentation_and_one_baseline_population_bundle_profiled_not_published",
+      "downloaded": true,
+      "artifact_sha256": "e639bc64590934c4a199b905c193965a76030a3b14aca0c08caa0b89e131259b",
       "terms_snapshot_sha256": "3711f963c05d0be80d53e5923308a6dee31b203da23435c9cfb7c7b6e4dd5e19",
       "release_ready": false
     },
@@ -64,26 +66,21 @@
       "candidate_release": "2024",
       "coverage_start": "1950 CE",
       "coverage_end": "2100 CE",
-      "license": null,
-      "license_status": "official_bulk_artifact_acquired_exact_dataset_terms_require_audit",
+      "license": "CC-BY-3.0-IGO",
+      "license_status": "official_download_page_checked",
       "urls": [
         "https://population.un.org/wpp/",
         "https://www.un.org/development/desa/pd/content/World-Population-Prospects-2024",
         "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Demographic_Indicators_Medium.csv.gz"
       ],
-      "blockers": [
-        "verify_bulk_artifact_license_and_population_unit_from_source_metadata",
-        "separate_estimates_1950_2023_from_medium_projections_2024_2100",
-        "audit_2101_boundary_rows_aggregates_territories_and_crosswalks",
-        "define_overlap_policy_with_world_bank_population"
-      ],
-      "notes": "Official medium demographic-indicators CSV acquired and profiled: 84,360 rows, 67 columns, 555 location IDs, 237 ISO3 codes, and no duplicate location/year/variant keys. It contains 237 Country/Area series plus many aggregate series. Estimates (1950-2023), projections (2024-2100), and 555 boundary rows for 2101 remain explicitly separated. It is intentionally not merged into the World Bank release until units, terms, territorial support, and overlap policy pass review.",
-      "checked_at": "2026-09-21",
-      "verification_level": "artifact_acquired_and_profiled_not_published",
+      "blockers": [],
+      "notes": "Official medium demographic-indicators CSV acquired, profiled, and published as a separate source-native metric: 237 Country/Area series annually from 1950 through 2100. The official download page establishes that TPopulation1July is in thousands and licenses the material under CC BY 3.0 IGO. Atlas converts exactly to people, excludes aggregate and 2101 boundary rows, marks 1950-2023 estimates versus 2024-2100 Medium projections, preserves the World rounding residual, and does not splice the series into World Bank population.",
+      "checked_at": "2026-09-22",
+      "verification_level": "artifact_acquired_profiled_and_fixture_published",
       "downloaded": true,
       "artifact_sha256": "286ac36bb1415e2e1ade03acfef0a29f0e4c087e2f78e38c48f50c5df89082bc",
       "terms_snapshot_sha256": null,
-      "release_ready": false
+      "release_ready": true
     },
     {
       "id": "world_bank_electricity",
@@ -134,8 +131,8 @@
         "read_source_sheet",
         "verify_units_ppp_and_territories"
       ],
-      "notes": "The University of Groningen release page verifies MPD 2023, 169 countries, coverage through 2022, CC BY 4.0, and a requirement to cite original papers from the workbook source sheet for graphical use. The official DataverseNL Excel download returned its Anubis anti-bot challenge on 2026-09-20; no bypass was attempted. This is territorial GDP-per-capita context, not individual income.",
-      "checked_at": "2026-09-20",
+      "notes": "The University of Groningen release page verifies MPD 2023, 169 countries, coverage through 2022, CC BY 4.0, and a requirement to cite original papers from the workbook source sheet for graphical use. A normal browser download and direct official file request were retried on 2026-09-22; DataverseNL still returned its Anubis protection page rather than the workbook, and no bypass was attempted. This is territorial GDP-per-capita context, not individual income.",
+      "checked_at": "2026-09-22",
       "verification_level": "documentation_only",
       "downloaded": false,
       "artifact_sha256": null,
@@ -286,22 +283,24 @@
       "candidate_release": "2.0",
       "coverage_start": "1886 CE globally; 1816 CE for Europe",
       "coverage_end": "2019 CE",
-      "license": null,
-      "license_status": "exact_download_terms_require_audit",
+      "license": "CC-BY-NC-SA-4.0",
+      "license_status": "official_dataset_page_checked_noncommercial_sharealike_restriction_requires_product_review",
       "urls": [
         "https://icr.ethz.ch/data/cshapes/",
         "https://icr.ethz.ch/data/cshapes/CShapes-2.0_Codebook.pdf"
       ],
       "blockers": [
-        "pin_artifact_and_license",
-        "select_gleditsch_ward_or_correlates_of_war_universe",
-        "audit_dependent_territories_and_undefined_borders"
+        "confirm_atlas_use_is_compatible_with_noncommercial_sharealike_terms_or_obtain_permission",
+        "repair_or_explicitly_exclude_11_invalid_geometries_with_recorded_provenance",
+        "audit_dates_names_and_undefined_borders_against_codebook_and_cited_sources",
+        "resolve_downloaded_geojson_omission_of_status_ruledby_border_definition_and_feature_ids",
+        "compare_overlap_and_layer_precedence_with_cliopatria"
       ],
-      "notes": "Strong modern historical-boundary complement to Cliopatria; includes dated state and dependent-territory geometry but uses an international-system coding universe, not a universal map of human political belonging.",
-      "checked_at": "2026-09-20",
-      "verification_level": "documentation_only",
-      "downloaded": false,
-      "artifact_sha256": null,
+      "notes": "Official CShapes 2.0 Gleditsch-Ward GeoJSON and codebook are pinned and profiled for comparison only: 710 dated geometry features, including 11 invalid geometries. CShapes maps independent states and dependent territories from 1886-2019, but is an international-system coding universe rather than a universal map of political belonging. The downloaded GeoJSON lacks several codebook fields needed for defensible dependency and undefined-border rendering, and its CC BY-NC-SA terms require a product-use decision before publication.",
+      "checked_at": "2026-09-22",
+      "verification_level": "artifacts_acquired_and_profiled_comparison_only",
+      "downloaded": true,
+      "artifact_sha256": "384b1ea90b9419f30a858d7ec237c85a22c60d1b35b5f85f215a1204f9989d42",
       "terms_snapshot_sha256": null,
       "release_ready": false
     },
@@ -499,7 +498,7 @@
         {
           "source_id": "un_wpp_2024",
           "role": "Detailed estimates and projections",
-          "release_ids": []
+          "release_ids": ["un-wpp-2024-medium-demographic-indicators"]
         },
         {
           "source_id": "hyde",

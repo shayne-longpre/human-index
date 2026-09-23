@@ -17,6 +17,13 @@ export const metricViews: Record<MvpMetricId, MetricView> = {
     legendAria: 'Population total color scale from ten thousand to two billion people on a logarithmic scale',
     legendClass: 'legend-ramp-population',
   },
+  population_outlook: {
+    mapCaption: 'UN Country / Area total · 1 July',
+    mapCaution: '2024 onward is the UN Medium projection.',
+    legendLabels: ['10K', '1M', '100M', '500M', '2B'],
+    legendAria: 'UN population total color scale from ten thousand to two billion people on a logarithmic scale',
+    legendClass: 'legend-ramp-population',
+  },
   access_to_electricity: {
     mapCaption: 'National / territorial estimate',
     mapCaution: 'Color does not identify local households.',
@@ -59,7 +66,7 @@ function populationColor(value: number | null): Rgba {
 }
 
 export function metricColor(metricId: MvpMetricId, value: number | null): Rgba {
-  if (metricId === 'population_total') return populationColor(value);
+  if (metricId === 'population_total' || metricId === 'population_outlook') return populationColor(value);
   if (metricId === 'access_to_electricity') return electricityColor(value);
   if (value === null) return unknownColor;
   return electricityColor((Math.max(45, Math.min(90, value)) - 45) / 45 * 100);
@@ -67,7 +74,7 @@ export function metricColor(metricId: MvpMetricId, value: number | null): Rgba {
 
 export function formatMetricValue(metric: PublishedMetric, value: number | null): string {
   if (value === null) return 'Unknown';
-  if (metric.id === 'population_total') return `${formatInteger(value)} people`;
+  if (metric.id === 'population_total' || metric.id === 'population_outlook') return `${formatInteger(value)} people`;
   if (metric.id === 'access_to_electricity') return formatPercent(value);
   return `${value.toFixed(1)} years`;
 }

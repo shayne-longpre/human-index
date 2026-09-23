@@ -53,6 +53,28 @@ export const populationTotalMetric: MetricDefinition = {
   globalSummaryEnabled: true,
 };
 
+export const populationOutlookMetric: MetricDefinition = {
+  id: 'population_outlook',
+  label: 'UN population outlook',
+  taxonomyIds: ['population_and_settlement'],
+  definition: 'UN WPP 2024 July population estimates and Medium projections, with source states kept distinct.',
+  unit: 'people',
+  aggregationKind: 'population_total',
+  statisticalUniverse: '237 UN WPP Country/Area series',
+  sourceSupportType: 'un_wpp_country_or_area_year',
+  contextVsIndividual: 'population',
+  comparabilityGroup: 'un-wpp-2024-medium-population-1-july',
+  temporalPolicy: 'exact_only',
+  displayScale: {
+    transform: 'log1p',
+    fixedDomain: [10_000, 2_000_000_000],
+    scaleVersion: 'population-country-total-v1',
+  },
+  summarySentenceTemplate: 'UN country/area population estimates and Medium projections at exact annual dates.',
+  prohibitedInterpretations: ['observed census counts', 'statistical confidence intervals', 'local population density'],
+  globalSummaryEnabled: true,
+};
+
 export const lifeExpectancyMetric: MetricDefinition = {
   id: 'life_expectancy_at_birth',
   label: 'Life expectancy',
@@ -82,10 +104,15 @@ export const lifeExpectancyMetric: MetricDefinition = {
   globalSummaryEnabled: true,
 };
 
-export const metricDefinitions = [populationTotalMetric, electricityAccessMetric, lifeExpectancyMetric] as const;
+export const metricDefinitions = [
+  populationTotalMetric,
+  populationOutlookMetric,
+  electricityAccessMetric,
+  lifeExpectancyMetric,
+] as const;
 
 export const metricTaxonomy = {
-  population_and_settlement: [populationTotalMetric.id],
+  population_and_settlement: [populationTotalMetric.id, populationOutlookMetric.id],
   material_conditions: [electricityAccessMetric.id],
   infrastructure_access: [electricityAccessMetric.id],
   health_and_survival: [lifeExpectancyMetric.id],

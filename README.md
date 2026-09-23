@@ -15,13 +15,16 @@ This is not a leaderboard of civilizations, a single “progress” score, or a 
 
 **A working first genuine-data development release now exists.**
 
-The application now presents three genuine-data measures plus two independent
+The application now presents four genuine-data measures plus two independent
 historical context layers in one timeline:
 
 - U.S. Census Bureau world-population estimate ranges at 39 published dates from
   10,000 BCE through 1950 CE;
 - annual World Bank population totals for 217 nonaggregate country/territory
   series from 1960–2025; and
+- a separate UN WPP 2024 population outlook for 237 Country/Area series,
+  preserving 1950–2023 modeled estimates and 2024–2100 Medium projections as
+  different evidence states; and
 - annual electricity access for every observed source year from 1990–2024,
   summarized with matching annual population weights; and
 - World Bank life expectancy from 1960–2024, shown as a territorial mean and a
@@ -42,15 +45,19 @@ coverage, and limitations are recorded in the release manifest and
 
 The application also includes a dedicated **Sources** page covering both the
 inputs published in the current release and the wider research registry. Atlas
-state is shareable through `metric`, `year`, and `place` URL parameters.
+state is shareable through `metric`, `year`, and `place` URL parameters. A
+read-only **Review** page exposes the current border-overlap and city-identity
+candidates without treating them as accepted edits.
 
 The early population view preserves the Census table's disagreement range and
 underlying named estimates; it is not a confidence interval or a gridded
 reconstruction. World Bank population remains the pragmatic modern source because
 it shares the electricity series' statistical geography. UN World Population
-Prospects 2024 is documented as the more detailed modern expansion source. HYDE
-3.5 remains blocked for gridded deep-time population pending authorized archive
-access and artifact-term verification.
+Prospects 2024 is published as a separate source-native measure rather than
+silently spliced into World Bank population. One HYDE 3.5 baseline population
+bundle is now acquired and profiled, but the archive license conflicts with its
+README and the grid remains unpublished pending clarification and full
+mass/mask validation.
 
 ## Run the application
 

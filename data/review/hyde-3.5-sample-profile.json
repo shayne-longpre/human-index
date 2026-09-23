@@ -1,0 +1,74 @@
+{
+  "schema_version": "0.1.0",
+  "review_status": "documentation_and_one_baseline_population_bundle_profiled_not_published",
+  "source": {
+    "id": "hyde-3.5-march-2025",
+    "scenario": "baseline",
+    "sample_year": "10000 BCE",
+    "provider_directory": "https://geo.public.data.uu.nl/vault-hyde/hyde35_c9_apr2025%5B1749214444%5D/"
+  },
+  "artifacts": {
+    "license": {
+      "filename": "License.txt",
+      "bytes": 19346,
+      "sha256": "3711f963c05d0be80d53e5923308a6dee31b203da23435c9cfb7c7b6e4dd5e19"
+    },
+    "readme": {
+      "filename": "readme_HYDE_3.5.txt",
+      "bytes": 11032,
+      "sha256": "28509c00c3feab730f70b4a2a58488427f070d7f0f0e4f0d5b31a9b9318a732b"
+    },
+    "population_sample": {
+      "filename": "10000BC_pop.zip",
+      "bytes": 34128612,
+      "sha256": "e639bc64590934c4a199b905c193965a76030a3b14aca0c08caa0b89e131259b"
+    }
+  },
+  "documented_semantics": {
+    "resolution": "5 arc minutes",
+    "population_count_unit": "inhabitants per grid cell",
+    "population_density_unit": "inhabitants per square kilometre per grid cell",
+    "scenarios": [
+      "baseline",
+      "lower",
+      "upper"
+    ],
+    "sample_bundle_members": [
+      "popc_10000BC.asc",
+      "popd_10000BC.asc",
+      "rurc_10000BC.asc",
+      "uopp_10000BC.asc",
+      "urbc_10000BC.asc"
+    ],
+    "readme_mentions_extension_to_2025": true,
+    "readme_coverage_sentence_still_ends_2023": true
+  },
+  "population_count_grid_profile": {
+    "header": {
+      "ncols": 4320,
+      "nrows": 2160,
+      "xllcorner": -180.0,
+      "yllcorner": -90.0,
+      "cellsize_degrees": 0.0833333,
+      "nodata_value": -9999.0
+    },
+    "populated_cells": 2215829,
+    "nodata_cells": 7115371,
+    "minimum_inhabitants_per_cell": 0.0,
+    "maximum_inhabitants_per_cell": 4134.510289219999,
+    "sum_inhabitants": 4487003.995882432,
+    "sum_status": "profile_only_requires_source_total_and_mask_reconciliation"
+  },
+  "terms_conflict": {
+    "archive_license_file": "CC BY-NC 4.0",
+    "readme_statement": "CC BY 3.0",
+    "status": "provider_clarification_required"
+  },
+  "publication_blockers": [
+    "resolve_archive_license_CC_BY_NC_4_0_vs_readme_CC_BY_3_0_conflict_with_provider",
+    "confirm_product_use_if_noncommercial_restriction_controls",
+    "reconcile_readme_2023_coverage_sentence_with_directory_and_extension_to_2025",
+    "acquire_general_masks_country_codes_and_selected_baseline_lower_upper_series",
+    "validate_grid_population_totals_nodata_land_masks_and_scenario_semantics_before_spatial_publication"
+  ]
+}

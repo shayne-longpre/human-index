@@ -11,6 +11,11 @@ interface InspectorProps {
 
 export function Inspector({ row, metric, manifest, onClose }: InspectorProps) {
   if (!row) return null;
+  const universeId = metric.population_universe_id
+    ?? metric.population_universe_periods?.find(
+      (period) => row.year >= period.start_year && row.year <= period.end_year,
+    )?.population_universe_id;
+  const universe = manifest.population_universes.find((candidate) => candidate.id === universeId);
   return (
     <aside className="inspector" aria-labelledby="inspector-title">
       <button className="icon-button inspector-close" type="button" onClick={onClose} aria-label="Close inspector">
@@ -27,7 +32,7 @@ export function Inspector({ row, metric, manifest, onClose }: InspectorProps) {
           <dt>Effective date</dt>
           <dd>{formatAstronomicalYear(row.year)}</dd>
         </div>
-        {metric.id !== 'population_total' ? (
+        {metric.aggregation_kind !== 'population_total' ? (
           <div>
             <dt>Population weight</dt>
             <dd>{row.population?.value === null || !row.population ? 'Unknown' : formatPeople(row.population.value)}</dd>
@@ -35,8 +40,14 @@ export function Inspector({ row, metric, manifest, onClose }: InspectorProps) {
         ) : null}
         <div>
           <dt>Statistical support</dt>
-          <dd>World Bank country or territory estimate</dd>
+          <dd>{metric.id === 'population_outlook' ? 'UN WPP Country/Area series' : 'World Bank country or territory estimate'}</dd>
         </div>
+        {row.metricEvidenceState ? (
+          <div>
+            <dt>Evidence state</dt>
+            <dd>{row.metricEvidenceState === 'medium_projection' ? 'UN Medium projection' : 'UN population estimate'}</dd>
+          </div>
+        ) : null}
         <div>
           <dt>Map placement</dt>
           <dd>{row.entity.map_status === 'placed' ? 'Natural Earth 1:110m geometry' : 'Unplaced at this map scale'}</dd>
@@ -45,7 +56,7 @@ export function Inspector({ row, metric, manifest, onClose }: InspectorProps) {
           <dt>Metric record</dt>
           <dd>{row.metricRecordLocator ?? 'No published observation for this year'}</dd>
         </div>
-        {metric.id !== 'population_total' ? (
+        {metric.aggregation_kind !== 'population_total' ? (
           <div>
             <dt>Population record</dt>
             <dd>{row.population?.original_record_locator ?? 'No published population observation'}</dd>
@@ -59,7 +70,7 @@ export function Inspector({ row, metric, manifest, onClose }: InspectorProps) {
       <div className="inspector-source">
         <span className="eyebrow">Source release</span>
         <p>{manifest.release_id}</p>
-        <span>{formatInteger(manifest.population_universes[0].entity_count)} statistical supports</span>
+        <span>{universe ? `${formatInteger(universe.entity_count)} statistical supports` : 'Date-specific statistical support'}</span>
       </div>
     </aside>
   );

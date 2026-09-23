@@ -1,0 +1,28 @@
+{
+  "schema_version": "0.1.0",
+  "review_status": "official_release_verified_workbook_not_acquired",
+  "checked_at": "2026-09-22",
+  "source": {
+    "release_page": "https://www.rug.nl/ggdc/historicaldevelopment/maddison/releases/maddison-project-database-2023?lang=en",
+    "dataset_doi": "https://doi.org/10.34894/INZBF2",
+    "excel_file_endpoint": "https://dataverse.nl/api/access/datafile/421302"
+  },
+  "verified_release_metadata": {
+    "version": "2023",
+    "country_count": 169,
+    "coverage_end_year": 2022,
+    "license": "CC BY 4.0",
+    "source_sheet_required_for_original_paper_attribution": true
+  },
+  "acquisition_attempt": {
+    "normal_browser_result": "download_not_started_endpoint_blocked_by_client",
+    "direct_http_result": "HTTP_200_anti_bot_HTML_not_workbook",
+    "protection": "Anubis",
+    "bypass_attempted": false
+  },
+  "publication_blockers": [
+    "authorized_workbook_access_through_dataversenl_antibot",
+    "read_and_preserve_workbook_source_sheet_attributions",
+    "verify_GDP_per_capita_units_PPP_bases_geographic_support_and_missingness"
+  ]
+}

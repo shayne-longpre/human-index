@@ -7,6 +7,7 @@ import {
   validateAtlasReleaseManifest,
   type MvpMetricId,
   type LifeExpectancyDataset,
+  type PopulationOutlookDataset,
   type PublishedMetric,
   type ViewRow,
 } from '@atlas/contracts';
@@ -21,7 +22,9 @@ import type { HistoricalCityPoint } from './components/MapView';
 import { LifeExpectancyDistribution } from './components/LifeExpectancyDistribution';
 import { PopulationBar } from './components/PopulationBar';
 import { PopulationTimeline } from './components/PopulationTimeline';
+import { PopulationOutlookSummary } from './components/PopulationOutlookSummary';
 import { SourcesPage } from './components/SourcesPage';
+import { ReviewPage } from './components/ReviewPage';
 import {
   downloadUrl,
   historicalPopulationDownloadUrl,
@@ -46,12 +49,21 @@ function buildRows(
   dataset: MetricDataset | undefined,
   year: number,
 ): ViewRow[] {
+  const outlook = dataset?.metric_id === 'population_outlook'
+    ? dataset as PopulationOutlookDataset
+    : null;
+  const populationObservations = outlook?.observations ?? release.population.observations;
   const populationByCode = new Map(
-    release.population.observations
+    populationObservations
       .filter((observation) => observation.year === year)
       .map((observation) => [observation.code, observation]),
   );
-  const metricByCode = new Map<string, { value: number | null; status: 'known' | 'unknown'; locator: string }>();
+  const metricByCode = new Map<string, {
+    value: number | null;
+    status: 'known' | 'unknown';
+    locator: string;
+    evidenceState?: 'estimate' | 'medium_projection';
+  }>();
 
   if (metric.id === 'population_total') {
     for (const observation of populationByCode.values()) {
@@ -59,6 +71,16 @@ function buildRows(
         value: observation.value,
         status: observation.status,
         locator: observation.original_record_locator,
+      });
+    }
+  } else if (outlook) {
+    for (const observation of outlook.observations) {
+      if (observation.year !== year) continue;
+      metricByCode.set(observation.code, {
+        value: observation.value,
+        status: observation.status,
+        locator: observation.original_record_locator,
+        evidenceState: observation.evidence_state,
       });
     }
   } else if (dataset?.metric_id === 'access_to_electricity') {
@@ -83,7 +105,7 @@ function buildRows(
     }
   }
 
-  return release.entities.map((entity) => {
+  return (outlook?.entities ?? release.entities).map((entity) => {
     const metricObservation = metricByCode.get(entity.code);
     return {
       entity,
@@ -92,14 +114,16 @@ function buildRows(
       metricValue: metricObservation?.value ?? null,
       metricStatus: metricObservation?.status ?? 'unknown',
       metricRecordLocator: metricObservation?.locator ?? null,
+      metricEvidenceState: metricObservation?.evidenceState,
     };
   });
 }
 
 export function App() {
-  const [page] = useState<'atlas' | 'sources'>(() =>
-    new URLSearchParams(window.location.search).get('page') === 'sources' ? 'sources' : 'atlas',
-  );
+  const [page] = useState<'atlas' | 'sources' | 'review'>(() => {
+    const requested = new URLSearchParams(window.location.search).get('page');
+    return requested === 'sources' || requested === 'review' ? requested : 'atlas';
+  });
   const [release, setRelease] = useState<ReleaseBase | null>(null);
   const [metricDatasets, setMetricDatasets] = useState<Partial<Record<MvpMetricId, MetricDataset>>>({});
   const [metricId, setMetricId] = useState<MvpMetricId>('population_total');
@@ -266,6 +290,10 @@ export function App() {
     }
     return (currentDataset as LifeExpectancyDataset).summaries.find((summary) => summary.year === year) ?? null;
   }, [currentDataset, metricId, year]);
+  const populationOutlookSummary = useMemo(() => {
+    if (metricId !== 'population_outlook' || currentDataset?.metric_id !== 'population_outlook') return null;
+    return (currentDataset as PopulationOutlookDataset).summaries.find((summary) => summary.year === year) ?? null;
+  }, [currentDataset, metricId, year]);
   const cityPoints = useMemo<HistoricalCityPoint[]>(() => {
     if (!release) return [];
     const cityById = new Map(release.historicalCities.cities.map((city) => [city.id, city]));
@@ -358,11 +386,12 @@ export function App() {
         <nav className="site-tabs" aria-label="Primary navigation">
           <a href={atlasUrl} aria-current={page === 'atlas' ? 'page' : undefined}>Atlas</a>
           <a href="?page=sources" aria-current={page === 'sources' ? 'page' : undefined}>Sources</a>
+          <a href="?page=review" aria-current={page === 'review' ? 'page' : undefined}>Review</a>
           {page === 'atlas' ? <a href={download} download>Download data</a> : null}
         </nav>
       </header>
 
-      {page === 'sources' ? <SourcesPage manifest={release.manifest} /> : (
+      {page === 'sources' ? <SourcesPage manifest={release.manifest} /> : page === 'review' ? <ReviewPage /> : (
       <main id="main-content">
         <section className="hero-copy">
           <div>
@@ -538,7 +567,13 @@ export function App() {
           <div className="layer-date-grid" aria-label="Effective evidence dates">
             <article className={supported ? 'layer-date-available' : 'layer-date-unavailable'}>
               <span>Selected measure</span>
-              <strong>{supported ? `Exact · ${formatAstronomicalYear(year)}` : 'No exact observation'}</strong>
+            <strong>
+              {supported
+                ? `${populationOutlookSummary?.evidence_state === 'medium_projection'
+                    ? 'Medium projection'
+                    : populationOutlookSummary ? 'Estimate' : 'Exact'} · ${formatAstronomicalYear(year)}`
+                : 'No exact observation'}
+            </strong>
               <small>{metric.label} · {metric.available_years.length} published dates</small>
             </article>
             <article className={historicalEnabled && historicalReference && !historicalError ? 'layer-date-available' : 'layer-date-unavailable'}>
@@ -578,6 +613,8 @@ export function App() {
             year={year}
             entityCount={release.entities.length}
           />
+        ) : metric.id === 'population_outlook' && populationOutlookSummary ? (
+          <PopulationOutlookSummary summary={populationOutlookSummary} />
         ) : metric.id === 'life_expectancy_at_birth' && lifeExpectancySummary ? (
           <LifeExpectancyDistribution summary={lifeExpectancySummary} />
         ) : prevalenceSummary && populationSummary ? (
@@ -601,7 +638,9 @@ export function App() {
           <p>
             {metric.definition} {deepTimePopulation
               ? 'Historical values use world support only; political geometry is a separate context layer.'
-              : 'Modern values are shown at their World Bank country or territory support.'}
+              : metric.id === 'population_outlook'
+                ? 'Values remain on the source-native UN Country/Area support; modern display geometry is only a visual placement.'
+                : 'Modern values are shown at their World Bank country or territory support.'}
             {' '}This view must not be interpreted as {metric.prohibited_interpretations.join(', ')}.
           </p>
           <div className="method-actions">

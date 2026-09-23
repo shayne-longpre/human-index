@@ -1,8 +1,8 @@
 # Deep-time population and changing borders
 
-Updated: 2026-09-21
+Updated: 2026-09-22
 
-## Implemented in release r4
+## Implemented through release r5
 
 - All 39 dates in the U.S. Census Bureau historical world-population comparison
   table are published from 10,000 BCE through 1950 CE. Summary bounds are shown
@@ -22,12 +22,11 @@ Updated: 2026-09-21
   cannot change a population total.
 
 The unresolved part of the original plan is spatially resolved historical
-population. HYDE's directory and CC BY-NC 4.0 license are now known, but no data
-artifact has been acquired; product-license compatibility and artifact semantics
-remain blocked. UN WPP's official medium demographic-indicators file is now
-acquired and profiled as the modern population expansion candidate, but remains
-outside the release pending territory, unit, terms, boundary-row, and
-estimate-versus-projection review.
+population. A HYDE 10,000 BCE baseline bundle and README are now acquired, but
+the root license and README conflict and the grid has not passed mask/scenario
+mass reconciliation. UN WPP's official medium demographic-indicators file is
+published separately in r5: its 1950–2023 estimates and 2024–2100 Medium
+projections remain visibly distinct and never replace World Bank silently.
 
 ## Product outcome
 
@@ -84,10 +83,10 @@ must never be added to member polities for population accounting. Overlapping
 ### Modern validation layer: CShapes 2.0
 
 CShapes provides dated independent-state and dependent-territory geometry from
-1886–2019 globally and from 1816 in Europe. It is a strong comparison layer for
-modern changes, but its Gleditsch–Ward and Correlates-of-War universes encode a
-particular international-system definition. Exact artifact terms and the chosen
-universe must be pinned before redistribution.
+1886–2019 globally and from 1816 in Europe. Atlas pinned and profiled the
+Gleditsch–Ward GeoJSON and codebook. Publication is still blocked by CC
+BY-NC-SA terms, 11 invalid geometries, missing codebook fields in the download,
+and the need for an explicit precedence comparison with Cliopatria.
 
 ### Names and places
 
@@ -220,11 +219,16 @@ nodata is distinct from zero; the UI states that the surface is reconstructed.
   the correctness or incorrectness of any feature.
 - A conservative three-series historical-city pass generated 353 identity
   candidates while leaving every observation source-native and unmerged.
-- The UN WPP 2024 medium demographic-indicators artifact is pinned and profiled;
-  source estimates, projections, aggregates, and 2101 boundary rows remain
-  distinguishable.
-- The HYDE ingestion contract now records the smallest defensible first download
-  and the licensing, variable, nodata, scenario, and mass-conservation gates.
+- UN WPP 2024 is now a parallel published metric with a 237-Country/Area universe,
+  explicit estimate/projection states, aggregate exclusion, and a preserved
+  World-reference rounding residual.
+- One HYDE baseline population bundle is profiled; its README establishes grid
+  meanings, while the root-license conflict and remaining nodata/scenario/mass
+  checks keep it unpublished.
+- CShapes 2.0 Gleditsch–Ward is pinned and profiled as a comparison source, not
+  silently layered over Cliopatria.
+- The generated read-only Review page exposes all 28 topology and 353 city
+  identity candidates without recording them as accepted decisions.
 
 ## Immediate next release
 
@@ -234,10 +238,10 @@ or `unresolved` decisions with citations. In parallel, review the strongest city
 identity candidates and design the multiple-source disagreement view before
 publishing Chandler or Modelski Modern.
 
-For population, acquire one HYDE baseline population artifact and its README
-through the provider's authorized route only after the CC BY-NC product decision.
-For UN WPP, pin the exact metadata/terms, select `Country/Area` rows through a
-reviewed territorial contract, and publish estimates separately from projections.
+For population, ask Utrecht to resolve the HYDE license conflict, then acquire
+general masks and matched baseline/lower/upper samples for mass validation.
+For modern borders, decide whether CShapes terms are compatible and compare a
+small 1886–2019 set against Cliopatria before any layer precedence rule.
 Do not build an annotation platform until a 5–10-date, evidence-rich regional
 pilot demonstrates that source-native data cannot cover the need.
 

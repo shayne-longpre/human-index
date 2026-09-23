@@ -18,6 +18,7 @@ from .sources.world_bank import (
 
 
 WORLD_BANK_UNIVERSE_ID = "world-bank-nonaggregate-economies-v1"
+WPP_UNIVERSE_ID = "un-wpp-2024-country-area-medium-v1"
 LIFE_EXPECTANCY_BINS = [0, 50, 60, 70, 80, 90, 130]
 
 
@@ -84,6 +85,33 @@ def metric_definition(
             "prohibited_interpretations": [
                 "local population density",
                 "gridded settlement reconstruction",
+            ],
+        }
+    if metric_id == "population_outlook":
+        return {
+            **shared,
+            "population_universe_id": WPP_UNIVERSE_ID,
+            "id": metric_id,
+            "label": "UN population outlook",
+            "taxonomy_ids": ["population_and_settlement"],
+            "indicator": "WPP 2024 total population as of 1 July, Medium variant",
+            "aggregation_kind": "population_total",
+            "unit": "people",
+            "support_type": "un_wpp_country_or_area_year",
+            "definition": (
+                "UN WPP 2024 July population: estimates for 1950–2023 and the "
+                "Medium projection for 2024–2100, kept visibly distinct."
+            ),
+            "display_scale": {
+                "transform": "log1p",
+                "fixed_domain": [10_000, 2_000_000_000],
+                "scale_version": "population-country-total-v1",
+            },
+            "safe_summary": "UN country/area population estimates and Medium projections at exact annual dates.",
+            "prohibited_interpretations": [
+                "observed census counts",
+                "statistical confidence intervals",
+                "local population density",
             ],
         }
     if metric_id == "access_to_electricity":

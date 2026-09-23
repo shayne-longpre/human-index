@@ -9,6 +9,7 @@ import type {
   HistoricalPopulationDataset,
   LifeExpectancyDataset,
   MvpMetricId,
+  PopulationOutlookDataset,
   PopulationDataset,
 } from '@atlas/contracts';
 import type { FeatureCollection, Geometry } from 'geojson';
@@ -46,7 +47,11 @@ export type HistoricalFeatureCollection = FeatureCollection<Geometry, Historical
   geometry_method: string;
   quality: HistoricalSnapshotQuality;
 };
-export type MetricDataset = PopulationDataset | ElectricityDataset | LifeExpectancyDataset;
+export type MetricDataset =
+  | PopulationDataset
+  | PopulationOutlookDataset
+  | ElectricityDataset
+  | LifeExpectancyDataset;
 
 export interface ReleaseBase {
   entities: AtlasEntity[];
@@ -58,7 +63,7 @@ export interface ReleaseBase {
   historicalCities: HistoricalCityDataset;
 }
 
-export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-20-r4';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-22-r5';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {

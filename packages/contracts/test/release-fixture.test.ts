@@ -17,10 +17,11 @@ import {
   type HistoricalCityDataset,
   type HistoricalPopulationDataset,
   type PopulationDataset,
+  type PopulationOutlookDataset,
   type LifeExpectancyDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-20-r4');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-22-r5');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -30,6 +31,7 @@ const manifest = readJson<AtlasReleaseManifest & {
   artifacts: Record<string, { bytes: number; sha256: string }>;
 }>('manifest.json');
 const population = readJson<PopulationDataset>('population.json');
+const populationOutlook = readJson<PopulationOutlookDataset>('population-outlook.json');
 const electricity = readJson<ElectricityDataset>('electricity.json');
 const historicalPopulation = readJson<HistoricalPopulationDataset>('historical-population.json');
 const historicalContext = readJson<HistoricalContextIndex>('historical-context.json');
@@ -83,6 +85,33 @@ const cliopatriaTopologyReview = JSON.parse(
   summary: { active_intersecting_polity_features: number; reported_overlap_candidates: number };
   overlap_candidates: Array<{ review_status: string }>;
 };
+const cshapesProfile = JSON.parse(
+  readFileSync(resolve('data/review/cshapes-2.0-profile.json'), 'utf8'),
+) as {
+  review_status: string;
+  profile: { features: number; invalid_geometries: number; start_date: string; end_date: string };
+  publication_blockers: string[];
+};
+const hydeProfile = JSON.parse(
+  readFileSync(resolve('data/review/hyde-3.5-sample-profile.json'), 'utf8'),
+) as {
+  review_status: string;
+  population_count_grid_profile: { sum_inhabitants: number; populated_cells: number };
+  terms_conflict: { archive_license_file: string; readme_statement: string; status: string };
+};
+const maddisonStatus = JSON.parse(
+  readFileSync(resolve('data/review/maddison-2023-acquisition-status.json'), 'utf8'),
+) as {
+  review_status: string;
+  acquisition_attempt: { direct_http_result: string; bypass_attempted: boolean };
+};
+const reviewQueue = JSON.parse(
+  readFileSync(resolve('apps/web/public/atlas/review/review-queue.json'), 'utf8'),
+) as {
+  status: string;
+  border_overlaps: { candidates: unknown[] };
+  city_identities: { candidates: unknown[] };
+};
 
 const populationByYear = new Map<number, typeof population.observations>();
 for (const observation of population.observations) {
@@ -99,11 +128,12 @@ for (const observation of electricity.observations) {
 }
 
 describe('genuine-data MVP release', () => {
-  it('publishes three valid, taxonomy-bound metrics with explicit time support', () => {
+  it('publishes four valid, taxonomy-bound metrics with explicit time support', () => {
     expect(() => validateAtlasReleaseManifest(manifest)).not.toThrow();
     expect(() => validatePublishedMetrics(manifest.metrics)).not.toThrow();
     expect(manifest.metrics.map((metric) => metric.id)).toEqual([
       'population_total',
+      'population_outlook',
       'access_to_electricity',
       'life_expectancy_at_birth',
     ]);
@@ -113,13 +143,14 @@ describe('genuine-data MVP release', () => {
     expect(population.years).toEqual(Array.from({ length: 66 }, (_, index) => 1960 + index));
     expect(electricity.years).toEqual(Array.from({ length: 35 }, (_, index) => 1990 + index));
     expect(lifeExpectancy.years).toEqual(Array.from({ length: 65 }, (_, index) => 1960 + index));
-    expect(() => assertSupportedYear(manifest.metrics[1], 2025)).toThrow(RangeError);
+    expect(populationOutlook.years).toEqual(Array.from({ length: 151 }, (_, index) => 1950 + index));
+    expect(() => assertSupportedYear(manifest.metrics[2], 2025)).toThrow(RangeError);
   });
 
   it('builds one shared time control while resolving each evidence layer independently', () => {
     const years = buildEvidenceTimelineYears(manifest, historicalContext, historicalCities);
     expect(years[0]).toBe(-9999);
-    expect(years.at(-1)).toBe(2025);
+    expect(years.at(-1)).toBe(2100);
     expect(years).toContain(-3399);
     expect(years).toContain(-3699);
     expect(years).toContain(1991);
@@ -252,6 +283,9 @@ describe('genuine-data MVP release', () => {
     expect(manifest.source_releases.map((source) => source.id)).toContain(
       'us-census-historical-world-population-2026-09-20',
     );
+    expect(manifest.source_releases.map((source) => source.id)).toContain(
+      'un-wpp-2024-medium-demographic-indicators',
+    );
     expect(manifest.citations.every((citation) => citation.url.startsWith('https://'))).toBe(true);
     expect(new Set(sourceRegistry.sources.map((source) => source.id)).size).toBe(
       sourceRegistry.sources.length,
@@ -290,8 +324,8 @@ describe('genuine-data MVP release', () => {
     expect(referencedReleaseIds).toEqual(releaseIds);
   });
 
-  it('keeps audit progress separate from reviewed publication', () => {
-    expect(wppProfile.review_status).toBe('acquired_and_profiled_not_published');
+  it('keeps automated review candidates separate from reviewed publication', () => {
+    expect(wppProfile.review_status).toBe('acquired_profiled_and_fixture_published');
     expect(wppProfile.artifact.sha256).toBe(
       '286ac36bb1415e2e1ade03acfef0a29f0e4c087e2f78e38c48f50c5df89082bc',
     );
@@ -334,6 +368,59 @@ describe('genuine-data MVP release', () => {
         (candidate) => candidate.review_status === 'automated_candidate_historian_review_outstanding',
       ),
     ).toBe(true);
+
+    expect(reviewQueue.status).toBe('read_only_candidates_human_review_outstanding');
+    expect(reviewQueue.border_overlaps.candidates).toHaveLength(28);
+    expect(reviewQueue.city_identities.candidates).toHaveLength(353);
+  });
+
+  it('records bounded source acquisition findings without promoting blocked data', () => {
+    expect(cshapesProfile.review_status).toBe('acquired_profiled_comparison_only_not_published');
+    expect(cshapesProfile.profile).toMatchObject({
+      features: 710,
+      invalid_geometries: 11,
+      start_date: '1886-01-01',
+      end_date: '2019-12-31',
+    });
+    expect(cshapesProfile.publication_blockers.length).toBeGreaterThan(0);
+
+    expect(hydeProfile.review_status).toBe(
+      'documentation_and_one_baseline_population_bundle_profiled_not_published',
+    );
+    expect(hydeProfile.population_count_grid_profile.populated_cells).toBe(2_215_829);
+    expect(hydeProfile.population_count_grid_profile.sum_inhabitants).toBeCloseTo(4_487_003.996, 3);
+    expect(hydeProfile.terms_conflict).toEqual({
+      archive_license_file: 'CC BY-NC 4.0',
+      readme_statement: 'CC BY 3.0',
+      status: 'provider_clarification_required',
+    });
+
+    expect(maddisonStatus.review_status).toBe('official_release_verified_workbook_not_acquired');
+    expect(maddisonStatus.acquisition_attempt).toMatchObject({
+      direct_http_result: 'HTTP_200_anti_bot_HTML_not_workbook',
+      bypass_attempted: false,
+    });
+  });
+
+  it('publishes WPP estimates and projections separately while conserving its source universe', () => {
+    expect(populationOutlook.entities).toHaveLength(237);
+    expect(populationOutlook.observations).toHaveLength(237 * 151);
+    expect(populationOutlook.observations.find((observation) => observation.year === 2023)?.evidence_state)
+      .toBe('estimate');
+    expect(populationOutlook.observations.find((observation) => observation.year === 2024)?.evidence_state)
+      .toBe('medium_projection');
+    expect(populationOutlook.observations.every((observation) => observation.year <= 2100)).toBe(true);
+    for (const summary of populationOutlook.summaries) {
+      const observations = populationOutlook.observations.filter(
+        (observation) => observation.year === summary.year,
+      );
+      expect(observations).toHaveLength(237);
+      expect(observations.reduce((sum, observation) => sum + observation.value, 0))
+        .toBe(summary.total_population);
+      expect(summary.total_population + summary.world_reference_rounding_residual)
+        .toBe(summary.world_reference_population);
+      expect(summary.mapped_population + summary.unplaced_population).toBe(summary.total_population);
+    }
   });
 
   it('conserves the life-expectancy context distribution without creating person-level values', () => {

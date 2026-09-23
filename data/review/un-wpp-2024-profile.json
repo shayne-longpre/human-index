@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "review_status": "acquired_and_profiled_not_published",
+  "review_status": "acquired_profiled_and_fixture_published",
   "source_id": "un-wpp-2024-medium-demographic-indicators",
   "source_url": "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Demographic_Indicators_Medium.csv.gz",
   "artifact": {
@@ -23,8 +23,10 @@
     ],
     "variant": "Medium",
     "population_column": "TPopulation1July",
-    "population_unit": "requires_exact_bulk_metadata_confirmation",
-    "official_dataset_page": "https://population.un.org/wpp/",
+    "population_unit": "thousands_of_people_converted_to_people",
+    "population_reference_date": "1 July",
+    "official_dataset_page": "https://population.un.org/wpp/downloads",
+    "license": "CC BY 3.0 IGO",
     "official_dataset_description": "Estimates and projections are distinct source products and must remain visibly distinct in Atlas."
   },
   "profile": {
@@ -53,12 +55,11 @@
     "missing_population_values": 555,
     "nonpositive_population_values": 0
   },
-  "publication_gates": [
-    "verify_bulk_artifact_license_and_population_unit_from_source_metadata",
-    "select_country_area_rows_without_regional_or_special_aggregates",
-    "review_parent_dependent_territory_and_historical_entity_crosswalks",
-    "publish_estimates_and_projections_as_visibly_distinct evidence_states",
-    "define_overlap_policy_with_existing_world_bank_population_release",
-    "audit_2101_boundary_rows_against_each_selected_indicator_definition"
+  "publication_decisions": [
+    "publish_only_LocTypeName_Country_Area_rows",
+    "exclude_2101_boundary_rows_outside_the_official_projection_horizon",
+    "preserve_estimate_and_medium_projection_evidence_states",
+    "keep_the_WPP_source_native_universe_separate_from_World_Bank",
+    "preserve_the_signed_world_reference_rounding_residual"
   ]
 }
