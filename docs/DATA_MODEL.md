@@ -192,6 +192,15 @@ Every derived artifact records source-release IDs, crosswalk and algorithm versi
 
 Production manifests cannot contain guessed artifact URLs, fake checksums, or placeholder provenance. The research registry intentionally has null acquisition checksums until real files are obtained.
 
+An exported `atlas_reproducible_view` pins the release, metric, requested and
+effective dates, selected support, layer state, fixed scale, and camera. It
+contains the date-specific metric rows and population weights used by the view,
+the displayed calculation, exact statuses and record locators, applicable
+historical evidence, the reconciliation decision set, and the complete release
+provenance. Large geometry is referenced by immutable artifact path and checksum
+rather than copied into every bundle. A pinned release that is not locally
+available must fail closed.
+
 ## 9. Reconciliation decisions
 
 Reconciliation is a derived, versioned evidence layer between immutable source

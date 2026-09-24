@@ -19,8 +19,10 @@
     "data:review:cities": "uv run python -m pipelines.atlas_etl.review_city_crosswalk --input-dir data/raw/reba_cities/2016 --output data/review/historical-city-crosswalk-candidates.json",
     "data:review:topology": "uv run python -m pipelines.atlas_etl.review_cliopatria_topology --input data/raw/cliopatria/v0.2.0/cliopatria_polities_only.geojson --output data/review/cliopatria-topology-pilot.json",
     "data:review:wpp": "uv run python -m pipelines.atlas_etl.profile_un_wpp --input data/raw/un_wpp/2024/WPP2024_Demographic_Indicators_Medium.csv.gz --output data/review/un-wpp-2024-profile.json",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --config apps/web/vite.config.ts",
+    "test:browser": "playwright test",
+    "test:browser:update": "playwright test --update-snapshots",
+    "test:watch": "vitest --config apps/web/vite.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -33,11 +35,13 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@types/geojson": "7946.0.16",
     "@types/node": "22.10.5",
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
     "@vitejs/plugin-react": "4.3.4",
+    "axe-core": "4.13.0",
     "typescript": "5.7.3",
     "vite": "6.1.0",
     "vitest": "3.0.5"

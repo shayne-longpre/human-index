@@ -137,6 +137,21 @@ The slider's stops are the sorted union of dates where any published layer
 changes. This makes all evidence reachable without forcing the color measure,
 political reconstruction, and point layer to pretend they share one cadence.
 
+## Reproducing one displayed view
+
+The browser-generated exact-view bundle is a projection of immutable release
+evidence, not a new data source. It records the view state and copies the
+date-specific statistical rows, original locators, population weights, displayed
+summary, metric contract, applicable historical evidence, full reconciliation
+artifact, release manifest, transformations, citations, and licenses. Political
+geometry remains a checksummed artifact reference and never becomes a
+statistical join merely because it is part of the visible map.
+
+The URL and bundle both pin the release. If that release is unavailable, the app
+shows an error rather than substituting the current release. The bundle contract
+is validated in TypeScript, and a fixture test recomputes the electricity
+summary from exported rows and weights.
+
 ## Population accounting remains separate
 
 The manifest's population-universe records define who can enter a summary. A

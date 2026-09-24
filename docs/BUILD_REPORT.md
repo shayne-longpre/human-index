@@ -1,6 +1,6 @@
 # Build report: evidence-aware temporal-map MVP, release r6
 
-Date: 2026-09-22
+Date: 2026-09-23
 
 ## Verified result
 
@@ -40,6 +40,14 @@ Cliopatria overlaps, eight are source-declared hierarchy relations and twenty
 remain unresolved. Composite features receive outline treatment; unresolved
 features remain simultaneously visible in coral, and inspectors name their
 counterparts. Every border decision prohibits population allocation.
+
+The application layer now adds reproducible exact views without changing the
+underlying r6 data artifacts. Shared URLs pin release, metric, date, selected
+support, layers, scale, and camera. The JSON view bundle contains exact rows and
+population weights, displayed calculations, statuses and record locators,
+historical evidence references, the reconciliation artifact, release manifest,
+transformations, citations, and license notices. Unknown pinned releases fail
+closed.
 
 This remains a development release. Early Census values have global support
 only; they are not local density, country totals, household locations, or
@@ -131,24 +139,29 @@ npm run typecheck
 npm test
 python3 -m unittest discover -s pipelines/tests
 npm run build
+npm run test:browser
 in-app browser desktop render and interaction checks
 ```
 
 Results:
 
 - Strict TypeScript: pass.
-- Vitest: 2 files, 26 tests, all pass.
+- Vitest: 3 files, 28 tests, all pass.
 - Python unittest: 5 tests, all pass.
 - Published release artifact checksums: pass for all 52 artifacts.
-- Production build: pass. Main application JavaScript is 315.53 kB
-  uncompressed / 94.57 kB gzip; the 1,962.03 kB map renderer remains a separate
-  lazy chunk (540.70 kB gzip).
-- Browser checks: the 1500 political map renders 137 changing polity features;
-  the 2024 electricity view renders its percentage scale and non-gray
-  choropleth; Review reports 336 linked, 15 rejected, and two unresolved city
-  pairs plus eight hierarchy and twenty unresolved border decisions. Filters
-  expose the ambiguous Shangqi/Shanghai pairs, rejected Perth homonym, and the
-  policy prohibiting statistical/political geography merges.
+- Production build: pass. Main application JavaScript is 327.16 kB
+  uncompressed / 97.97 kB gzip; the 1,962.77 kB map renderer remains a separate
+  lazy chunk (540.90 kB gzip).
+- Playwright/Chrome: 4 tests pass. They inspect a parsed exact-view download,
+  URL/history restoration, desktop and mobile screenshot baselines, reduced
+  motion, serious/critical axe findings on all three pages, and fail-closed
+  release pinning.
+- The exact-view contract test recomputes the 2024 electricity prevalence
+  result from its exported rows and weights and matches the displayed result.
+- The automated browser pass found and fixed one nested-interactive map role,
+  31 contrast failures, an unfocusable scroll area, and cramped mobile source
+  attribution. A final in-app browser pass confirmed the pinned URL, reset-view
+  control, and successful exact-view download status.
 - Existing mass-conservation, missingness, original-locator, boundary-geometry,
   and checksum tests continue to pass.
 
@@ -161,9 +174,12 @@ until its license conflict, full artifact set, grid semantics, and conservation
 checks are resolved. CShapes cannot enter the public map until licensing and
 geometry/field defects are resolved. Twenty border overlaps and two city
 identities still require evidence-based adjudication; deterministic unresolved
-rendering does not resolve the historical claim.
+rendering does not resolve the historical claim. Browser work still needs a
+tested WebGL fallback, another engine/platform, broader touch/keyboard flows,
+and measured network, scrubbing, frame-rate, and memory benchmarks.
 
 See `MVP_SOURCE_SELECTION.md`, `CITY_SOURCE_AUDIT.md`,
 `EVIDENCE_INTEGRATION.md`, and `DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`.
 The priority-ranked gap analysis against the original vision is in
 `ORIGINAL_VISION_GAP_PRIORITIES.md`.
+Exact-view and browser-test contracts are in `VIEW_REPRODUCIBILITY.md`.

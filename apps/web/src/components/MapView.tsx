@@ -16,6 +16,7 @@ import type {
   HistoricalProperties,
 } from '../data';
 import { metricColor } from '../metricViews';
+import { camerasEqual, type AtlasMapCamera } from '../viewState';
 
 interface MapViewProps {
   geometry: CountryFeatureCollection;
@@ -37,6 +38,9 @@ interface MapViewProps {
   onSelect: (code: string) => void;
   onHistoricalSelect: (properties: HistoricalProperties) => void;
   onCitySelect: (point: HistoricalCityPoint) => void;
+  camera: AtlasMapCamera;
+  resetCamera: AtlasMapCamera;
+  onCameraChange: (camera: AtlasMapCamera) => void;
 }
 
 export interface HistoricalCityPoint {
@@ -76,10 +80,15 @@ export function MapView({
   onSelect,
   onHistoricalSelect,
   onCitySelect,
+  camera,
+  resetCamera,
+  onCameraChange,
 }: MapViewProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const overlayRef = useRef<MapboxOverlay | null>(null);
+  const cameraCallbackRef = useRef(onCameraChange);
+  cameraCallbackRef.current = onCameraChange;
   const [fallback, setFallback] = useState(false);
   const knownValueCount = Array.from(valueByCode.values()).filter((value) => value !== null).length;
   const territorialValuesAvailable = knownValueCount > 0;
@@ -90,12 +99,12 @@ export function MapView({
       const map = new MapLibreMap({
         container: elementRef.current,
         style,
-        center: [8, 14],
-        zoom: 1.12,
+        center: [camera.longitude, camera.latitude],
+        zoom: camera.zoom,
         minZoom: 0.75,
         maxZoom: 7,
-        pitch: 18,
-        bearing: 0,
+        pitch: camera.pitch,
+        bearing: camera.bearing,
         scrollZoom: false,
         cooperativeGestures: true,
         attributionControl: false,
@@ -107,6 +116,16 @@ export function MapView({
       const overlay = new MapboxOverlay({ interleaved: false, layers: [] });
       map.addControl(overlay);
       map.addControl(new NavigationControl({ showCompass: false }), 'bottom-right');
+      map.on('moveend', () => {
+        const center = map.getCenter();
+        cameraCallbackRef.current({
+          longitude: center.lng,
+          latitude: center.lat,
+          zoom: map.getZoom(),
+          pitch: map.getPitch(),
+          bearing: map.getBearing(),
+        });
+      });
       map.on('error', (event: ErrorEvent) => {
         if (event.error?.message.toLowerCase().includes('webgl')) setFallback(true);
       });
@@ -127,6 +146,27 @@ export function MapView({
   }, []);
 
   useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const center = map.getCenter();
+    const current = {
+      longitude: center.lng,
+      latitude: center.lat,
+      zoom: map.getZoom(),
+      pitch: map.getPitch(),
+      bearing: map.getBearing(),
+    };
+    if (!camerasEqual(current, camera)) {
+      map.jumpTo({
+        center: [camera.longitude, camera.latitude],
+        zoom: camera.zoom,
+        pitch: camera.pitch,
+        bearing: camera.bearing,
+      });
+    }
+  }, [camera]);
+
+  useEffect(() => {
     const overlay = overlayRef.current;
     if (!overlay) return;
     const layers: Layer[] = [
@@ -135,7 +175,7 @@ export function MapView({
           data: geometry,
           filled: true,
           stroked: true,
-          pickable: true,
+          pickable: territorialValuesAvailable,
           autoHighlight: true,
           highlightColor: [255, 246, 220, 90],
           lineWidthUnits: 'pixels',
@@ -299,9 +339,23 @@ export function MapView({
       <div
         ref={elementRef}
         className="map-canvas"
-        role="img"
+        role="region"
         aria-label={`World map for ${year} ${metricLabel.toLocaleLowerCase()}${historicalEnabled && historicalSnapshot ? ` with ${historicalSnapshot.feature_count} Cliopatria polity features` : ''}${citiesEnabled && cityPoints.length ? ` and ${cityPoints.length} historical city observations` : ''}`}
       />
+      <button
+        className="map-reset"
+        type="button"
+        onClick={() => {
+          mapRef.current?.jumpTo({
+            center: [resetCamera.longitude, resetCamera.latitude],
+            zoom: resetCamera.zoom,
+            pitch: resetCamera.pitch,
+            bearing: resetCamera.bearing,
+          });
+        }}
+      >
+        Reset view
+      </button>
       {fallback ? (
         <div className="map-fallback" role="status">
           <span>Map rendering is unavailable.</span>

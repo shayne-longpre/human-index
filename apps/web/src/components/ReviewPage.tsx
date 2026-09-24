@@ -194,7 +194,7 @@ export function ReviewPage() {
             <p>{view === 'borders' ? queue.border_overlaps.pilot.scope_warning : view === 'cities' ? queue.city_identities.method.warning : queue.decision_set.semantic_boundary}</p>
           </div>
 
-          <div className="table-scroll">
+          <div className="table-scroll" role="region" aria-label="Scrollable reconciliation decisions" tabIndex={0}>
             {view === 'borders' ? (
               <table>
                 <thead><tr><th>Features</th><th>Disposition</th><th className="numeric">Overlap</th><th>Page behavior</th></tr></thead>

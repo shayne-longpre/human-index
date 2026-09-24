@@ -51,6 +51,13 @@ every current border-overlap and city-identity candidate, including the rule,
 evidence boundary, and unresolved cases. Identity links never merge source
 observations, and border decisions never allocate population.
 
+Atlas links now also pin the release, context-layer visibility, published scale,
+and map camera. “Download this exact view” emits a JSON bundle containing the
+date-specific rows and weights, displayed summary, evidence statuses, metric
+definition, reconciliation decisions, manifest, transformations, citations,
+and source-specific licenses. A mismatched pinned release fails closed rather
+than silently showing newer values.
+
 The early population view preserves the Census table's disagreement range and
 underlying named estimates; it is not a confidence interval or a gridded
 reconstruction. World Bank population remains the pragmatic modern source because
@@ -69,6 +76,7 @@ Requires Node.js 20+ and pnpm 11.
 pnpm install
 pnpm dev
 pnpm test
+pnpm test:browser
 pnpm build
 ```
 
@@ -86,6 +94,8 @@ The proposed deep-time population and historical-boundary sequence is in
 `docs/DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md`. The deliberately small source,
 taxonomy, transformation, and release architecture is documented in
 `docs/EVIDENCE_INTEGRATION.md`.
+The exact-view contract and automated browser/accessibility gate are documented
+in `docs/VIEW_REPRODUCIBILITY.md`.
 The ranked gap analysis against the original vision is in
 `docs/ORIGINAL_VISION_GAP_PRIORITIES.md`.
 

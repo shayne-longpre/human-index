@@ -70,7 +70,7 @@ export function DataTable({ rows, metric, onSelect }: DataTableProps) {
           />
         </label>
       </div>
-      <div className="table-scroll">
+      <div className="table-scroll" role="region" aria-label="Scrollable evidence table" tabIndex={0}>
         <table>
           <thead>
             <tr>

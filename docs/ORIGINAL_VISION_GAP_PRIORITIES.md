@@ -1,6 +1,6 @@
 # Original-vision gap priorities
 
-Updated: 2026-09-22
+Updated: 2026-09-23
 
 This ranks what remains against the original product question: **Where did
 people live at this point in history, and what can we say about the conditions
@@ -38,37 +38,36 @@ population separately.
 the map, bar, table, and export agree; tooltips continue to call electricity a
 national or territorial estimate.
 
-## 3 — Make a cited view reproducible as a bundle
+## Completed enabling layer — Reproducible cited views
 
-**Why third:** CSV downloads exist, but the original vision requires a view that
-can be cited and reproduced rather than merely revisited approximately.
+The application now pins release, metric, requested date, selected support,
+context layers, published scale, and camera in the URL. Its exact-view JSON
+bundle includes rows, weights, statuses, effective dates, metric definition,
+displayed summary, decisions, manifest, transformations, citations, and license
+notices. A fixture test recomputes the electricity summary from exported rows.
+Unavailable release IDs fail closed.
 
-**Required work:** Pin release ID, effective layer dates, camera, filters, and
-scale mode in the URL; generate a “download this view” bundle containing rows,
-weights, statuses, metric definition, manifest, transformations, decisions,
-citations, and license notices; expose a newer-release notice without mutating an
-old link.
+The remaining deployment task is a hosted immutable-release resolver and a
+newer-release notice; it is not a blocker for local reproducibility.
 
-**Exit gate:** Recomputing the bundle reproduces the displayed summary and a
-shared URL continues to resolve to the same immutable release.
+## 3 — Finish publication-quality reliability and performance
 
-## 4 — Finish publication-quality reliability and accessibility
+**Progress:** A repeatable Chrome suite now covers deep-time and modern visual
+baselines, mobile layout, exact-view download, back/forward state, reduced
+motion, release mismatch, and serious/critical axe findings. Its first pass
+fixed map semantics, contrast, scroll focus, and mobile attribution layout.
 
-**Why fourth:** The application works, but release confidence still relies too
-heavily on manual desktop inspection. The map renderer remains a large lazy
-chunk, and the fallback is a message plus table rather than a lightweight map.
-
-**Required work:** Add screenshot regression tests at representative ancient and
-modern dates, mobile/touch and keyboard flows, reduced-motion checks,
-back/forward tests, automated accessibility smoke tests, WebGL-failure coverage,
-and measured transfer/scrubbing/frame-rate benchmarks.
+**Remaining work:** Add WebGL-failure coverage and a lightweight fallback,
+broader touch/keyboard flows, a second engine/platform, and measured
+transfer/scrubbing/frame-rate/memory benchmarks. The map renderer remains a
+large lazy chunk.
 
 **Exit gate:** Documented desktop/mobile/browser measurements and repeatable CI
 checks cover the interactions in `ACCEPTANCE_TESTS.md`.
 
-## 5 — Broaden historical-border reconciliation
+## 4 — Broaden historical-border reconciliation
 
-**Why fifth:** Reconciliation v1 is complete for the existing bounded candidate
+**Why fourth:** Reconciliation v1 is complete for the existing bounded candidate
 set, not for all 13,380 Cliopatria polity records. Twenty 1500 CE Mediterranean
 overlaps remain unresolved, and CShapes is still audit-only.
 
@@ -81,9 +80,9 @@ using it as a modern comparison source.
 precedence or coexistence rules, and no effect on population allocation unless a
 separate mass-conserving contract exists.
 
-## 6 — Publish multiple city series with disagreement intact
+## 5 — Publish multiple city series with disagreement intact
 
-**Why sixth:** Reconciliation v1 now links 336 candidate pairs into 300 canonical
+**Why fifth:** Reconciliation v1 now links 336 candidate pairs into 300 canonical
 place clusters and rejects 15 distant homonyms, but Chandler and Modelski Modern
 remain unpublished. Two coordinate-only identities and two Chandler zero cells
 remain unresolved.
@@ -95,9 +94,9 @@ IDs and locators. Never average them by default.
 **Exit gate:** A place can show multiple estimates for the same date without
 calling their spread a confidence interval or replacing either source value.
 
-## 7 — Add the next human-condition vertical
+## 6 — Add the next human-condition vertical
 
-**Why seventh:** Population, electricity, and life expectancy prove three
+**Why sixth:** Population, electricity, and life expectancy prove three
 aggregation contracts. Breadth should follow completion of the core spatial and
 reproducibility experience.
 
@@ -109,14 +108,14 @@ personal-income distribution.
 **Exit gate:** One new adapter and registry entry can add the metric without
 special-casing the map or summary architecture.
 
-## 8 — Add comparison and richer evidence modes
+## 7 — Add comparison and richer evidence modes
 
 Two-date comparison, evidence-quality overlays, local contrast, and a compact
 historical ribbon become useful after one view is scientifically and
 operationally complete. Comparison must lock metric definition, scale, bins,
 camera, and population universe.
 
-## 9 — Defer globe, collaborative infrastructure, and AI extraction
+## 8 — Defer globe, collaborative infrastructure, and AI extraction
 
 A globe, database-backed multi-reviewer platform, and assisted evidence
 extraction remain valuable future work. None fixes the current absence of a
@@ -126,10 +125,12 @@ their complexity.
 
 ## Recommended immediate sequence
 
-1. Ask the HYDE publisher to resolve the license conflict and confirm the
-   controlling terms.
-2. In parallel, implement the reproducible view bundle and browser regression
-   suite; neither depends on HYDE access.
-3. When HYDE is cleared, complete one baseline/lower/upper spatial ingestion
-   slice and conservation report before expanding dates.
-4. Only then calibrate electricity onto the validated population surface.
+1. Continue the HYDE license clarification without blocking other work.
+2. Publish Chandler and Modelski Modern as companion observations with a
+   disagreement-preserving place view; keep the two identity pairs and two zero
+   cells explicitly unresolved.
+3. Expand boundary candidate scans to representative dates/regions, while
+   leaving claims without historian evidence unresolved.
+4. Add WebGL-failure coverage and measured performance benchmarks.
+5. When HYDE is cleared, complete one baseline/lower/upper spatial ingestion
+   slice and conservation report before calibrating electricity onto it.

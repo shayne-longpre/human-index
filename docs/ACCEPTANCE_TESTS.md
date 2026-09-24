@@ -69,3 +69,14 @@ A production manifest cannot contain fake SHA256 values, mutable `latest` depend
 ## Release decision
 
 Release only the modules that pass their relevant tests. A blocked ancient population source does not prevent publishing a truthful modern module, but the landing page must not claim completed deep-time coverage. A polished globe never compensates for failed denominator or provenance checks.
+
+## Implemented fixture gates — 2026-09-23
+
+The current automated browser suite covers pinned view state, JSON bundle
+download and parsing, history restoration, representative desktop/mobile visual
+baselines, reduced motion, and serious/critical axe findings on Atlas, Sources,
+and Review. The contract suite recomputes the downloaded-view electricity result
+from exported rows and weights. These implemented checks do not yet cover the
+WebGL failure path, a second browser engine, full touch/keyboard interaction, or
+performance budgets; those requirements remain open rather than implicitly
+passing.

@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated: 2026-09-22
+Updated: 2026-09-23
 
 ## MVP release
 
@@ -25,6 +25,13 @@ read-only Review page exposes versioned decisions for all 28 border-overlap and
 353 city-identity candidates without merging or mutating source observations.
 The map applies the allowed display effects and names the relevant counterpart
 polities in the click inspector.
+
+Shared Atlas links pin the immutable release, metric, requested year, selected
+support, context layers, published scale, and camera. An exact-view JSON bundle
+contains the date-specific rows and population weights, displayed calculation,
+historical evidence references, decisions, manifest, transformations,
+citations, and licenses. Browser back restores meaningful metric/layer changes;
+an unavailable release ID fails closed.
 
 ## Scientific separation
 
@@ -97,24 +104,26 @@ polities in the click inspector.
   allocation.
 - Map dependencies remain in a lazy chunk, and nearby boundary snapshots are
   prefetched after the active snapshot resolves.
+- View-row joining is independent of map geometry. The exact-view builder and
+  validator form a narrow typed contract and load the decision artifact only
+  when requested.
 
 ## Verified state
 
-The final r6 verification counts are recorded in `BUILD_REPORT.md` after strict
-type checking, unit tests, the production build, and desktop browser checks.
+The final r6 verification counts are recorded in `BUILD_REPORT.md`. The browser
+gate adds downloadable-bundle inspection, history restoration, reduced-motion,
+axe, and desktop/mobile screenshot checks.
 
 ## Immediate next work
 
 1. Resolve HYDE licensing and validate one matched baseline/lower/upper gridded
    population slice with masks and mass conservation.
-2. Add a reproducible view bundle and automated browser/accessibility regression
-   coverage while HYDE access is blocked.
-3. Calibrate one condition layer onto the validated population universe without
+2. Publish companion historical-city series with source disagreement intact.
+3. Extend bounded border candidate scans across representative dates/regions
+   without auto-resolving claims that lack evidence.
+4. Add WebGL-failure coverage and measured performance benchmarks.
+5. Calibrate one condition layer onto the validated population universe without
    losing unplaced or unknown population.
-4. Broaden the boundary decision process beyond the 1500 Mediterranean pilot
-   and obtain evidence for the twenty unresolved pairs.
-5. Publish companion city estimates with their disagreements intact, then add
-   the next condition vertical only after the spatial core is complete.
 
 The full sequence and acceptance gates are in
 `DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md` and `EVIDENCE_INTEGRATION.md`.

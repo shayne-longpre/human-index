@@ -5,7 +5,7 @@
   font-synthesis: none;
   --ink: #f0eadc;
   --muted: #a5ada6;
-  --faint: #6e7a72;
+  --faint: #929e96;
   --line: rgba(231, 224, 203, 0.16);
   --panel: #0b1b17;
   --panel-raised: #10231d;
@@ -22,7 +22,7 @@ body { margin: 0; min-width: 320px; min-height: 100vh; background: #071411; }
 button, input, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; }
-button:focus-visible, a:focus-visible, input:focus-visible {
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 3px;
 }
@@ -35,9 +35,13 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   padding: 10px 14px;
   color: #071411;
   background: var(--gold);
-  transform: translateY(-150%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
-.skip-link:focus { transform: translateY(0); }
+.skip-link:focus { width: auto; height: auto; overflow: visible; clip-path: none; }
 
 .app-shell { width: min(1500px, 100%); margin: 0 auto; padding: 0 28px; }
 .site-header {
@@ -173,6 +177,21 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .map-shell, .map-canvas { position: absolute; inset: 0; }
 .map-canvas { background: #071411; }
 .map-canvas canvas { outline: none; }
+.map-reset {
+  position: absolute;
+  z-index: 3;
+  right: 10px;
+  bottom: 80px;
+  min-height: 34px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  color: #cbd4cd;
+  background: rgba(7,20,17,.9);
+  font: 500 8px/1 "DM Mono", monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
 .map-shell::after {
   content: "";
   position: absolute;
@@ -319,6 +338,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   font: 500 10px/1 "DM Mono", monospace;
 }
 .year-controls { display: flex; align-items: center; gap: 15px; }
+.motion-note { max-width: 92px; color: var(--faint); font: 400 8px/1.35 "DM Mono", monospace; }
 .year-controls > button, .unsupported-year button {
   min-height: 33px;
   padding: 7px 12px;
@@ -436,6 +456,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .primary-action, .secondary-action { min-height: 43px; display: grid; place-items: center; padding: 10px 16px; border: 1px solid var(--gold-dark); text-decoration: none; font-size: 11px; cursor: pointer; }
 .primary-action { color: #102018; background: var(--gold); font-weight: 700; }
 .secondary-action { color: var(--ink); background: transparent; }
+.secondary-action:disabled, .year-controls > button:disabled { cursor: not-allowed; opacity: .55; }
+.view-action-status { display: block; color: var(--faint); font: 400 8px/1.45 "DM Mono", monospace; overflow-wrap: anywhere; }
 .manifest-action { color: var(--muted); text-align: center; text-decoration: none; font-size: 10px; }
 .manifest-action:hover { color: var(--ink); }
 .source-list { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 4px; background: var(--line); }
@@ -619,6 +641,8 @@ footer { min-height: 90px; display: flex; align-items: center; justify-content: 
   .method-strip { grid-template-columns: 1fr; gap: 24px; }
   .method-actions { grid-column: auto; grid-row: auto; }
   .source-list { grid-column: auto; }
+  .source-list a { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .source-list small { white-space: normal; }
   .sources-hero { padding: 50px 4px 42px; }
   .sources-hero > .eyebrow { margin-bottom: -5px; }
   .sources-actions { align-items: stretch; flex-direction: column; }

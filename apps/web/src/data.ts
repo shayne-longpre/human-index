@@ -82,6 +82,18 @@ export interface ReleaseBase {
   historicalCities: HistoricalCityDataset;
 }
 
+export interface ReconciliationDecisionArtifact {
+  schema_version: string;
+  decision_set_id: string;
+  status: string;
+  summary: Record<string, unknown>;
+  source_policies: Array<Record<string, unknown>>;
+  place_clusters: Array<Record<string, unknown>>;
+  city_identity_decisions: Array<Record<string, unknown>>;
+  border_overlap_decisions: Array<Record<string, unknown>>;
+  [key: string]: unknown;
+}
+
 export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-22-r6';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
@@ -140,6 +152,26 @@ export function downloadUrl(metricId: MvpMetricId, manifest: AtlasReleaseManifes
 
 export function historicalPopulationDownloadUrl(manifest: AtlasReleaseManifest): string {
   return `${releaseRoot}/${manifest.deep_time_population.download_file}`;
+}
+
+let reconciliationCache: Promise<ReconciliationDecisionArtifact> | null = null;
+
+export function loadReconciliationDecisions(
+  manifest: AtlasReleaseManifest,
+): Promise<ReconciliationDecisionArtifact> {
+  if (reconciliationCache) return reconciliationCache;
+  reconciliationCache = getJson<ReconciliationDecisionArtifact>(
+    `${releaseRoot}/${manifest.reconciliation.data_file}`,
+  ).then((artifact) => {
+    if (artifact.decision_set_id !== manifest.reconciliation.decision_set_id) {
+      throw new Error('Reconciliation artifact does not match the release manifest');
+    }
+    return artifact;
+  }).catch((error: unknown) => {
+    reconciliationCache = null;
+    throw error;
+  });
+  return reconciliationCache;
 }
 
 const historicalSnapshotCache = new Map<string, Promise<HistoricalFeatureCollection>>();

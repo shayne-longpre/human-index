@@ -6,3 +6,4 @@ export * from './prevalence';
 export * from './release';
 export * from './timeline';
 export * from './types';
+export * from './viewBundle';

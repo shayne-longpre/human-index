@@ -1,15 +1,16 @@
 import {
   aggregatePrevalence,
+  atlasViewBundleFilename,
   buildEvidenceTimelineYears,
+  createAtlasViewBundle,
   formatAstronomicalYear,
   nearestTimelineIndex,
   resolveHistoricalSnapshot,
+  validateAtlasViewBundle,
   validateAtlasReleaseManifest,
   type MvpMetricId,
   type LifeExpectancyDataset,
   type PopulationOutlookDataset,
-  type PublishedMetric,
-  type ViewRow,
 } from '@atlas/contracts';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { DataTable } from './components/DataTable';
@@ -30,6 +31,7 @@ import {
   historicalPopulationDownloadUrl,
   loadHistoricalSnapshot,
   loadMetricData,
+  loadReconciliationDecisions,
   loadReleaseBase,
   manifestUrl,
   prefetchHistoricalSnapshot,
@@ -39,85 +41,16 @@ import {
   type ReleaseBase,
 } from './data';
 import { metricViews } from './metricViews';
+import { buildViewRows } from './viewRows';
+import {
+  atlasViewSearch,
+  DEFAULT_MAP_CAMERA,
+  normalizeAtlasMapCamera,
+  parseAtlasViewState,
+  type AtlasMapCamera,
+} from './viewState';
 
 const MapView = lazy(() => import('./components/MapView').then((module) => ({ default: module.MapView })));
-
-// Keeps the app join independent of map geometry and rendering state.
-function buildRows(
-  release: ReleaseBase,
-  metric: PublishedMetric,
-  dataset: MetricDataset | undefined,
-  year: number,
-): ViewRow[] {
-  const outlook = dataset?.metric_id === 'population_outlook'
-    ? dataset as PopulationOutlookDataset
-    : null;
-  const populationObservations = outlook?.observations ?? release.population.observations;
-  const populationByCode = new Map(
-    populationObservations
-      .filter((observation) => observation.year === year)
-      .map((observation) => [observation.code, observation]),
-  );
-  const metricByCode = new Map<string, {
-    value: number | null;
-    status: 'known' | 'unknown';
-    locator: string;
-    evidenceState?: 'estimate' | 'medium_projection';
-  }>();
-
-  if (metric.id === 'population_total') {
-    for (const observation of populationByCode.values()) {
-      metricByCode.set(observation.code, {
-        value: observation.value,
-        status: observation.status,
-        locator: observation.original_record_locator,
-      });
-    }
-  } else if (outlook) {
-    for (const observation of outlook.observations) {
-      if (observation.year !== year) continue;
-      metricByCode.set(observation.code, {
-        value: observation.value,
-        status: observation.status,
-        locator: observation.original_record_locator,
-        evidenceState: observation.evidence_state,
-      });
-    }
-  } else if (dataset?.metric_id === 'access_to_electricity') {
-    for (const observation of dataset.observations) {
-      if (observation.year === year) {
-        metricByCode.set(observation.code, {
-          value: observation.value_percent,
-          status: observation.status,
-          locator: observation.original_record_locator,
-        });
-      }
-    }
-  } else if (dataset?.metric_id === 'life_expectancy_at_birth') {
-    for (const observation of dataset.observations) {
-      if (observation.year === year) {
-        metricByCode.set(observation.code, {
-          value: observation.value_years,
-          status: observation.status,
-          locator: observation.original_record_locator,
-        });
-      }
-    }
-  }
-
-  return (outlook?.entities ?? release.entities).map((entity) => {
-    const metricObservation = metricByCode.get(entity.code);
-    return {
-      entity,
-      year,
-      population: populationByCode.get(entity.code) ?? null,
-      metricValue: metricObservation?.value ?? null,
-      metricStatus: metricObservation?.status ?? 'unknown',
-      metricRecordLocator: metricObservation?.locator ?? null,
-      metricEvidenceState: metricObservation?.evidenceState,
-    };
-  });
-}
 
 export function App() {
   const [page] = useState<'atlas' | 'sources' | 'review'>(() => {
@@ -133,6 +66,7 @@ export function App() {
   const [playing, setPlaying] = useState(false);
   const [historicalEnabled, setHistoricalEnabled] = useState(true);
   const [citiesEnabled, setCitiesEnabled] = useState(true);
+  const [camera, setCamera] = useState<AtlasMapCamera>(DEFAULT_MAP_CAMERA);
   const [historicalSnapshot, setHistoricalSnapshot] = useState<HistoricalFeatureCollection | null>(null);
   const [historicalLoading, setHistoricalLoading] = useState(false);
   const [historicalError, setHistoricalError] = useState<string | null>(null);
@@ -140,6 +74,22 @@ export function App() {
   const [selectedCityPoint, setSelectedCityPoint] = useState<HistoricalCityPoint | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [metricError, setMetricError] = useState<string | null>(null);
+  const [bundleStatus, setBundleStatus] = useState<'idle' | 'building' | 'downloaded' | 'error'>('idle');
+  const [shareStatus, setShareStatus] = useState<'idle' | 'copied' | 'error'>('idle');
+  const [reducedMotion, setReducedMotion] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReducedMotion(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion) setPlaying(false);
+  }, [reducedMotion]);
 
   useEffect(() => {
     let active = true;
@@ -147,37 +97,24 @@ export function App() {
       .then((loaded) => {
         if (!active) return;
         validateAtlasReleaseManifest(loaded.manifest);
-        const parameters = new URLSearchParams(window.location.search);
-        const requestedMetric = loaded.manifest.metrics.find(
-          (candidate) => candidate.id === parameters.get('metric'),
-        );
-        const initialMetric = requestedMetric
-          ?? loaded.manifest.metrics.find((candidate) => candidate.id === loaded.manifest.default_view.metric_id)
-          ?? loaded.manifest.metrics[0];
-        const requestedYearParameter = parameters.get('year');
-        const requestedYear = requestedYearParameter === null ? Number.NaN : Number(requestedYearParameter);
-        const requestedPlace = parameters.get('place');
         const releaseYears = buildEvidenceTimelineYears(
           loaded.manifest,
           loaded.historicalContext,
           loaded.historicalCities,
         );
-        const releaseStartYear = Math.min(...releaseYears);
-        const releaseEndYear = Math.max(...releaseYears);
+        const initial = parseAtlasViewState(
+          window.location.search,
+          loaded.manifest,
+          releaseYears,
+          new Set(loaded.entities.map((entity) => entity.code)),
+        );
         setRelease(loaded);
-        setMetricId(initialMetric.id);
-        setYear(
-          Number.isInteger(requestedYear)
-            && requestedYear >= releaseStartYear
-            && requestedYear <= releaseEndYear
-            ? requestedYear
-            : loaded.manifest.default_view.year,
-        );
-        setSelectedCode(
-          requestedPlace && loaded.entities.some((entity) => entity.code === requestedPlace)
-            ? requestedPlace
-            : null,
-        );
+        setMetricId(initial.metricId);
+        setYear(initial.year);
+        setSelectedCode(initial.selectedCode);
+        setHistoricalEnabled(initial.historicalEnabled);
+        setCitiesEnabled(initial.citiesEnabled);
+        setCamera(initial.camera);
         setMetricDatasets({ population_total: loaded.population });
         void loadMetricData('access_to_electricity', loaded.manifest).then((dataset) => {
           if (active) {
@@ -191,14 +128,55 @@ export function App() {
     return () => { active = false; };
   }, []);
 
+  const timelineYears = useMemo(
+    () => release
+      ? buildEvidenceTimelineYears(release.manifest, release.historicalContext, release.historicalCities)
+      : [2024],
+    [release],
+  );
+
   useEffect(() => {
     if (!release || page !== 'atlas') return;
-    const parameters = new URLSearchParams();
-    parameters.set('metric', metricId);
-    parameters.set('year', String(year));
-    if (selectedCode) parameters.set('place', selectedCode);
-    window.history.replaceState(null, '', `${window.location.pathname}?${parameters.toString()}`);
-  }, [metricId, page, release, selectedCode, year]);
+    const search = atlasViewSearch(release.manifest, {
+      metricId,
+      year,
+      selectedCode,
+      historicalEnabled,
+      citiesEnabled,
+      scaleMode: 'published',
+      camera,
+    });
+    window.history.replaceState(null, '', `${window.location.pathname}${search}`);
+  }, [camera, citiesEnabled, historicalEnabled, metricId, page, release, selectedCode, year]);
+
+  useEffect(() => {
+    if (!release || page !== 'atlas') return;
+    const restore = () => {
+      try {
+        const restored = parseAtlasViewState(
+          window.location.search,
+          release.manifest,
+          timelineYears,
+          new Set(release.entities.map((entity) => entity.code)),
+        );
+        setMetricId(restored.metricId);
+        setYear(restored.year);
+        setSelectedCode(restored.selectedCode);
+        setHistoricalEnabled(restored.historicalEnabled);
+        setCitiesEnabled(restored.citiesEnabled);
+        setCamera(restored.camera);
+        setError(null);
+      } catch (cause: unknown) {
+        setError(cause instanceof Error ? cause.message : 'The pinned view could not be restored');
+      }
+    };
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, [page, release, timelineYears]);
+
+  const pushViewHistory = useCallback(() => {
+    if (release && page === 'atlas') window.history.pushState(null, '', window.location.href);
+  }, [page, release]);
 
   useEffect(() => {
     if (!release || metricDatasets[metricId]) return;
@@ -261,9 +239,19 @@ export function App() {
   const currentDataset = metricDatasets[metricId];
   const supported = metric?.available_years.includes(year) ?? false;
   const rows = useMemo(
-    () => release && metric ? buildRows(release, metric, currentDataset, year) : [],
+    () => release && metric ? buildViewRows(release, metric, currentDataset, year) : [],
     [currentDataset, metric, release, year],
   );
+  useEffect(() => {
+    if (!selectedCode || !metric) return;
+    const selectionHasNoStatisticalMeaning = metric.id === 'population_total' && year < 1960;
+    const selectionIsAbsentFromLoadedDataset = currentDataset
+      ? !rows.some((row) => row.entity.code === selectedCode)
+      : false;
+    if (selectionHasNoStatisticalMeaning || selectionIsAbsentFromLoadedDataset) {
+      setSelectedCode(null);
+    }
+  }, [currentDataset, metric, rows, selectedCode, year]);
   const valueByCode = useMemo(
     () => new Map(rows.map((row) => [row.entity.code, row.metricValue])),
     [rows],
@@ -294,6 +282,10 @@ export function App() {
     if (metricId !== 'population_outlook' || currentDataset?.metric_id !== 'population_outlook') return null;
     return (currentDataset as PopulationOutlookDataset).summaries.find((summary) => summary.year === year) ?? null;
   }, [currentDataset, metricId, year]);
+  const historicalPopulationObservation = useMemo(
+    () => release?.historicalPopulation.observations.find((observation) => observation.year === year) ?? null,
+    [release, year],
+  );
   const cityPoints = useMemo<HistoricalCityPoint[]>(() => {
     if (!release) return [];
     const cityById = new Map(release.historicalCities.cities.map((city) => [city.id, city]));
@@ -305,11 +297,33 @@ export function App() {
       });
   }, [release, year]);
 
+  const displayedSummary = useMemo(() => {
+    if (!metric || !supported) return null;
+    if (metric.id === 'population_total') {
+      return year < 1960 ? historicalPopulationObservation : populationSummary;
+    }
+    if (metric.id === 'population_outlook') return populationOutlookSummary;
+    if (metric.id === 'life_expectancy_at_birth') return lifeExpectancySummary;
+    return prevalenceSummary && populationSummary
+      ? { prevalence: prevalenceSummary, population_accounting: populationSummary }
+      : null;
+  }, [
+    historicalPopulationObservation,
+    lifeExpectancySummary,
+    metric,
+    populationOutlookSummary,
+    populationSummary,
+    prevalenceSummary,
+    supported,
+    year,
+  ]);
+
   const select = useCallback((code: string) => {
+    pushViewHistory();
     setSelectedHistorical(null);
     setSelectedCityPoint(null);
     setSelectedCode(code);
-  }, []);
+  }, [pushViewHistory]);
   const selectHistorical = useCallback((properties: HistoricalProperties) => {
     setSelectedCode(null);
     setSelectedCityPoint(null);
@@ -324,15 +338,95 @@ export function App() {
   useEffect(() => {
     setSelectedCityPoint(null);
   }, [year]);
-  const timelineYears = useMemo(
-    () => release
-      ? buildEvidenceTimelineYears(release.manifest, release.historicalContext, release.historicalCities)
-      : [2024],
-    [release],
-  );
   const firstYear = timelineYears[0];
   const lastYear = timelineYears[timelineYears.length - 1];
   const timelineIndex = nearestTimelineIndex(timelineYears, year);
+
+  const pinnedSearch = release ? atlasViewSearch(release.manifest, {
+    metricId,
+    year,
+    selectedCode,
+    historicalEnabled,
+    citiesEnabled,
+    scaleMode: 'published',
+    camera,
+  }) : '';
+
+  useEffect(() => {
+    setBundleStatus('idle');
+    setShareStatus('idle');
+  }, [camera, citiesEnabled, historicalEnabled, metricId, selectedCode, year]);
+
+  const downloadViewBundle = useCallback(async () => {
+    if (!release || !metric) return;
+    setBundleStatus('building');
+    try {
+      const decisions = await loadReconciliationDecisions(release.manifest);
+      const bundle = createAtlasViewBundle({
+        manifest: release.manifest,
+        metric,
+        requestedYear: year,
+        metricSupported: supported,
+        selectedSupportCode: selectedCode,
+        historicalBordersEnabled: historicalEnabled,
+        historicalCitiesEnabled: citiesEnabled,
+        camera: normalizeAtlasMapCamera(camera),
+        effectiveMetricYear: supported ? year : null,
+        historicalSnapshot: historicalEnabled ? historicalReference : null,
+        historicalCityEffectiveYear: citiesEnabled && cityPoints.length > 0 ? year : null,
+        pinnedQuery: pinnedSearch,
+        rows: metric.id === 'population_total' && year < 1960 ? [] : rows,
+        displayedSummary,
+        historicalPopulationObservation: metric.id === 'population_total'
+          ? historicalPopulationObservation
+          : null,
+        historicalCities: citiesEnabled ? cityPoints : [],
+        selectedHistoricalFeatureId: selectedHistorical?.source_feature_id ?? null,
+        selectedHistoricalCityId: selectedCityPoint?.city.id ?? null,
+        reconciliationDecisions: decisions,
+      });
+      validateAtlasViewBundle(bundle);
+      const objectUrl = URL.createObjectURL(new Blob(
+        [`${JSON.stringify(bundle, null, 2)}\n`],
+        { type: 'application/json' },
+      ));
+      const anchor = document.createElement('a');
+      anchor.href = objectUrl;
+      anchor.download = atlasViewBundleFilename(bundle);
+      anchor.click();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+      setBundleStatus('downloaded');
+    } catch {
+      setBundleStatus('error');
+    }
+  }, [
+    camera,
+    citiesEnabled,
+    cityPoints,
+    displayedSummary,
+    historicalEnabled,
+    historicalPopulationObservation,
+    historicalReference,
+    metric,
+    pinnedSearch,
+    release,
+    rows,
+    selectedCityPoint,
+    selectedCode,
+    selectedHistorical,
+    supported,
+    year,
+  ]);
+
+  const copyPinnedLink = useCallback(async () => {
+    if (!release) return;
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}${pinnedSearch}`);
+      setShareStatus('copied');
+    } catch {
+      setShareStatus('error');
+    }
+  }, [pinnedSearch, release]);
 
   useEffect(() => {
     if (!playing) return;
@@ -372,7 +466,9 @@ export function App() {
   const download = deepTimePopulation
     ? historicalPopulationDownloadUrl(release.manifest)
     : downloadUrl(metric.id, release.manifest);
-  const atlasUrl = `?metric=${metric.id}&year=${year}${selectedCode ? `&place=${selectedCode}` : ''}`;
+  const atlasUrl = pinnedSearch;
+  const sourcesUrl = `?page=sources&release=${encodeURIComponent(release.manifest.release_id)}`;
+  const reviewUrl = `?page=review&release=${encodeURIComponent(release.manifest.release_id)}`;
   const dateMagnitude = year <= 0 ? 1 - year : year;
   const dateEra = year <= 0 ? 'BCE' : 'CE';
 
@@ -385,8 +481,8 @@ export function App() {
         </a>
         <nav className="site-tabs" aria-label="Primary navigation">
           <a href={atlasUrl} aria-current={page === 'atlas' ? 'page' : undefined}>Atlas</a>
-          <a href="?page=sources" aria-current={page === 'sources' ? 'page' : undefined}>Sources</a>
-          <a href="?page=review" aria-current={page === 'review' ? 'page' : undefined}>Review</a>
+          <a href={sourcesUrl} aria-current={page === 'sources' ? 'page' : undefined}>Sources</a>
+          <a href={reviewUrl} aria-current={page === 'review' ? 'page' : undefined}>Review</a>
           {page === 'atlas' ? <a href={download} download>Download data</a> : null}
         </nav>
       </header>
@@ -415,6 +511,7 @@ export function App() {
                   className={candidate.id === metric.id ? 'metric-active' : 'metric-option'}
                   aria-pressed={candidate.id === metric.id}
                   onClick={() => {
+                    pushViewHistory();
                     setPlaying(false);
                     setMetricId(candidate.id);
                   }}
@@ -431,6 +528,7 @@ export function App() {
                 className={historicalEnabled ? 'context-toggle context-toggle-active' : 'context-toggle'}
                 aria-pressed={historicalEnabled}
                 onClick={() => {
+                  pushViewHistory();
                   setHistoricalEnabled((enabled) => !enabled);
                   setSelectedHistorical(null);
                 }}
@@ -443,6 +541,7 @@ export function App() {
                 className={citiesEnabled ? 'context-toggle context-toggle-active' : 'context-toggle'}
                 aria-pressed={citiesEnabled}
                 onClick={() => {
+                  pushViewHistory();
                   setCitiesEnabled((enabled) => !enabled);
                   setSelectedCityPoint(null);
                 }}
@@ -478,6 +577,9 @@ export function App() {
               onSelect={select}
               onHistoricalSelect={selectHistorical}
               onCitySelect={selectCity}
+              camera={camera}
+              resetCamera={DEFAULT_MAP_CAMERA}
+              onCameraChange={(nextCamera) => setCamera(normalizeAtlasMapCamera(nextCamera))}
             />
           </Suspense>
           <Legend metric={metric} unavailable={deepTimePopulation} />
@@ -513,9 +615,15 @@ export function App() {
               <h2 id="time-title">Time</h2>
             </div>
             <div className="year-controls">
-              <button type="button" onClick={() => setPlaying((current) => !current)}>
+              <button
+                type="button"
+                disabled={reducedMotion}
+                aria-describedby={reducedMotion ? 'reduced-motion-note' : undefined}
+                onClick={() => setPlaying((current) => !current)}
+              >
                 {playing ? 'Pause' : 'Play'}
               </button>
+              {reducedMotion ? <span id="reduced-motion-note" className="motion-note">Playback off: reduced motion</span> : null}
               <label className="year-entry">
                 <span>Requested date</span>
                 <span className="era-entry">
@@ -600,7 +708,9 @@ export function App() {
           {!supported ? (
             <div className="unsupported-year" role="status">
               <span>{metric.label} has no published observation for {formatAstronomicalYear(year)}.</span>
-              <button type="button" onClick={() => setYear(nearestYear)}>Show {formatAstronomicalYear(nearestYear)}</button>
+              <button type="button" onClick={() => { pushViewHistory(); setYear(nearestYear); }}>
+                Show {formatAstronomicalYear(nearestYear)}
+              </button>
             </div>
           ) : null}
         </section>
@@ -647,12 +757,34 @@ export function App() {
             <a className="primary-action" href={download} download>
               Download {deepTimePopulation ? 'historical world estimates' : 'full series'} · CSV
             </a>
+            <button
+              type="button"
+              className="secondary-action"
+              disabled={bundleStatus === 'building'}
+              onClick={() => { void downloadViewBundle(); }}
+            >
+              {bundleStatus === 'building' ? 'Building exact-view bundle…' : 'Download this exact view · JSON'}
+            </button>
+            <button type="button" className="secondary-action" onClick={() => { void copyPinnedLink(); }}>
+              Copy pinned view link
+            </button>
             <button type="button" className="secondary-action" onClick={() => setTableOpen((open) => !open)}>
               {tableOpen ? 'Hide evidence table' : 'Open evidence table'}
             </button>
             <a className="manifest-action" href={manifestUrl} target="_blank" rel="noreferrer">
               Open release manifest ↗
             </a>
+            <span className="view-action-status" aria-live="polite">
+              {bundleStatus === 'downloaded'
+                ? 'Exact-view bundle downloaded.'
+                : bundleStatus === 'error'
+                  ? 'The exact-view bundle could not be built.'
+                  : shareStatus === 'copied'
+                    ? 'Pinned link copied.'
+                    : shareStatus === 'error'
+                      ? 'Clipboard unavailable; copy the pinned browser URL.'
+                      : 'Release, dates, layers, scale, camera, evidence, and decisions are pinned.'}
+            </span>
           </div>
           <div className="source-list">
             {release.manifest.citations.map((citation) => (

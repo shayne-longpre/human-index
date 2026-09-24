@@ -35,7 +35,7 @@ export function HistoricalPopulationTable({
         </div>
       </div>
 
-      <div className="table-scroll historical-table-scroll">
+      <div className="table-scroll historical-table-scroll" role="region" aria-label="Scrollable historical population evidence" tabIndex={0}>
         <table>
           <thead>
             <tr><th scope="col">Population source</th><th scope="col">Support</th><th scope="col" className="numeric">People</th></tr>
@@ -54,7 +54,7 @@ export function HistoricalPopulationTable({
         </table>
       </div>
 
-      <div className="table-scroll historical-table-scroll">
+      <div className="table-scroll historical-table-scroll" role="region" aria-label="Scrollable historical polity evidence" tabIndex={0}>
         <table>
           <thead>
             <tr><th scope="col">Historical polity</th><th scope="col">Source interval</th><th scope="col" className="numeric">Source area km²</th></tr>
@@ -72,7 +72,7 @@ export function HistoricalPopulationTable({
           </tbody>
         </table>
       </div>
-      <div className="table-scroll historical-table-scroll">
+      <div className="table-scroll historical-table-scroll" role="region" aria-label="Scrollable historical city evidence" tabIndex={0}>
         <table>
           <thead>
             <tr><th scope="col">Historical city point</th><th scope="col">Source metadata</th><th scope="col" className="numeric">Estimated people</th></tr>
