@@ -116,30 +116,31 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   pointer-events: none;
 }
 .metric-picker {
-  width: 245px;
-  padding: 13px;
+  width: 285px;
+  padding: 11px;
   border: 1px solid var(--line);
   border-radius: 2px;
   background: rgba(7, 20, 17, .91);
   backdrop-filter: blur(14px);
   pointer-events: auto;
 }
-.metric-picker .control-label { margin: 0 4px 10px; }
+.metric-picker .control-label { margin: 0 4px 7px; }
 .metric-picker button {
   width: 100%;
-  min-height: 41px;
+  min-height: 34px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 11px;
+  gap: 8px;
+  padding: 7px 9px;
   border: 0;
   border-radius: 2px;
   text-align: left;
+  white-space: nowrap;
   cursor: pointer;
 }
 .metric-active { color: #132018; background: var(--gold); font-weight: 650; }
 .metric-dot { width: 7px; height: 7px; border-radius: 50%; background: #27443a; }
-.metric-option { margin-top: 4px; color: #c7cec8; background: transparent; }
+.metric-option { margin-top: 2px; color: #c7cec8; background: transparent; }
 .metric-option:hover { background: rgba(241,207,124,.08); }
 .metric-picker button small { margin-left: auto; font: 400 8px/1 "DM Mono", monospace; opacity: .72; }
 .metric-blocked { margin-top: 4px; color: #829088; background: transparent; }
@@ -268,6 +269,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .legend-ramp-electricity { background: linear-gradient(90deg, rgb(30,48,48), rgb(45,85,75), rgb(88,128,95), rgb(168,166,96), rgb(245,211,127)); }
 .legend-ramp-population { background: linear-gradient(90deg, rgb(25,50,48), rgb(39,82,74), rgb(96,131,91), rgb(176,169,93), rgb(245,211,127)); }
 .legend-ramp-life { background: linear-gradient(90deg, rgb(30,48,48), rgb(45,85,75), rgb(88,128,95), rgb(168,166,96), rgb(245,211,127)); }
+.legend-ramp-gdp { background: linear-gradient(90deg, rgb(30,48,48), rgb(43,82,73), rgb(101,131,91), rgb(182,168,91), rgb(245,211,127)); }
 .legend-labels { margin-top: 6px; color: var(--muted); font: 400 8px/1 "DM Mono", monospace; }
 .legend-unknown { display: flex; align-items: center; gap: 7px; margin-top: 11px; color: var(--muted); font-size: 9px; }
 .unknown-swatch { width: 10px; height: 10px; background: repeating-linear-gradient(135deg, #77807b 0 2px, #545d58 2px 4px); }
@@ -621,6 +623,7 @@ footer { min-height: 90px; display: flex; align-items: center; justify-content: 
   .atlas-stage { min-height: 670px; }
   .stage-toolbar { top: 10px; left: 10px; right: 10px; }
   .metric-picker { width: 207px; }
+  .metric-picker button { white-space: normal; }
   .release-badge { display: none; }
   .context-toggle { max-width: 150px; text-align: left; }
   .legend { right: 10px; bottom: 205px; width: 198px; }

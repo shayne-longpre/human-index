@@ -15,6 +15,7 @@ from .sources.world_bank import (
     LIFE_EXPECTANCY_INDICATOR,
     POPULATION_INDICATOR,
 )
+from .sources.world_bank_economics import GDP_PER_CAPITA_INDICATOR
 
 
 WORLD_BANK_UNIVERSE_ID = "world-bank-nonaggregate-economies-v1"
@@ -29,6 +30,7 @@ def taxonomy_catalog() -> list[dict[str, Any]]:
             "families": [
                 {"id": "population_and_settlement", "label": "Population & settlement"},
                 {"id": "material_conditions", "label": "Material conditions"},
+                {"id": "economic_activity", "label": "Economic activity"},
                 {"id": "infrastructure_access", "label": "Infrastructure access"},
                 {"id": "health_and_survival", "label": "Health & survival"},
             ],
@@ -159,6 +161,35 @@ def metric_definition(
                 "an individual lifespan prediction",
                 "a person-level distribution",
                 "a global life-table estimate",
+            ],
+        }
+    if metric_id == "gdp_per_capita_constant_2015_usd":
+        return {
+            **shared,
+            "id": metric_id,
+            "label": "GDP per person",
+            "taxonomy_ids": ["material_conditions", "economic_activity"],
+            "indicator": GDP_PER_CAPITA_INDICATOR,
+            "aggregation_kind": "context_fact",
+            "unit": "constant 2015 US$/person",
+            "definition": (
+                "Territorial GDP divided by midyear population, expressed in constant "
+                "2015 US dollars for the stated World Bank economy and year."
+            ),
+            "display_scale": {
+                "transform": "log1p",
+                "fixed_domain": [200, 250_000],
+                "scale_version": "gdp-per-capita-constant-2015-usd-v1",
+            },
+            "safe_summary": (
+                "Source-published territorial GDP per capita; Atlas reports coverage "
+                "without constructing a global average."
+            ),
+            "prohibited_interpretations": [
+                "individual income",
+                "household wealth",
+                "a purchasing-power-parity measure",
+                "a welfare ranking",
             ],
         }
     raise ValidationError(f"Unknown published metric: {metric_id}")

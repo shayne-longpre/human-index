@@ -35,6 +35,13 @@ from .sources.world_bank import (
     WORLD_REFERENCE_CODE,
     WorldBankAdapter,
 )
+from .sources.world_bank_economics import (
+    GDP_PER_CAPITA_INDICATOR,
+    GDP_PER_CAPITA_SOURCE_URL,
+    SOURCE_RELEASE_ID as WORLD_BANK_ECONOMICS_SOURCE_ID,
+    WORLD_BANK_COUNTRIES_URL as WORLD_BANK_ECONOMICS_COUNTRIES_URL,
+    WorldBankEconomicsAdapter,
+)
 from .sources.modelski_cities import (
     SOURCE_ARTICLE_URL as MODELSKI_ARTICLE_URL,
     SOURCE_DATA_URL as MODELSKI_DATA_URL,
@@ -64,9 +71,10 @@ from .sources.un_wpp import (
 
 
 RETRIEVED_ON = "2026-09-20"
-PUBLISHED_ON = "2026-09-22"
+PUBLISHED_ON = "2026-09-23"
 WPP_RETRIEVED_ON = "2026-09-21"
-RELEASE_ID = "atlas-mvp-2026-09-22-r6"
+ECONOMICS_RETRIEVED_ON = "2026-09-23"
+RELEASE_ID = "atlas-mvp-2026-09-23-r7"
 CLIOPATRIA_GEOMETRY_MEMBER = "cliopatria_polities_only.geojson"
 
 
@@ -114,6 +122,20 @@ def build(args: argparse.Namespace) -> None:
             args.countries,
             SOURCE_URLS["world_bank_countries"],
             RETRIEVED_ON,
+            "CC-BY-4.0",
+        ),
+        InputArtifact(
+            "world_bank_gdp_per_capita_constant_2015_usd",
+            args.gdp_per_capita,
+            GDP_PER_CAPITA_SOURCE_URL,
+            ECONOMICS_RETRIEVED_ON,
+            "CC-BY-4.0",
+        ),
+        InputArtifact(
+            "world_bank_economics_countries",
+            args.economics_countries,
+            WORLD_BANK_ECONOMICS_COUNTRIES_URL,
+            ECONOMICS_RETRIEVED_ON,
             "CC-BY-4.0",
         ),
         InputArtifact(
@@ -196,6 +218,10 @@ def build(args: argparse.Namespace) -> None:
         life_expectancy=args.life_expectancy,
         countries=args.countries,
     )
+    economics_adapter = WorldBankEconomicsAdapter(
+        gdp_per_capita=args.gdp_per_capita,
+        countries=args.economics_countries,
+    )
     historical_population_adapter = UsCensusHistoricalPopulationAdapter(
         args.historical_population
     )
@@ -206,6 +232,8 @@ def build(args: argparse.Namespace) -> None:
     wpp_adapter = Wpp2024MediumAudit(args.un_wpp)
     wpp_profile = wpp_adapter.profile()
     codes = adapter.nonaggregate_codes()
+    if economics_adapter.nonaggregate_codes() != codes:
+        raise ValidationError("World Bank economics and population entity universes differ")
     metadata = adapter.entities()
     entity_names = {code: metadata[code]["name"] for code in codes}
     geometry, placed_codes = build_display_geometry(
@@ -228,15 +256,19 @@ def build(args: argparse.Namespace) -> None:
     population = adapter.series(POPULATION_INDICATOR)
     electricity = adapter.series(ELECTRICITY_INDICATOR)
     life_expectancy = adapter.series(LIFE_EXPECTANCY_INDICATOR)
+    gdp_per_capita = economics_adapter.series()
     population_years = adapter.years(POPULATION_INDICATOR)
     electricity_years = adapter.years(ELECTRICITY_INDICATOR, require_known=True)
     life_expectancy_years = adapter.years(LIFE_EXPECTANCY_INDICATOR, require_known=True)
+    gdp_per_capita_years = economics_adapter.years(require_known=True)
     if population_years != list(range(1960, 2026)):
         raise ValidationError("Population release does not cover every year from 1960 through 2025")
     if electricity_years != list(range(1990, 2025)):
         raise ValidationError("Electricity observations do not cover every year from 1990 through 2024")
     if life_expectancy_years != list(range(1960, 2025)):
         raise ValidationError("Life expectancy observations do not cover every year from 1960 through 2024")
+    if gdp_per_capita_years != list(range(1960, 2026)):
+        raise ValidationError("GDP-per-capita observations do not cover every year from 1960 through 2025")
 
     population_rows: list[dict[str, Any]] = []
     population_summaries: list[dict[str, Any]] = []
@@ -425,15 +457,48 @@ def build(args: argparse.Namespace) -> None:
             }
         )
 
+    gdp_per_capita_rows: list[dict[str, Any]] = []
+    gdp_per_capita_summaries: list[dict[str, Any]] = []
+    for year in gdp_per_capita_years:
+        known_entities = 0
+        mapped_known_entities = 0
+        for code in sorted(codes):
+            value = gdp_per_capita.get((code, year))
+            if value is not None:
+                known_entities += 1
+                if code in placed_codes:
+                    mapped_known_entities += 1
+            gdp_per_capita_rows.append(
+                {
+                    "code": code,
+                    "year": year,
+                    "value_constant_2015_usd": value,
+                    "status": "known" if value is not None else "unknown",
+                    "original_record_locator": economics_adapter.record_locator(code, year),
+                }
+            )
+        gdp_per_capita_summaries.append(
+            {
+                "year": year,
+                "known_entities": known_entities,
+                "unknown_entities": len(codes) - known_entities,
+                "mapped_known_entities": mapped_known_entities,
+                "unplaced_known_entities": known_entities - mapped_known_entities,
+                "aggregation_policy": "coverage_counts_only_no_global_gdp_per_capita",
+            }
+        )
+
     args.output.mkdir(parents=True, exist_ok=True)
     entities_path = args.output / "entities.json"
     population_path = args.output / "population.json"
     electricity_path = args.output / "electricity.json"
     life_expectancy_path = args.output / "life-expectancy.json"
+    gdp_per_capita_path = args.output / "gdp-per-capita.json"
     geometry_path = args.output / "countries.geojson"
     population_csv_path = args.output / "population.csv"
     electricity_csv_path = args.output / "electricity.csv"
     life_expectancy_csv_path = args.output / "life-expectancy.csv"
+    gdp_per_capita_csv_path = args.output / "gdp-per-capita.csv"
     historical_population_path = args.output / "historical-population.json"
     historical_population_csv_path = args.output / "historical-population.csv"
     historical_context_index_path = args.output / "historical-context.json"
@@ -474,6 +539,19 @@ def build(args: argparse.Namespace) -> None:
             "summaries": life_expectancy_summaries,
         },
     )
+    write_json(
+        gdp_per_capita_path,
+        {
+            "schema_version": "0.1.0",
+            "metric_id": "gdp_per_capita_constant_2015_usd",
+            "source_release_id": WORLD_BANK_ECONOMICS_SOURCE_ID,
+            "source_unit": "constant 2015 US dollars per person",
+            "temporal_policy": "exact_only",
+            "years": gdp_per_capita_years,
+            "observations": gdp_per_capita_rows,
+            "summaries": gdp_per_capita_summaries,
+        },
+    )
     write_json(geometry_path, geometry)
     population_csv_path.write_bytes(
         _csv_bytes(
@@ -508,6 +586,18 @@ def build(args: argparse.Namespace) -> None:
                 "population_status",
                 "original_record_locator",
                 "population_record_locator",
+            ],
+        )
+    )
+    gdp_per_capita_csv_path.write_bytes(
+        _csv_bytes(
+            gdp_per_capita_rows,
+            [
+                "code",
+                "year",
+                "value_constant_2015_usd",
+                "status",
+                "original_record_locator",
             ],
         )
     )
@@ -664,10 +754,12 @@ def build(args: argparse.Namespace) -> None:
             population_path,
             electricity_path,
             life_expectancy_path,
+            gdp_per_capita_path,
             geometry_path,
             population_csv_path,
             electricity_csv_path,
             life_expectancy_csv_path,
+            gdp_per_capita_csv_path,
             historical_population_path,
             historical_population_csv_path,
             historical_context_index_path,
@@ -751,6 +843,13 @@ def build(args: argparse.Namespace) -> None:
                 "life-expectancy.json",
                 "life-expectancy.csv",
                 [f"world-bank-wdi-{WORLD_BANK_LAST_UPDATED}"],
+            ),
+            metric_definition(
+                "gdp_per_capita_constant_2015_usd",
+                gdp_per_capita_years,
+                gdp_per_capita_path.name,
+                gdp_per_capita_csv_path.name,
+                [WORLD_BANK_ECONOMICS_SOURCE_ID],
             ),
         ],
         "population_universes": [
@@ -899,6 +998,14 @@ def build(args: argparse.Namespace) -> None:
                 "license": WPP_SOURCE_LICENSE,
                 "profile": wpp_profile,
             },
+            {
+                "id": WORLD_BANK_ECONOMICS_SOURCE_ID,
+                "publisher": "World Bank",
+                "source_update": WORLD_BANK_LAST_UPDATED,
+                "retrieved_on": ECONOMICS_RETRIEVED_ON,
+                "license": "CC BY 4.0",
+                "profile": economics_adapter.profile(),
+            },
         ],
         "alternative_sources": [
             {
@@ -937,7 +1044,13 @@ def build(args: argparse.Namespace) -> None:
             {
                 "id": "world-bank-mvp-normalize-v1",
                 "version": "1.0.0",
-                "input_artifact_ids": [artifact.id for artifact in inputs[:5]],
+                "input_artifact_ids": [
+                    "world_bank_population",
+                    "world_bank_electricity",
+                    "world_bank_life_expectancy",
+                    "world_bank_countries",
+                    "natural_earth_admin_0",
+                ],
                 "parameters": {
                     "universe_id": WORLD_BANK_UNIVERSE_ID,
                     "population_years": [1960, 2025],
@@ -954,6 +1067,32 @@ def build(args: argparse.Namespace) -> None:
                     "prevalence_mass_conservation": "passed_all_years",
                     "context_distribution_mass_conservation": "passed_all_years",
                     "world_reference_residual_nonnegative": "passed_all_years",
+                },
+            },
+            {
+                "id": "world-bank-gdp-per-capita-normalize-v1",
+                "version": "1.0.0",
+                "input_artifact_ids": [
+                    "world_bank_gdp_per_capita_constant_2015_usd",
+                    "world_bank_economics_countries",
+                ],
+                "parameters": {
+                    "indicator": GDP_PER_CAPITA_INDICATOR,
+                    "unit": "constant 2015 US dollars per person",
+                    "years": [1960, 2025],
+                    "universe_id": WORLD_BANK_UNIVERSE_ID,
+                    "no_interpolation": True,
+                    "cross_source_splicing": "none",
+                    "global_aggregation": "disabled",
+                },
+                "output_artifacts": {
+                    artifact_key(gdp_per_capita_path): artifacts[artifact_key(gdp_per_capita_path)],
+                    artifact_key(gdp_per_capita_csv_path): artifacts[artifact_key(gdp_per_capita_csv_path)],
+                },
+                "validation": {
+                    **economics_adapter.profile(),
+                    "published_summaries": len(gdp_per_capita_summaries),
+                    "entity_universe_matches_population_release": True,
                 },
             },
             {
@@ -1076,6 +1215,11 @@ def build(args: argparse.Namespace) -> None:
                 "license": "CC BY 4.0",
             },
             {
+                "label": "World Bank, GDP per capita (constant 2015 US$)",
+                "url": "https://data.worldbank.org/indicator/NY.GDP.PCAP.KD",
+                "license": "CC BY 4.0",
+            },
+            {
                 "label": "Natural Earth vector v5.1.2",
                 "url": "https://github.com/nvkelso/natural-earth-vector/releases/tag/v5.1.2",
                 "license": "Public domain",
@@ -1110,6 +1254,7 @@ def build(args: argparse.Namespace) -> None:
             "Population color represents a territorial total, not local density or a gridded settlement reconstruction.",
             "Electricity values are national or territorial estimates, not local household observations.",
             "Life expectancy is a national or territorial period mean; the population distribution groups people by territorial context and is not a person-level lifespan distribution.",
+            "GDP per capita is a territorial national-accounts context value in constant 2015 US dollars; it is not individual income, household wealth, or a purchasing-power-parity welfare ranking.",
             "The covered universe is reconciled to WLD with an explicit residual but lacks source-coded parent/dependency relations.",
             "The 1:110m display geometry omits some small territories; their population remains in summaries.",
             "Pre-1960 historical population is a global estimate or source-disagreement range and is not spatially allocated.",
@@ -1137,6 +1282,7 @@ def build(args: argparse.Namespace) -> None:
                 "historical_population_dates": len(historical_population_observations),
                 "electricity_years": [electricity_years[0], electricity_years[-1]],
                 "life_expectancy_years": [life_expectancy_years[0], life_expectancy_years[-1]],
+                "gdp_per_capita_years": [gdp_per_capita_years[0], gdp_per_capita_years[-1]],
                 "historical_context_snapshots": len(historical_snapshots),
                 "historical_city_observations": len(historical_cities["observations"]),
                 "wpp_population_years": [wpp_dataset["years"][0], wpp_dataset["years"][-1]],
@@ -1156,6 +1302,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--electricity", type=Path, required=True)
     parser.add_argument("--life-expectancy", type=Path, required=True)
     parser.add_argument("--countries", type=Path, required=True)
+    parser.add_argument("--gdp-per-capita", type=Path, required=True)
+    parser.add_argument("--economics-countries", type=Path, required=True)
     parser.add_argument("--geometry", type=Path, required=True)
     parser.add_argument("--historical-population", type=Path, required=True)
     parser.add_argument("--cliopatria-archive", type=Path, required=True)

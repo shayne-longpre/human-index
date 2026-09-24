@@ -2,6 +2,7 @@ import type {
   AtlasEntity,
   AtlasReleaseManifest,
   ElectricityDataset,
+  GdpPerCapitaDataset,
   HistoricalCityDataset,
   HistoricalContextIndex,
   HistoricalContextSnapshotReference,
@@ -70,7 +71,8 @@ export type MetricDataset =
   | PopulationDataset
   | PopulationOutlookDataset
   | ElectricityDataset
-  | LifeExpectancyDataset;
+  | LifeExpectancyDataset
+  | GdpPerCapitaDataset;
 
 export interface ReleaseBase {
   entities: AtlasEntity[];
@@ -94,7 +96,7 @@ export interface ReconciliationDecisionArtifact {
   [key: string]: unknown;
 }
 
-export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-22-r6';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-23-r7';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {

@@ -104,16 +104,47 @@ export const lifeExpectancyMetric: MetricDefinition = {
   globalSummaryEnabled: true,
 };
 
+export const gdpPerCapitaMetric: MetricDefinition = {
+  id: 'gdp_per_capita_constant_2015_usd',
+  label: 'GDP per person',
+  taxonomyIds: ['material_conditions', 'economic_activity'],
+  definition:
+    'Territorial GDP divided by midyear population, expressed in constant 2015 US dollars for the stated World Bank economy and year.',
+  unit: 'constant 2015 US$/person',
+  aggregationKind: 'context_fact',
+  statisticalUniverse: 'World Bank nonaggregate country and territory entities',
+  sourceSupportType: 'country_or_territory_year',
+  contextVsIndividual: 'territorial_context',
+  comparabilityGroup: 'world-bank-ny-gdp-pcap-kd-2026-07-13',
+  temporalPolicy: 'exact_only',
+  displayScale: {
+    transform: 'log1p',
+    fixedDomain: [200, 250_000],
+    scaleVersion: 'gdp-per-capita-constant-2015-usd-v1',
+  },
+  summarySentenceTemplate:
+    'Source-published territorial GDP per capita; Atlas reports coverage without constructing a global average.',
+  prohibitedInterpretations: [
+    'individual income',
+    'household wealth',
+    'a purchasing-power-parity measure',
+    'a welfare ranking',
+  ],
+  globalSummaryEnabled: false,
+};
+
 export const metricDefinitions = [
   populationTotalMetric,
   populationOutlookMetric,
   electricityAccessMetric,
   lifeExpectancyMetric,
+  gdpPerCapitaMetric,
 ] as const;
 
 export const metricTaxonomy = {
   population_and_settlement: [populationTotalMetric.id, populationOutlookMetric.id],
-  material_conditions: [electricityAccessMetric.id],
+  material_conditions: [electricityAccessMetric.id, gdpPerCapitaMetric.id],
   infrastructure_access: [electricityAccessMetric.id],
   health_and_survival: [lifeExpectancyMetric.id],
+  economic_activity: [gdpPerCapitaMetric.id],
 } as const;

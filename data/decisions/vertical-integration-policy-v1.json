@@ -1,0 +1,73 @@
+{
+  "schema_version": "0.1.0",
+  "decision_set_id": "atlas-vertical-integration-2026-09-23-v1",
+  "status": "active_for_candidate_adapter_work",
+  "effective_on": "2026-09-23",
+  "inputs": {
+    "candidate_lock": "data/registry/candidate-source-lock.json",
+    "candidate_profiles": "data/review/vertical-source-profiles.json",
+    "research_registry": "data/registry/sources.json"
+  },
+  "global_rules": [
+    "source_observations_are_immutable",
+    "derived_rows_require_input_ids_transform_version_parameters_and_output_checksum",
+    "source_native_statistical_supports_are_preserved",
+    "historical_polities_are_never_joined_to_modern_territories_by_name_alone",
+    "display_geometry_never_defines_statistical_membership",
+    "missing_absent_not_applicable_disputed_and_uncoded_are_distinct_states",
+    "cross_source_splicing_requires_a_metric_specific_versioned_decision",
+    "source_ranges_scenarios_and_low_best_high_fields_are_not_confidence_intervals",
+    "candidate_acquisition_does_not_imply_publication_approval"
+  ],
+  "verticals": [
+    {
+      "id": "population_over_time",
+      "published_products": [
+        "us-census-historical-world-population-2026-09-20",
+        "world-bank-wdi-2026-07-13",
+        "un-wpp-2024-medium-demographic-indicators"
+      ],
+      "candidate_products": ["hyde-3.5"],
+      "decision": "keep_deep_time_world_modern_territorial_and_un_projection_products_separate",
+      "merge_policy": "none",
+      "geography_policy": "never_allocate_world_totals_to_polities_or_modern_countries_without_an_explicit_mass_conserving_model",
+      "next_gate": "resolve_hyde_license_masks_scenarios_and_grid_total_validation"
+    },
+    {
+      "id": "political_borders_and_names",
+      "published_products": ["cliopatria-v0.2.0", "natural-earth-v5.1.2"],
+      "candidate_products": ["cshapes-2.0", "world-historical-gazetteer"],
+      "decision": "cliopatria_is_contestable_historical_context_and_natural_earth_is_display_geometry_only",
+      "merge_policy": "source_declared_hierarchy_annotations_only_no_geometry_union",
+      "geography_policy": "historical_political_context_statistical_geography_and_display_geometry_remain_separate",
+      "next_gate": "resolve_cshapes_terms_and_fields_then_select_licensed_whg_name_datasets"
+    },
+    {
+      "id": "economics_over_time",
+      "published_products": ["world-bank-wdi-economics-2026-07-13"],
+      "candidate_products": ["maddison-2023", "clio-infra-gdp-per-capita"],
+      "decision": "publish_world_bank_constant_2015_usd_as_a_modern_source_native_series",
+      "merge_policy": "no_splice_between_constant_usd_ppp_or_different_historical_releases",
+      "geography_policy": "use_world_bank_support_ids_for_the_published_slice_and_preserve_each_historical_sources_native_support_later",
+      "next_gate": "obtain_maddison_workbook_source_sheet_and_resolve_clio_artifact_terms"
+    },
+    {
+      "id": "institutions_and_governance",
+      "published_products": [],
+      "candidate_products": ["vdem-v16", "seshat-equinox-v1", "clio-infra-xrcomp"],
+      "decision": "first_candidate_is_vdem_v2x_suffr_as_de_jure_legal_eligibility_not_an_atlas_democracy_score",
+      "merge_policy": "none_across_variables_that_measure_different_institutional_concepts",
+      "geography_policy": "reconcile_vdem_country_year_seshat_polity_nga_time_and_clio_2012_supports_separately",
+      "next_gate": "parse_vdem_rdata_profile_country_support_and_preserve_seshat_native_status_codes"
+    },
+    {
+      "id": "conflict_and_security",
+      "published_products": [],
+      "candidate_products": ["ucdp-ged-26.1", "ucdp-prio-acd-26.1", "clio-infra-conflict"],
+      "decision": "ged_events_acd_conflict_years_and_clio_historical_binary_context_are_distinct_products",
+      "merge_policy": "no_event_to_country_prevalence_or_cross_product_fatality_merge",
+      "geography_policy": "event_location_conflict_location_conflict_parties_and_display_polygons_are_distinct_supports",
+      "next_gate": "review_nonmonotonic_ged_fatality_fields_and_build_a_versioned_gleditsch_ward_crosswalk"
+    }
+  ]
+}

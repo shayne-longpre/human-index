@@ -4,12 +4,13 @@ Updated: 2026-09-23
 
 ## MVP release
 
-Release r6 publishes four separately defined measures:
+Release r7 publishes five separately defined measures:
 
 - World Bank population totals, 1960–2025;
 - UN World Population Prospects 2024 population outlook, 1950–2100;
 - World Bank electricity access, 1990–2024; and
-- World Bank life expectancy at birth, 1960–2024.
+- World Bank life expectancy at birth, 1960–2024; and
+- World Bank GDP per capita in constant 2015 US dollars, 1960–2025.
 
 It also publishes U.S. Census global historical-population ranges at 39 source
 dates from 10,000 BCE through 1950 CE, 36 Cliopatria political-context
@@ -49,6 +50,9 @@ an unavailable release ID fails closed.
 - Cliopatria polygons and Modelski points are historical context. Neither affects
   metric aggregation or population conservation.
 - Missing, unplaced, unsupported, estimated, and projected states stay distinct.
+- GDP per capita is territorial economic context. Atlas reports source-support
+  coverage but does not construct a global mean or interpret it as individual
+  income, household wealth, or a PPP welfare ranking.
 
 ## Source audit decisions
 
@@ -83,6 +87,15 @@ an unavailable release ID fails closed.
   169-country coverage through 2022, CC BY 4.0, and source-sheet attribution;
   the official download currently returns DataverseNL's Anubis page. No bypass
   was attempted.
+- The bounded vertical acquisition pass pins 19 additional candidate artifacts:
+  World Bank economics, eight Clio Infra workbooks, V-Dem v16 data/codebook/
+  release metadata, Seshat Equinox v1 data/metadata, and both UCDP 26.1
+  products and codebooks. Three provider-level blockers remain recorded for
+  HYDE, Maddison, and WHG.
+- Candidate profiling keeps the remaining verticals out of the release. UCDP
+  GED has 417,968 events and 5,075 non-monotonic low/best/high rows; Seshat uses
+  source-native sentinels and polity/NGA/time supports; Clio uses 2012 country
+  supports; and V-Dem's large RData object still needs an entity audit.
 
 ## Implemented architecture
 
@@ -97,6 +110,10 @@ an unavailable release ID fails closed.
 - WPP demonstrates source addition without concatenating releases: it has its
   own source release, universe, transformation, summaries, CSV, and presentation
   metadata.
+- World Bank economics demonstrates a second narrow adapter on the same modern
+  entity universe without reusing population semantics or aggregation. The
+  vertical integration decision set separately records all candidate merge and
+  geography policies.
 - The reconciliation policy and generated decision set are separate, versioned,
   checksummed artifacts. Every candidate has an explicit disposition; rules
   cannot drift from their declared results. Accepted place identity never
@@ -110,25 +127,29 @@ an unavailable release ID fails closed.
 
 ## Verified state
 
-The final r6 verification counts are recorded in `BUILD_REPORT.md`. The browser
+The r7 release builder and unit/contract suites are passing. The browser
 gate adds downloadable-bundle inspection, history restoration, reduced-motion,
 axe, and desktop/mobile screenshot checks.
 
 ## Immediate next work
 
-1. Resolve HYDE licensing and validate one matched baseline/lower/upper gridded
+1. Parse V-Dem v16 reproducibly and audit the country-year support for the
+   descriptive de-jure suffrage candidate.
+2. Build the UCDP Gleditsch-Ward crosswalk and decide how to handle the 5,075
+   non-monotonic fatality-bound rows before publishing a conflict measure.
+3. Resolve Clio artifact terms and Maddison access before any historical GDP
+   extension; keep their series source-native rather than splicing silently.
+4. Resolve HYDE licensing and validate one matched baseline/lower/upper gridded
    population slice with masks and mass conservation.
-2. Publish companion historical-city series with source disagreement intact.
-3. Extend bounded border candidate scans across representative dates/regions
-   without auto-resolving claims that lack evidence.
-4. Add WebGL-failure coverage and measured performance benchmarks.
-5. Calibrate one condition layer onto the validated population universe without
-   losing unplaced or unknown population.
+5. Extend bounded border candidate scans without auto-resolving unsupported
+   claims, then evaluate licensed temporal-name datasets from WHG.
 
 The full sequence and acceptance gates are in
 `DEEP_TIME_POPULATION_AND_BORDERS_PLAN.md` and `EVIDENCE_INTEGRATION.md`.
 The ranked comparison with the original vision is in
 `ORIGINAL_VISION_GAP_PRIORITIES.md`.
+The acquisition, profiling, and merge policy for the new verticals is in
+`VERTICAL_SOURCE_INTEGRATION.md`.
 
 ## Renderer spike note
 

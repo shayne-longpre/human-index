@@ -66,6 +66,16 @@ export function buildViewRows(
         });
       }
     }
+  } else if (dataset?.metric_id === 'gdp_per_capita_constant_2015_usd') {
+    for (const observation of dataset.observations) {
+      if (observation.year === year) {
+        metricByCode.set(observation.code, {
+          value: observation.value_constant_2015_usd,
+          status: observation.status,
+          locator: observation.original_record_locator,
+        });
+      }
+    }
   }
 
   return (outlook?.entities ?? release.entities).map((entity) => {

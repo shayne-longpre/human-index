@@ -10,6 +10,7 @@ import {
   validateAtlasReleaseManifest,
   type MvpMetricId,
   type LifeExpectancyDataset,
+  type GdpPerCapitaDataset,
   type PopulationOutlookDataset,
 } from '@atlas/contracts';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
@@ -24,6 +25,7 @@ import { LifeExpectancyDistribution } from './components/LifeExpectancyDistribut
 import { PopulationBar } from './components/PopulationBar';
 import { PopulationTimeline } from './components/PopulationTimeline';
 import { PopulationOutlookSummary } from './components/PopulationOutlookSummary';
+import { TerritorialCoverageSummary } from './components/TerritorialCoverageSummary';
 import { SourcesPage } from './components/SourcesPage';
 import { ReviewPage } from './components/ReviewPage';
 import {
@@ -282,6 +284,13 @@ export function App() {
     if (metricId !== 'population_outlook' || currentDataset?.metric_id !== 'population_outlook') return null;
     return (currentDataset as PopulationOutlookDataset).summaries.find((summary) => summary.year === year) ?? null;
   }, [currentDataset, metricId, year]);
+  const gdpPerCapitaSummary = useMemo(() => {
+    if (
+      metricId !== 'gdp_per_capita_constant_2015_usd'
+      || currentDataset?.metric_id !== 'gdp_per_capita_constant_2015_usd'
+    ) return null;
+    return (currentDataset as GdpPerCapitaDataset).summaries.find((summary) => summary.year === year) ?? null;
+  }, [currentDataset, metricId, year]);
   const historicalPopulationObservation = useMemo(
     () => release?.historicalPopulation.observations.find((observation) => observation.year === year) ?? null,
     [release, year],
@@ -304,11 +313,13 @@ export function App() {
     }
     if (metric.id === 'population_outlook') return populationOutlookSummary;
     if (metric.id === 'life_expectancy_at_birth') return lifeExpectancySummary;
+    if (metric.id === 'gdp_per_capita_constant_2015_usd') return gdpPerCapitaSummary;
     return prevalenceSummary && populationSummary
       ? { prevalence: prevalenceSummary, population_accounting: populationSummary }
       : null;
   }, [
     historicalPopulationObservation,
+    gdpPerCapitaSummary,
     lifeExpectancySummary,
     metric,
     populationOutlookSummary,
@@ -496,7 +507,7 @@ export function App() {
           </div>
           <p>
             Explore population through deep time, changing political maps, ancient city estimates, electricity access,
-            and life expectancy. Missing observations stay visible and time is never filled silently.
+            life expectancy, and GDP per person. Missing observations stay visible and time is never filled silently.
           </p>
         </section>
 
@@ -727,6 +738,8 @@ export function App() {
           <PopulationOutlookSummary summary={populationOutlookSummary} />
         ) : metric.id === 'life_expectancy_at_birth' && lifeExpectancySummary ? (
           <LifeExpectancyDistribution summary={lifeExpectancySummary} />
+        ) : metric.id === 'gdp_per_capita_constant_2015_usd' && gdpPerCapitaSummary ? (
+          <TerritorialCoverageSummary summary={gdpPerCapitaSummary} />
         ) : prevalenceSummary && populationSummary ? (
           <PopulationBar
             summary={prevalenceSummary}

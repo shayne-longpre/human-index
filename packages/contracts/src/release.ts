@@ -4,7 +4,8 @@ export type MvpMetricId =
   | 'population_total'
   | 'population_outlook'
   | 'access_to_electricity'
-  | 'life_expectancy_at_birth';
+  | 'life_expectancy_at_birth'
+  | 'gdp_per_capita_constant_2015_usd';
 
 export interface AtlasEntity {
   code: string;
@@ -326,6 +327,34 @@ export interface LifeExpectancyDataset {
   years: number[];
   observations: LifeExpectancyObservation[];
   summaries: LifeExpectancySummary[];
+}
+
+export interface GdpPerCapitaObservation {
+  code: string;
+  year: number;
+  value_constant_2015_usd: number | null;
+  status: Extract<ValueStatus, 'known' | 'unknown'>;
+  original_record_locator: string;
+}
+
+export interface GdpPerCapitaSummary {
+  year: number;
+  known_entities: number;
+  unknown_entities: number;
+  mapped_known_entities: number;
+  unplaced_known_entities: number;
+  aggregation_policy: 'coverage_counts_only_no_global_gdp_per_capita';
+}
+
+export interface GdpPerCapitaDataset {
+  schema_version: string;
+  metric_id: 'gdp_per_capita_constant_2015_usd';
+  source_release_id: string;
+  source_unit: 'constant 2015 US dollars per person';
+  temporal_policy: 'exact_only';
+  years: number[];
+  observations: GdpPerCapitaObservation[];
+  summaries: GdpPerCapitaSummary[];
 }
 
 export interface HistoricalCity {

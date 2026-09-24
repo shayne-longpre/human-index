@@ -13,6 +13,7 @@ import {
   type AtlasEntity,
   type AtlasReleaseManifest,
   type ElectricityDataset,
+  type GdpPerCapitaDataset,
   type HistoricalContextIndex,
   type HistoricalCityDataset,
   type HistoricalPopulationDataset,
@@ -21,7 +22,7 @@ import {
   type LifeExpectancyDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-22-r6');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-23-r7');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -37,6 +38,7 @@ const historicalPopulation = readJson<HistoricalPopulationDataset>('historical-p
 const historicalContext = readJson<HistoricalContextIndex>('historical-context.json');
 const historicalCities = readJson<HistoricalCityDataset>('historical-cities.json');
 const lifeExpectancy = readJson<LifeExpectancyDataset>('life-expectancy.json');
+const gdpPerCapita = readJson<GdpPerCapitaDataset>('gdp-per-capita.json');
 const entities = readJson<{ entities: AtlasEntity[] }>('entities.json').entities;
 const sourceRegistry = JSON.parse(
   readFileSync(resolve('data/registry/sources.json'), 'utf8'),
@@ -105,6 +107,27 @@ const maddisonStatus = JSON.parse(
   review_status: string;
   acquisition_attempt: { direct_http_result: string; bypass_attempted: boolean };
 };
+const candidateSourceLock = JSON.parse(
+  readFileSync(resolve('data/registry/candidate-source-lock.json'), 'utf8'),
+) as {
+  status: string;
+  artifacts: Array<{ id: string; sha256: string; publication_status: string }>;
+  blocked_sources: Array<{ source_id: string; status: string }>;
+};
+const verticalProfiles = JSON.parse(
+  readFileSync(resolve('data/review/vertical-source-profiles.json'), 'utf8'),
+) as {
+  status: string;
+  candidate_lock: { artifact_count: number; blocked_source_count: number };
+  profiles: {
+    seshat: { tsdat123: { rows: number; polity_ids: number; sentinel_review: string } };
+    ucdp: {
+      ged: { event_rows: number; invalid_low_best_high_order: number; year_range: number[] };
+      armed_conflict: { conflict_year_rows: number; year_range: number[] };
+    };
+    vdem: { first_candidate_variable: { id: string; not_practice_measure: boolean } };
+  };
+};
 const reviewQueue = JSON.parse(
   readFileSync(resolve('apps/web/public/atlas/review/review-queue.json'), 'utf8'),
 ) as {
@@ -156,7 +179,7 @@ for (const observation of electricity.observations) {
 }
 
 describe('genuine-data MVP release', () => {
-  it('publishes four valid, taxonomy-bound metrics with explicit time support', () => {
+  it('publishes five valid, taxonomy-bound metrics with explicit time support', () => {
     expect(() => validateAtlasReleaseManifest(manifest)).not.toThrow();
     expect(() => validatePublishedMetrics(manifest.metrics)).not.toThrow();
     expect(manifest.metrics.map((metric) => metric.id)).toEqual([
@@ -164,6 +187,7 @@ describe('genuine-data MVP release', () => {
       'population_outlook',
       'access_to_electricity',
       'life_expectancy_at_birth',
+      'gdp_per_capita_constant_2015_usd',
     ]);
     expect(manifest.metrics[0].available_years[0]).toBe(-9999);
     expect(manifest.metrics[0].available_years).toContain(1950);
@@ -172,6 +196,10 @@ describe('genuine-data MVP release', () => {
     expect(electricity.years).toEqual(Array.from({ length: 35 }, (_, index) => 1990 + index));
     expect(lifeExpectancy.years).toEqual(Array.from({ length: 65 }, (_, index) => 1960 + index));
     expect(populationOutlook.years).toEqual(Array.from({ length: 151 }, (_, index) => 1950 + index));
+    expect(gdpPerCapita.years).toEqual(Array.from({ length: 66 }, (_, index) => 1960 + index));
+    expect(gdpPerCapita.summaries.every(
+      (summary) => summary.known_entities + summary.unknown_entities === entities.length,
+    )).toBe(true);
     expect(() => assertSupportedYear(manifest.metrics[2], 2025)).toThrow(RangeError);
   });
 
@@ -519,6 +547,38 @@ describe('genuine-data MVP release', () => {
     expect(maddisonStatus.acquisition_attempt).toMatchObject({
       direct_http_result: 'HTTP_200_anti_bot_HTML_not_workbook',
       bypass_attempted: false,
+    });
+
+    expect(candidateSourceLock.status).toBe(
+      'acquired_candidate_source_lock_not_publication_approval',
+    );
+    expect(candidateSourceLock.artifacts).toHaveLength(19);
+    expect(candidateSourceLock.blocked_sources.map((source) => source.source_id).sort()).toEqual([
+      'hyde',
+      'maddison',
+      'world_historical_gazetteer',
+    ]);
+    expect(verticalProfiles.candidate_lock).toMatchObject({
+      artifact_count: 19,
+      blocked_source_count: 3,
+    });
+    expect(verticalProfiles.profiles.ucdp.ged).toMatchObject({
+      event_rows: 417_968,
+      rows_not_low_le_best_le_high: 5_075,
+      year_range: [1989, 2025],
+    });
+    expect(verticalProfiles.profiles.ucdp.armed_conflict).toMatchObject({
+      conflict_year_rows: 2_816,
+      year_range: [1946, 2025],
+    });
+    expect(verticalProfiles.profiles.seshat.tsdat123).toMatchObject({
+      rows: 1_494,
+      polity_ids: 373,
+      sentinel_review: 'minus_999_and_fractional_codings_must_not_be_treated_as_plain_values',
+    });
+    expect(verticalProfiles.profiles.vdem.first_candidate_variable).toMatchObject({
+      id: 'v2x_suffr',
+      not_practice_measure: true,
     });
   });
 

@@ -15,7 +15,7 @@ This is not a leaderboard of civilizations, a single “progress” score, or a 
 
 **A working first genuine-data development release now exists.**
 
-The application now presents four genuine-data measures plus two independent
+The application now presents five genuine-data measures plus two independent
 historical context layers in one timeline:
 
 - U.S. Census Bureau world-population estimate ranges at 39 published dates from
@@ -28,7 +28,9 @@ historical context layers in one timeline:
 - annual electricity access for every observed source year from 1990–2024,
   summarized with matching annual population weights; and
 - World Bank life expectancy from 1960–2024, shown as a territorial mean and a
-  population-weighted context distribution—not an individual lifespan distribution.
+  population-weighted context distribution—not an individual lifespan distribution; and
+- World Bank GDP per capita in constant 2015 US dollars from 1960–2025, shown as
+  territorial economic context without inventing a global average.
 
 A pinned Natural Earth 1:110m layer places 170 modern statistical supports on
 the map. A separately pinned Cliopatria v0.2.0 layer supplies 36 display-only
@@ -84,6 +86,8 @@ The tracked, legally redistributable release fixture is sufficient for developme
 
 ```bash
 pnpm data:acquire
+pnpm data:acquire:verticals
+pnpm data:review:verticals
 pnpm data:build
 ```
 
@@ -96,6 +100,8 @@ taxonomy, transformation, and release architecture is documented in
 `docs/EVIDENCE_INTEGRATION.md`.
 The exact-view contract and automated browser/accessibility gate are documented
 in `docs/VIEW_REPRODUCIBILITY.md`.
+The candidate-source acquisition, profiling, and deterministic merge gates are
+documented in `docs/VERTICAL_SOURCE_INTEGRATION.md`.
 The ranked gap analysis against the original vision is in
 `docs/ORIGINAL_VISION_GAP_PRIORITIES.md`.
 

@@ -1,10 +1,10 @@
-# Build report: evidence-aware temporal-map MVP, release r6
+# Build report: evidence-aware temporal-map MVP, release r7
 
 Date: 2026-09-23
 
 ## Verified result
 
-The repository contains a static React/TypeScript Atlas with four genuine-data
+The repository contains a static React/TypeScript Atlas with five genuine-data
 measures and independent historical context layers:
 
 - U.S. Census Bureau historical world-population estimate ranges at 39 source
@@ -16,7 +16,10 @@ measures and independent historical context layers:
 - World Bank electricity access, annually from 1990 through 2024, with annual
   matching population accounting; and
 - World Bank life expectancy, annually from 1960 through 2024, shown as a
-  territorial mean and population-conserving context distribution.
+  territorial mean and population-conserving context distribution; and
+- World Bank GDP per capita in constant 2015 US dollars, annually from 1960
+  through 2025, shown as territorial observations without fabricating a global
+  aggregate.
 
 Modelski Ancient v2 contributes 621 sparse exact-date observations for 154
 source-geocoded cities from 3700 BCE through 1000 CE. Cliopatria contributes 36
@@ -42,7 +45,7 @@ features remain simultaneously visible in coral, and inspectors name their
 counterparts. Every border decision prohibits population allocation.
 
 The application layer now adds reproducible exact views without changing the
-underlying r6 data artifacts. Shared URLs pin release, metric, date, selected
+underlying r7 data artifacts. Shared URLs pin release, metric, date, selected
 support, layers, scale, and camera. The JSON view bundle contains exact rows and
 population weights, displayed calculations, statuses and record locators,
 historical evidence references, the reconciliation artifact, release manifest,
@@ -67,6 +70,7 @@ manifest.
 | World Bank `SP.POP.TOTL` | 17,490 API rows for 1960–2025; publisher update 2026-07-13 |
 | World Bank `EG.ELC.ACCS.ZS` | 9,540 API rows for 1990–2025; actual non-null observation years end in 2024 |
 | World Bank `SP.DYN.LE00.IN` | 17,490 API rows for 1960–2025; actual non-null observation years end in 2024 |
+| World Bank `NY.GDP.PCAP.KD` | 14,322 API rows for 217 non-aggregate economies, 1960–2025; publisher update 2026-07-13 |
 | UN WPP 2024 Medium demographic indicators | 237 source-native countries/areas; 1950–2023 estimates and 2024–2100 Medium projections; aggregate rows and 2101 boundary rows excluded |
 | Natural Earth admin 0 | v5.1.2, 1:110m, 170 matched supports including explicit `KOS` → `XKX`; modern display only |
 | U.S. Census historical world-population table | 39 dates, 10,000 BCE–1950 CE; global source ranges and named estimates |
@@ -94,6 +98,26 @@ geometry. These are accounting facts, not corrections to the source.
 
 ## Candidate-source work
 
+The explicit candidate acquisition command now tracks 19 artifacts across the
+four requested verticals. Each successful artifact has an exact URL, byte
+count, retrieval date, and SHA-256 checksum in
+`data/registry/candidate-source-lock.json`; three unavailable source families
+remain recorded as blockers rather than being silently substituted.
+
+- Clio-Infra candidate workbooks were acquired and schema-profiled for GDP per
+  capita, international armed conflict, state antiquity, polity, democracy,
+  and executive constraints. They remain outside the release pending semantic,
+  entity, and overlap adjudication.
+- Seshat Equinox data were acquired and profiled, including 1,494 temporal rows
+  spanning source-coded dates from 13,600 BCE through 1900 CE. Source sentinel
+  dates and fractional/status values must be interpreted before publication.
+- V-Dem v16 and its codebook were acquired. The first proposed institutional
+  field is the source's de-jure suffrage share; it is explicitly not a measure
+  of participation in practice.
+- UCDP GED v26.1 and the UCDP/PRIO Armed Conflict Dataset v26.1 were acquired.
+  GED has 417,968 events for 1989–2025, but 5,075 records violate a naive
+  low/best/high ordering assumption and therefore require source-semantic review.
+
 - CShapes 2.0's official GeoJSON and codebook are pinned and profiled for
   comparison only: 710 dated features, 1886–2019, and 11 invalid geometries.
   Publication remains blocked by geometry repair/provenance work, omitted
@@ -102,13 +126,16 @@ geometry. These are accounting facts, not corrections to the source.
 - A genuine HYDE 3.5 10,000 BCE baseline archive, README, and license were
   acquired through the provider's normal directory flow. The sample contains
   population-count, density, rural, urban, and urban-other grids. It remains
-  unpublished because the archive license says CC BY-NC 4.0 while the README
-  says CC BY 3.0, the README's latest-year descriptions conflict, and the full
-  masks/scenarios and conservation checks are not yet acquired.
+  unpublished and the full source family is marked blocked because the archive
+  license says CC BY-NC 4.0 while the README says CC BY 3.0, the README's
+  latest-year descriptions conflict, and the full masks/scenarios and
+  conservation checks are not yet acquired.
 - The official Maddison Project Database 2023 page and terms were rechecked.
   The workbook remains unavailable because the official Dataverse request
   returns an Anubis challenge page. No bypass was attempted and no income layer
   was published.
+- World Historical Gazetteer remains blocked pending selection of a licensed,
+  stable bulk/API path and a precise role for names versus political geometry.
 
 ## Architecture boundary
 
@@ -146,12 +173,12 @@ in-app browser desktop render and interaction checks
 Results:
 
 - Strict TypeScript: pass.
-- Vitest: 3 files, 28 tests, all pass.
-- Python unittest: 5 tests, all pass.
-- Published release artifact checksums: pass for all 52 artifacts.
-- Production build: pass. Main application JavaScript is 327.16 kB
-  uncompressed / 97.97 kB gzip; the 1,962.77 kB map renderer remains a separate
-  lazy chunk (540.90 kB gzip).
+- Vitest: 4 files, 29 tests, all pass.
+- Python unittest: 9 tests, all pass.
+- Published release artifact checksums: pass for all 54 artifacts.
+- Production build: pass. Main application JavaScript is 344.10 kB
+  uncompressed / 102.16 kB gzip; the 1,962.77 kB map renderer remains a separate
+  lazy chunk (540.91 kB gzip).
 - Playwright/Chrome: 4 tests pass. They inspect a parsed exact-view download,
   URL/history restoration, desktop and mobile screenshot baselines, reduced
   motion, serious/critical axe findings on all three pages, and fail-closed
@@ -174,7 +201,9 @@ until its license conflict, full artifact set, grid semantics, and conservation
 checks are resolved. CShapes cannot enter the public map until licensing and
 geometry/field defects are resolved. Twenty border overlaps and two city
 identities still require evidence-based adjudication; deterministic unresolved
-rendering does not resolve the historical claim. Browser work still needs a
+rendering does not resolve the historical claim. The candidate economics,
+government, and conflict sources are profiled but not yet published: joining
+their changing entities and definitions is the next scientific task. Browser work still needs a
 tested WebGL fallback, another engine/platform, broader touch/keyboard flows,
 and measured network, scrubbing, frame-rate, and memory benchmarks.
 

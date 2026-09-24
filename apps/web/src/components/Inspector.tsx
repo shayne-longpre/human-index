@@ -11,6 +11,8 @@ interface InspectorProps {
 
 export function Inspector({ row, metric, manifest, onClose }: InspectorProps) {
   if (!row) return null;
+  const usesPopulationWeight = metric.aggregation_kind === 'person_prevalence'
+    || metric.aggregation_kind === 'context_distribution';
   const universeId = metric.population_universe_id
     ?? metric.population_universe_periods?.find(
       (period) => row.year >= period.start_year && row.year <= period.end_year,
@@ -32,7 +34,7 @@ export function Inspector({ row, metric, manifest, onClose }: InspectorProps) {
           <dt>Effective date</dt>
           <dd>{formatAstronomicalYear(row.year)}</dd>
         </div>
-        {metric.aggregation_kind !== 'population_total' ? (
+        {usesPopulationWeight ? (
           <div>
             <dt>Population weight</dt>
             <dd>{row.population?.value === null || !row.population ? 'Unknown' : formatPeople(row.population.value)}</dd>
@@ -56,7 +58,7 @@ export function Inspector({ row, metric, manifest, onClose }: InspectorProps) {
           <dt>Metric record</dt>
           <dd>{row.metricRecordLocator ?? 'No published observation for this year'}</dd>
         </div>
-        {metric.aggregation_kind !== 'population_total' ? (
+        {usesPopulationWeight ? (
           <div>
             <dt>Population record</dt>
             <dd>{row.population?.original_record_locator ?? 'No published population observation'}</dd>

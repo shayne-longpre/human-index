@@ -1,5 +1,6 @@
 import { formatAstronomicalYear, type AtlasReleaseManifest } from '@atlas/contracts';
 import sourceRegistry from '../../../../data/registry/sources.json';
+import candidateSourceLock from '../../../../data/registry/candidate-source-lock.json';
 import { releaseRoot } from '../data';
 
 interface RegistrySource {
@@ -40,6 +41,10 @@ const registry = sourceRegistry as {
 };
 const catalog = registry.sources;
 const verticals = registry.verticals;
+const candidateLock = candidateSourceLock as {
+  artifacts: Array<{ id: string; source_id: string; sha256: string; publication_status: string }>;
+  blocked_sources: Array<{ source_id: string; status: string; reason: string }>;
+};
 const catalogById = new Map(catalog.map((source) => [source.id, source]));
 
 function humanize(value: string): string {
@@ -47,6 +52,7 @@ function humanize(value: string): string {
 }
 
 function releaseRole(id: string): string {
+  if (id.startsWith('world-bank-wdi-economics')) return 'Published territorial GDP-per-capita context';
   if (id.startsWith('world-bank')) return 'Modern population, electricity, and life-expectancy observations';
   if (id.startsWith('us-census')) return 'Deep-time global population estimates and source ranges';
   if (id.startsWith('cliopatria')) return 'Historical political context geometry and names';
@@ -88,12 +94,15 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
 
       <section className="source-section" aria-labelledby="source-matrix-title">
         <div className="section-intro">
-          <span className="eyebrow">Coverage ledger · {verticals.length} data verticals</span>
+          <span className="eyebrow">
+            Coverage ledger · {verticals.length} data verticals · {candidateLock.artifacts.length} pinned candidate artifacts
+          </span>
           <h2 id="source-matrix-title">What is in—and what is still outstanding</h2>
           <p>
             Acquired means an exact source artifact is locally pinned. In release means at least one
             reviewed slice is published in {manifest.release_id}. A published slice can still have
-            explicit blockers before the wider source is safe to use.
+            explicit blockers before the wider source is safe to use. {candidateLock.blocked_sources.length}
+            {' '}candidate sources currently have access or licensing blockers recorded in the acquisition lock.
           </p>
         </div>
         <div className="source-matrix-scroll" role="region" aria-label="Source ingestion status by data vertical" tabIndex={0}>

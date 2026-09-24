@@ -1,0 +1,318 @@
+{
+  "artifacts": [
+    {
+      "bytes": 3976465,
+      "id": "world_bank_gdp_per_capita_constant_2015_usd",
+      "kind": "json",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-09-23/gdp-per-capita-constant-2015-usd.json",
+      "publication_status": "candidate_adapter_required",
+      "relative_path": "world_bank/2026-09-23/gdp-per-capita-constant-2015-usd.json",
+      "sha256": "60bdf145e781d722bffa9e9ea4eb0b3b74f220dcdba36f7d391b1f2c048dc930",
+      "source_id": "world_bank_economics",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=1960:2025&per_page=20000",
+      "verticals": [
+        "economics_over_time"
+      ]
+    },
+    {
+      "bytes": 113590,
+      "id": "world_bank_country_metadata_2026_09_23",
+      "kind": "json",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-09-23/countries.json",
+      "publication_status": "candidate_adapter_required",
+      "relative_path": "world_bank/2026-09-23/countries.json",
+      "sha256": "4bca8777553d4e674df745b0628cbb8bf5efe838ef8f5cb606ad3b15d48b3302",
+      "source_id": "world_bank_economics",
+      "url": "https://api.worldbank.org/v2/country?format=json&per_page=500",
+      "verticals": [
+        "economics_over_time"
+      ]
+    },
+    {
+      "bytes": 701980,
+      "id": "clio_infra_gdp_per_capita_compact",
+      "kind": "xlsx",
+      "license": "unverified_per_artifact_terms",
+      "path": "data/raw/clio_infra/2024-09-02/GDPperCapita_Compact.xlsx",
+      "publication_status": "acquisition_for_review_only",
+      "relative_path": "clio_infra/2024-09-02/GDPperCapita_Compact.xlsx",
+      "sha256": "1d6330694ff58b524c36b33f8d7554f2f9cc5f0aff21071f24c65c0c260de332",
+      "source_id": "clio_infra",
+      "url": "https://clio-infra.eu/data/GDPperCapita_Compact.xlsx",
+      "verticals": [
+        "economics_over_time"
+      ]
+    },
+    {
+      "bytes": 753679,
+      "id": "clio_infra_gdp_per_capita_broad",
+      "kind": "xlsx",
+      "license": "unverified_per_artifact_terms",
+      "path": "data/raw/clio_infra/2024-09-02/GDPperCapita_Broad.xlsx",
+      "publication_status": "acquisition_for_review_only",
+      "relative_path": "clio_infra/2024-09-02/GDPperCapita_Broad.xlsx",
+      "sha256": "61807423081188d4b29c4f0f92d93ae7408e87dd5729b912e044b2baff307487",
+      "source_id": "clio_infra",
+      "url": "https://clio-infra.eu/data/GDPperCapita_Broad.xlsx",
+      "verticals": [
+        "economics_over_time"
+      ]
+    },
+    {
+      "bytes": 2075971,
+      "id": "clio_infra_internal_conflict_compact",
+      "kind": "xlsx",
+      "license": "unverified_per_artifact_terms",
+      "path": "data/raw/clio_infra/2024-09-02/ArmedconflictsInternal_Compact.xlsx",
+      "publication_status": "acquisition_for_review_only",
+      "relative_path": "clio_infra/2024-09-02/ArmedconflictsInternal_Compact.xlsx",
+      "sha256": "e9d929e1117837035ccad3e0991f2bd354d6609516b4a2c3dd7bdafe27e4b08f",
+      "source_id": "clio_infra",
+      "url": "https://clio-infra.eu/data/Armedconflicts%28Internal%29_Compact.xlsx",
+      "verticals": [
+        "conflict_and_security"
+      ]
+    },
+    {
+      "bytes": 2086979,
+      "id": "clio_infra_internal_conflict_broad",
+      "kind": "xlsx",
+      "license": "unverified_per_artifact_terms",
+      "path": "data/raw/clio_infra/2024-09-02/ArmedconflictsInternal_Broad.xlsx",
+      "publication_status": "acquisition_for_review_only",
+      "relative_path": "clio_infra/2024-09-02/ArmedconflictsInternal_Broad.xlsx",
+      "sha256": "32cf0411df128de67edf5e6cc77083fe5c85d7761e2c1493cb7f9cb4941bb570",
+      "source_id": "clio_infra",
+      "url": "https://clio-infra.eu/data/Armedconflicts%28Internal%29_Broad.xlsx",
+      "verticals": [
+        "conflict_and_security"
+      ]
+    },
+    {
+      "bytes": 2081222,
+      "id": "clio_infra_international_conflict_compact",
+      "kind": "xlsx",
+      "license": "unverified_per_artifact_terms",
+      "path": "data/raw/clio_infra/2024-09-02/ArmedConflictsInternational_Compact.xlsx",
+      "publication_status": "acquisition_for_review_only",
+      "relative_path": "clio_infra/2024-09-02/ArmedConflictsInternational_Compact.xlsx",
+      "sha256": "c111e2657fab789eb75fcde835a82e980455c98c8827ee50d1c28c5604504c1d",
+      "source_id": "clio_infra",
+      "url": "https://clio-infra.eu/data/ArmedConflicts%28International%29_Compact.xlsx",
+      "verticals": [
+        "conflict_and_security"
+      ]
+    },
+    {
+      "bytes": 2092218,
+      "id": "clio_infra_international_conflict_broad",
+      "kind": "xlsx",
+      "license": "unverified_per_artifact_terms",
+      "path": "data/raw/clio_infra/2024-09-02/ArmedConflictsInternational_Broad.xlsx",
+      "publication_status": "acquisition_for_review_only",
+      "relative_path": "clio_infra/2024-09-02/ArmedConflictsInternational_Broad.xlsx",
+      "sha256": "ddbc7e0410ea0a6b39d87da19342733568be8e33db3b81711012f03c6eb3fe1a",
+      "source_id": "clio_infra",
+      "url": "https://clio-infra.eu/data/ArmedConflicts%28International%29_Broad.xlsx",
+      "verticals": [
+        "conflict_and_security"
+      ]
+    },
+    {
+      "bytes": 496545,
+      "id": "clio_infra_executive_recruitment_competitiveness_compact",
+      "kind": "xlsx",
+      "license": "unverified_per_artifact_terms",
+      "path": "data/raw/clio_infra/2024-09-02/CompetitivenessofExecutiveRecruitmentXRCOMP_Compact.xlsx",
+      "publication_status": "acquisition_for_review_only",
+      "relative_path": "clio_infra/2024-09-02/CompetitivenessofExecutiveRecruitmentXRCOMP_Compact.xlsx",
+      "sha256": "45bb61887f8ee9a04eb61997f18b8ef3c62d0a46d7cb47300939aeed26a65220",
+      "source_id": "clio_infra",
+      "url": "https://clio-infra.eu/data/CompetitivenessofExecutiveRecruitment%28XRCOMP%29_Compact.xlsx",
+      "verticals": [
+        "institutions_and_governance"
+      ]
+    },
+    {
+      "bytes": 537561,
+      "id": "clio_infra_executive_recruitment_competitiveness_broad",
+      "kind": "xlsx",
+      "license": "unverified_per_artifact_terms",
+      "path": "data/raw/clio_infra/2024-09-02/CompetitivenessofExecutiveRecruitmentXRCOMP_Broad.xlsx",
+      "publication_status": "acquisition_for_review_only",
+      "relative_path": "clio_infra/2024-09-02/CompetitivenessofExecutiveRecruitmentXRCOMP_Broad.xlsx",
+      "sha256": "276a2d67eafe303ec0177495a981d7da9704357032d9acd46cd8c3231d2832d4",
+      "source_id": "clio_infra",
+      "url": "https://clio-infra.eu/data/CompetitivenessofExecutiveRecruitment%28XRCOMP%29_Broad.xlsx",
+      "verticals": [
+        "institutions_and_governance"
+      ]
+    },
+    {
+      "bytes": 33878255,
+      "id": "vdem_v16_country_year_rdata",
+      "kind": "rdata",
+      "license": "CC-BY-SA-4.0",
+      "path": "data/raw/vdem/v16/vdem.RData",
+      "publication_status": "candidate_variable_review_required",
+      "relative_path": "vdem/v16/vdem.RData",
+      "sha256": "39b412d39a061c18f20c98e4ad4d6355b05a0441df31be4ee9aec420dc3d95ea",
+      "source_id": "vdem",
+      "url": "https://raw.githubusercontent.com/vdeminstitute/vdemdata/V16/data/vdem.RData",
+      "verticals": [
+        "institutions_and_governance"
+      ]
+    },
+    {
+      "bytes": 3617986,
+      "id": "vdem_v16_codebook",
+      "kind": "pdf",
+      "license": "CC-BY-SA-4.0",
+      "path": "data/raw/vdem/v16/codebook_v16.pdf",
+      "publication_status": "candidate_variable_review_required",
+      "relative_path": "vdem/v16/codebook_v16.pdf",
+      "sha256": "d3c4130e1042b0ab37365658d7444444cdc5847fc8d9491cf5e08d5ffd4ac8d4",
+      "source_id": "vdem",
+      "url": "https://v-dem.net/documents/70/codebook_v16.pdf",
+      "verticals": [
+        "institutions_and_governance"
+      ]
+    },
+    {
+      "bytes": 3482,
+      "id": "vdem_v16_release_metadata",
+      "kind": "json",
+      "license": "CC-BY-SA-4.0",
+      "path": "data/raw/vdem/v16/github-release.json",
+      "publication_status": "candidate_variable_review_required",
+      "relative_path": "vdem/v16/github-release.json",
+      "sha256": "b66cacdc19981d368d3e6f1768c85b2bdffb5c649fb58959093318a6f541449b",
+      "source_id": "vdem",
+      "url": "https://api.github.com/repos/vdeminstitute/vdemdata/releases/tags/V16",
+      "verticals": [
+        "institutions_and_governance"
+      ]
+    },
+    {
+      "bytes": 3591457,
+      "id": "seshat_equinox_v1_archive",
+      "kind": "zip",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/seshat/equinox-v1/Equinox_Data-v.1.zip",
+      "publication_status": "candidate_case_study_review_required",
+      "relative_path": "seshat/equinox-v1/Equinox_Data-v.1.zip",
+      "sha256": "bf38dd49dcec9881e4f1ba9651e11bd60fd4400450b301e5b579553386729e14",
+      "source_id": "seshat",
+      "url": "https://zenodo.org/api/records/6642230/files/seshatdb/Equinox_Data-v.1.zip/content",
+      "verticals": [
+        "institutions_and_governance"
+      ]
+    },
+    {
+      "bytes": 4151,
+      "id": "seshat_equinox_v1_metadata",
+      "kind": "json",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/seshat/equinox-v1/zenodo-record.json",
+      "publication_status": "candidate_case_study_review_required",
+      "relative_path": "seshat/equinox-v1/zenodo-record.json",
+      "sha256": "1486e46d363e77c50a1074b943265daa33ab2768c5818135e947650ee224859a",
+      "source_id": "seshat",
+      "url": "https://zenodo.org/api/records/6642230",
+      "verticals": [
+        "institutions_and_governance"
+      ]
+    },
+    {
+      "bytes": 39122522,
+      "id": "ucdp_ged_26_1_csv_archive",
+      "kind": "zip",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/ucdp/26.1/ged261-csv.zip",
+      "publication_status": "candidate_event_adapter_required",
+      "relative_path": "ucdp/26.1/ged261-csv.zip",
+      "sha256": "8c941d84954e555ee2e54f40fa04d9203bf1e2f962203d0a9930966c4947c667",
+      "source_id": "ucdp",
+      "url": "https://ucdp.uu.se/downloads/ged/ged261-csv.zip",
+      "verticals": [
+        "conflict_and_security"
+      ]
+    },
+    {
+      "bytes": 917038,
+      "id": "ucdp_ged_26_1_codebook",
+      "kind": "pdf",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/ucdp/26.1/ged261-codebook.pdf",
+      "publication_status": "candidate_event_adapter_required",
+      "relative_path": "ucdp/26.1/ged261-codebook.pdf",
+      "sha256": "f767380ebbf365aec7586f98b6d100cafb69fb54010a908604d53bd9ad655972",
+      "source_id": "ucdp",
+      "url": "https://ucdp.uu.se/downloads/ged/ged261.pdf",
+      "verticals": [
+        "conflict_and_security"
+      ]
+    },
+    {
+      "bytes": 45955,
+      "id": "ucdp_prio_armed_conflict_26_1_csv_archive",
+      "kind": "zip",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/ucdp/26.1/ucdp-prio-acd-261-csv.zip",
+      "publication_status": "candidate_conflict_year_adapter_required",
+      "relative_path": "ucdp/26.1/ucdp-prio-acd-261-csv.zip",
+      "sha256": "5f951743222964674a446e32a5a871077b29bd13349588d85fc59953d89c878a",
+      "source_id": "ucdp",
+      "url": "https://ucdp.uu.se/downloads/ucdpprio/ucdp-prio-acd-261-csv.zip",
+      "verticals": [
+        "conflict_and_security"
+      ]
+    },
+    {
+      "bytes": 3582666,
+      "id": "ucdp_prio_armed_conflict_26_1_codebook",
+      "kind": "pdf",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/ucdp/26.1/ucdp-prio-acd-261-codebook.pdf",
+      "publication_status": "candidate_conflict_year_adapter_required",
+      "relative_path": "ucdp/26.1/ucdp-prio-acd-261-codebook.pdf",
+      "sha256": "6d757183dd632d10d7287ee63493b1e632733f308b77220406dce7ceab664455",
+      "source_id": "ucdp",
+      "url": "https://ucdp.uu.se/downloads/ucdpprio/ucdp-prio-acd-261.pdf",
+      "verticals": [
+        "conflict_and_security"
+      ]
+    }
+  ],
+  "blocked_sources": [
+    {
+      "reason": "Provider license conflict and missing masks/scenario series remain unresolved.",
+      "source_id": "hyde",
+      "status": "partial_sample_only_not_publishable",
+      "verticals": [
+        "population_over_time"
+      ]
+    },
+    {
+      "reason": "The official DataverseNL page and API return the Anubis protection page; no bypass attempted.",
+      "source_id": "maddison",
+      "status": "official_workbook_access_blocked",
+      "verticals": [
+        "economics_over_time"
+      ]
+    },
+    {
+      "reason": "WHG requires credentials for most API/download routes and carries per-source licenses.",
+      "source_id": "world_historical_gazetteer",
+      "status": "bulk_acquisition_requires_user_token_and_dataset_selection",
+      "verticals": [
+        "political_borders_and_names"
+      ]
+    }
+  ],
+  "retrieved_on": "2026-09-23",
+  "schema_version": "0.1.0",
+  "status": "acquired_candidate_source_lock_not_publication_approval"
+}

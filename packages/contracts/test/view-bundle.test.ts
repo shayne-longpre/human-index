@@ -23,7 +23,7 @@ import {
   type AtlasUrlViewState,
 } from '../../../apps/web/src/viewState';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-22-r6');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-23-r7');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;

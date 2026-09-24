@@ -26,6 +26,9 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: [path.resolve(here, '../../packages/contracts/test/**/*.test.ts')],
+    include: [
+      path.resolve(here, '../../packages/contracts/test/**/*.test.ts'),
+      path.resolve(here, 'src/**/*.test.ts'),
+    ],
   },
 });

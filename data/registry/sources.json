@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.3.0",
+  "schema_version": "0.4.0",
   "status": "research_registry_not_ingestion_lockfile",
   "sources": [
     {
@@ -113,6 +113,35 @@
       "release_ready": false
     },
     {
+      "id": "world_bank_economics",
+      "label": "World Bank World Development Indicators — economics",
+      "dossier": "S18",
+      "role": "modern_territorial_economic_context",
+      "candidate_release": "API source update 2026-07-13; retrieved 2026-09-23",
+      "coverage_start": "1960 CE",
+      "coverage_end": "2025 CE",
+      "license": "CC-BY-4.0",
+      "license_status": "official_indicator_and_api_routes_checked",
+      "urls": [
+        "https://data.worldbank.org/indicator/NY.GDP.PCAP.KD",
+        "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=1960:2025&per_page=20000"
+      ],
+      "indicators": [
+        "NY.GDP.PCAP.KD"
+      ],
+      "blockers": [
+        "historical_extension_requires_maddison_or_another_source_native_series",
+        "do_not_splice_constant_usd_and_ppp_series_without_an_explicit_rebase_contract"
+      ],
+      "notes": "The exact API response and matching country metadata are pinned in the candidate lock and published in release r7. Atlas shows source-native territorial GDP per capita in constant 2015 US dollars and reports coverage counts only; it does not construct a global average or treat the measure as individual income, wealth, or PPP welfare.",
+      "checked_at": "2026-09-23",
+      "verification_level": "artifact_acquired_profiled_and_fixture_published",
+      "downloaded": true,
+      "artifact_sha256": "60bdf145e781d722bffa9e9ea4eb0b3b74f220dcdba36f7d391b1f2c048dc930",
+      "terms_snapshot_sha256": null,
+      "release_ready": true
+    },
+    {
       "id": "maddison",
       "label": "Maddison Project Database 2023",
       "dossier": "S4",
@@ -144,27 +173,26 @@
       "label": "Seshat Global History Databank",
       "dossier": "S5",
       "role": "historical_context_facts",
-      "candidate_release": "authorized_public_release_to_select",
-      "coverage_start": null,
-      "coverage_end": null,
-      "license": "CC-BY-SA-4.0",
-      "license_status": "current_public_data_terms_checked",
+      "candidate_release": "Equinox Data v1 (Zenodo 6642230)",
+      "coverage_start": "source-coded -13600 in TSDat123; variable-specific and not yet date-normalized",
+      "coverage_end": "2000 CE in selected derived tables",
+      "license": "CC-BY-4.0",
+      "license_status": "exact_zenodo_archive_license_acquired",
       "urls": [
-        "https://seshat-db.com/terms/current/",
-        "https://seshat-db.com/sc/scvars/",
-        "https://seshat-db.com/downloads_page/"
+        "https://zenodo.org/records/6642230",
+        "https://seshat-db.com/terms/current/"
       ],
       "blockers": [
-        "authorized_access_and_consent",
-        "pin_public_snapshot",
-        "verify_populated_variables",
-        "review_entity_time_links"
+        "select_non_evaluative_source_variables_for_first_slice",
+        "preserve_native_missing_and_coded_sentinel_states",
+        "review_polity_nga_and_time_links_before_map_join",
+        "do_not_crosswalk_polities_to_modern_countries_by_name"
       ],
-      "notes": "Research sample; preserve native status values; no automatic global extrapolation.",
-      "checked_at": "2026-09-19",
-      "verification_level": "documentation_only",
-      "downloaded": false,
-      "artifact_sha256": null,
+      "notes": "The public Equinox v1 Zenodo archive and metadata are pinned. Its workbook contains source-native polity, NGA, variable, and derived time-series sheets; this is a historical research sample rather than complete global coverage. No institutional variable is published until coded sentinel values and support links are audited.",
+      "checked_at": "2026-09-23",
+      "verification_level": "artifact_acquired_and_schema_profile_in_progress_not_published",
+      "downloaded": true,
+      "artifact_sha256": "bf38dd49dcec9881e4f1ba9651e11bd60fd4400450b301e5b579553386729e14",
       "terms_snapshot_sha256": null,
       "release_ready": false
     },
@@ -174,24 +202,26 @@
       "dossier": "S6",
       "role": "institutional_source_reference",
       "candidate_release": "16",
-      "coverage_start": null,
-      "coverage_end": null,
+      "coverage_start": "1789 CE for the selected suffrage candidate; variable-specific",
+      "coverage_end": "2025 CE",
       "license": "CC-BY-SA-4.0",
       "license_status": "dataset_page_checked",
       "urls": [
-        "https://www.v-dem.net/data/the-v-dem-dataset/",
-        "https://www.v-dem.net/about/historical-v-dem/"
+        "https://v-dem.net/data/dataset-archive/",
+        "https://github.com/vdeminstitute/vdemdata/releases/tag/V16",
+        "https://v-dem.net/documents/70/codebook_v16.pdf"
       ],
       "blockers": [
-        "acquire_codebook_and_release",
         "select_descriptive_variables",
-        "verify_denominators_and_country_units"
+        "parse_and_profile_the_large_rdata_object_reproducibly",
+        "verify_country_year_support_and_historical_entity_crosswalks",
+        "preserve_estimates_and_uncertainty_fields_without_recasting_source_indexes_as_atlas_scores"
       ],
-      "notes": "No cross-release splicing; external composite indexes linked rather than used for Atlas verdicts.",
-      "checked_at": "2026-09-19",
-      "verification_level": "documentation_only",
-      "downloaded": false,
-      "artifact_sha256": null,
+      "notes": "The provider-owned v16 RData package, official v16 codebook, and release metadata are pinned. The first candidate variable is v2x_suffr, a de-jure adult-citizen suffrage share; it is not yet published because the large RData object and entity support still require a reproducible adapter audit. No cross-release splicing or Atlas-authored democracy score is allowed.",
+      "checked_at": "2026-09-23",
+      "verification_level": "artifacts_and_codebook_acquired_adapter_pending",
+      "downloaded": true,
+      "artifact_sha256": "39b412d39a061c18f20c98e4ad4d6355b05a0441df31be4ee9aec420dc3d95ea",
       "terms_snapshot_sha256": null,
       "release_ready": false
     },
@@ -207,18 +237,20 @@
       "license_status": "artifact_terms_unverified",
       "urls": [
         "https://clio-infra.eu/",
-        "https://clio-infra.eu/Indicators/LifeExpectancyatBirthTotal.html"
+        "https://clio-infra.eu/Indicators/GDPperCapita.html",
+        "https://clio-infra.eu/Indicators/LifeExpectancyatBirthTotal.html",
+        "https://clio-infra.eu/Indicators/ArmedConflictsInternational.html"
       ],
       "blockers": [
         "verify_per_artifact_terms",
-        "acquire_series_and_quality_codes",
+        "audit_series_quality_codes_and_metadata",
         "audit_2012_boundary_support"
       ],
-      "notes": "An early catalog date is not dense or global coverage.",
-      "checked_at": "2026-09-19",
-      "verification_level": "documentation_only",
-      "downloaded": false,
-      "artifact_sha256": null,
+      "notes": "Compact and broad workbooks are pinned for GDP per capita, internal conflict, international conflict, and executive-recruitment competitiveness. These candidates cover multiple verticals, but the workbooks' per-artifact reuse terms, metadata/quality fields, and use of 2012 boundary support must be resolved before publication. An early catalog date does not imply dense or global coverage.",
+      "checked_at": "2026-09-23",
+      "verification_level": "candidate_artifacts_acquired_for_review_not_published",
+      "downloaded": true,
+      "artifact_sha256": "1d6330694ff58b524c36b33f8d7554f2f9cc5f0aff21071f24c65c0c260de332",
       "terms_snapshot_sha256": null,
       "release_ready": false
     },
@@ -228,7 +260,7 @@
       "dossier": "S8",
       "role": "events",
       "candidate_release": "26.1",
-      "coverage_start": null,
+      "coverage_start": "1946 CE for conflict-years; 1989 CE for georeferenced events",
       "coverage_end": "2025 CE",
       "license": "CC-BY-4.0",
       "license_status": "download_center_checked",
@@ -236,15 +268,17 @@
         "https://ucdp.uu.se/downloads/"
       ],
       "blockers": [
-        "select_specific_product",
-        "acquire_codebook",
-        "verify_temporal_spatial_and_event_coverage"
+        "choose_event_level_ged_or_conflict_year_acd_per_measure",
+        "crosswalk_gleditsch_ward_location_codes_without_name_only_joins",
+        "define_event_location_versus_conflict_party_support",
+        "keep_best_low_high_fatality_fields_as_source_estimates_not_confidence_intervals",
+        "review_5075_event_rows_where_low_best_high_are_not_monotonic_before_any_fatality_measure"
       ],
-      "notes": "No automatic exposure prevalence; final and candidate data must remain distinct.",
-      "checked_at": "2026-09-19",
-      "verification_level": "documentation_only",
-      "downloaded": false,
-      "artifact_sha256": null,
+      "notes": "UCDP GED 26.1 (event records, 1989–2025), UCDP/PRIO Armed Conflict Dataset 26.1 (conflict-years, 1946–2025), and both codebooks are pinned. They remain separate products: event locations, conflict parties, and territorial context are not interchangeable, and no conflict exposure prevalence is inferred.",
+      "checked_at": "2026-09-23",
+      "verification_level": "artifacts_and_codebooks_acquired_adapter_pending",
+      "downloaded": true,
+      "artifact_sha256": "8c941d84954e555ee2e54f40fa04d9203bf1e2f962203d0a9930966c4947c667",
       "terms_snapshot_sha256": null,
       "release_ready": false
     },
@@ -567,6 +601,11 @@
       "description": "Territorial GDP and related historical context series require indicator-specific units, PPP bases, citations, and boundary support.",
       "sources": [
         {
+          "source_id": "world_bank_economics",
+          "role": "Published modern territorial GDP per capita",
+          "release_ids": ["world-bank-wdi-economics-2026-07-13"]
+        },
+        {
           "source_id": "maddison",
           "role": "Historical territorial GDP per capita candidate",
           "release_ids": []
@@ -626,6 +665,11 @@
           "source_id": "vdem",
           "role": "Modern and historical institutional variables candidate",
           "release_ids": []
+        },
+        {
+          "source_id": "clio_infra",
+          "role": "Executive-recruitment and other historical institutional candidates",
+          "release_ids": []
         }
       ]
     },
@@ -637,6 +681,11 @@
         {
           "source_id": "ucdp",
           "role": "Conflict event candidate",
+          "release_ids": []
+        },
+        {
+          "source_id": "clio_infra",
+          "role": "Historical internal and international conflict candidates",
           "release_ids": []
         }
       ]

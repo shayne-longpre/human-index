@@ -38,6 +38,13 @@ export const metricViews: Record<MvpMetricId, MetricView> = {
     legendAria: 'Life expectancy color scale from forty-five to ninety years',
     legendClass: 'legend-ramp-life',
   },
+  gdp_per_capita_constant_2015_usd: {
+    mapCaption: 'Territorial national-accounts context',
+    mapCaution: 'Constant 2015 US$ is not individual income or a PPP welfare ranking.',
+    legendLabels: ['$200', '$2K', '$20K', '$80K', '$250K'],
+    legendAria: 'GDP per capita color scale from two hundred to two hundred fifty thousand constant 2015 US dollars on a logarithmic scale',
+    legendClass: 'legend-ramp-gdp',
+  },
 };
 
 const populationStops: Array<{ value: number; color: Rgba }> = [
@@ -65,9 +72,39 @@ function populationColor(value: number | null): Rgba {
   ) as Rgba;
 }
 
+const gdpStops: Array<{ value: number; color: Rgba }> = [
+  { value: 200, color: [30, 48, 48, 255] },
+  { value: 2_000, color: [43, 82, 73, 255] },
+  { value: 20_000, color: [101, 131, 91, 255] },
+  { value: 80_000, color: [182, 168, 91, 255] },
+  { value: 250_000, color: [245, 211, 127, 255] },
+];
+
+function gdpColor(value: number | null): Rgba {
+  if (value === null) return unknownColor;
+  const boundedValue = Math.min(
+    gdpStops[gdpStops.length - 1].value,
+    Math.max(gdpStops[0].value, value),
+  );
+  const logged = Math.log1p(boundedValue);
+  const loggedStops = gdpStops.map((stop) => Math.log1p(stop.value));
+  const upperIndex = Math.min(
+    gdpStops.length - 1,
+    Math.max(1, loggedStops.findIndex((stop) => stop >= logged)),
+  );
+  const lower = gdpStops[upperIndex - 1];
+  const upper = gdpStops[upperIndex];
+  const mix = (logged - loggedStops[upperIndex - 1]) /
+    (loggedStops[upperIndex] - loggedStops[upperIndex - 1] || 1);
+  return lower.color.map((channel, index) =>
+    index === 3 ? channel : Math.round(channel + (upper.color[index] - channel) * mix),
+  ) as Rgba;
+}
+
 export function metricColor(metricId: MvpMetricId, value: number | null): Rgba {
   if (metricId === 'population_total' || metricId === 'population_outlook') return populationColor(value);
   if (metricId === 'access_to_electricity') return electricityColor(value);
+  if (metricId === 'gdp_per_capita_constant_2015_usd') return gdpColor(value);
   if (value === null) return unknownColor;
   return electricityColor((Math.max(45, Math.min(90, value)) - 45) / 45 * 100);
 }
@@ -76,5 +113,8 @@ export function formatMetricValue(metric: PublishedMetric, value: number | null)
   if (value === null) return 'Unknown';
   if (metric.id === 'population_total' || metric.id === 'population_outlook') return `${formatInteger(value)} people`;
   if (metric.id === 'access_to_electricity') return formatPercent(value);
+  if (metric.id === 'gdp_per_capita_constant_2015_usd') {
+    return `$${formatInteger(value)} constant 2015 US$`;
+  }
   return `${value.toFixed(1)} years`;
 }
