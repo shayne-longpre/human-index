@@ -1,6 +1,16 @@
-# Build report: evidence-aware temporal-map MVP, release r7
+# Build report: evidence-aware temporal-map MVP
 
-Date: 2026-09-23
+## Release r8 population mapping — verified October 6, 2026
+
+Release `atlas-mvp-2026-10-06-r8` adds source-native GHSL GHS-POP R2023A map grids at ten exact estimate dates, 1975–2020, and two separately labeled projection dates, 2025/2030. All twelve official 1 km ZIP archives were acquired with URL, size, and SHA-256 recorded in `data/registry/population-surface-lock.json`. The application publishes only one-degree display bins (25 MB across JSON and CSV files), not the multi-gigabyte source rasters. The 2020 source raster totals 7,840,952,947.014 modeled people; the published bins total 7,840,952,852.707, with 94.307 people recorded outside the display grid. Its 19,284 covered bins include valid zeros distinct from NODATA. The method, CRS, physical-area calculation, source/projection distinction, and conservation tolerance are documented in `POPULATION_SURFACES.md`.
+
+The map, legend, separate GHSL timeline, source selector, accessible table, CSV/JSON downloads, source citations, and exact-view bundle are wired to the release. The requested date slider is still singular: the grid appears only at an exact published date, while historical borders resolve independently. No GHSL cell is assigned to a historical polity or reconciled into a World Bank/UN country total. The visual pass inspected desktop and mobile captures of the 2020 grid and its evidence panel. It caught distracting horizontal bands caused by translucent historical polygon fills over the grid; the grid view now renders borders as outlines only. Covered-zero dots appear after zooming in, avoiding stripes at world scale while preserving zero/NODATA accounting in the panel and table.
+
+The Clio Infra total-population compact workbook was acquired for review and pinned at SHA-256 `fbf1c9349a10dfe115c79e5808b9b6f29631eca9c0741e0ad59d90eef435a329`. It contains 3,221 unique country/year records on modern 2012 geography from 1500–2000, but only 70 in 1500. The read-only spreadsheet audit reset an invalid `A1` worksheet-dimension declaration before counting rows; it did not modify the source. Seshat Equinox v1 was profiled for 395 Polity Population rows, including 178 without `Date.From` and 48 textual `Value.From` entries. Neither is published: Clio terms, units, row-level underlying citations, and historical geometry support need review; Seshat's population PolIDs have no exact matches to published Cliopatria Seshat IDs and must not be joined by name. WorldPop Global2 is a separate modern comparison candidate, not a pre-1975 solution or splice. Its 2020 constrained global raster is acquired and source-pinned; a review-only adapter pass conserves its 7,849,969,310.541 modeled people, but the derived display file remains unpublished until its Microsoft-input derivative terms are resolved.
+
+Checks actually run for r8: `.venv/bin/python -m unittest discover -s pipelines/tests -v` (13 pass), `pnpm test` (31 pass), `pnpm build` (pass, with Vite's existing >500 kB lazy map-chunk warning), and `pnpm test:browser` (5 pass). The release-fixture suite validates every published artifact checksum; the browser test loads the GHSL grid and checks its exact-view pin. An attempted `pnpm data:review:verticals` could not initialize the sandbox-restricted uv cache; running the equivalent module with `.venv/bin/python` succeeded and refreshed `data/review/vertical-source-profiles.json`. No benchmark or frame-rate measurement was made.
+
+## Release r7 baseline — verified September 23, 2026
 
 ## Verified result
 

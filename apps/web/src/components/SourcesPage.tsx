@@ -58,6 +58,8 @@ function releaseRole(id: string): string {
   if (id.startsWith('cliopatria')) return 'Historical political context geometry and names';
   if (id.startsWith('reba-modelski')) return 'Sparse exact-date ancient city population points';
   if (id.startsWith('un-wpp')) return 'Separate annual population estimates and Medium projections';
+  if (id.startsWith('ghsl-')) return 'Five-year source-native modeled population grid, 1975–2020';
+  if (id.startsWith('worldpop-')) return 'Separate modeled population grid; never spliced with GHSL';
   return 'Modern display geometry only';
 }
 
@@ -88,7 +90,7 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
           <a className="primary-action" href={`${releaseRoot}/manifest.json`} target="_blank" rel="noreferrer">
             Open release manifest ↗
           </a>
-          <a className="secondary-link" href="?metric=population_total&year=2024">Return to atlas</a>
+          <a className="secondary-link" href={`?metric=population_total&year=${manifest.default_view.year}`}>Return to atlas</a>
         </div>
       </header>
 

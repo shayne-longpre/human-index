@@ -91,6 +91,94 @@ export interface PublishedTransformation {
   output_artifacts: Record<string, { bytes: number; sha256: string }>;
 }
 
+export interface PopulationSurfaceReference {
+  source_release_id: string;
+  year: number;
+  evidence_state: 'modeled_estimate' | 'projection';
+  data_file: string;
+  download_file: string;
+  source_artifact_id: string;
+  source_artifact_sha256: string;
+  source_total_people: number;
+  published_bin_total_people: number;
+  unassigned_outside_grid_people: number;
+  covered_bin_count: number;
+}
+
+export interface PopulationSurfaceDataset {
+  schema_version: '0.1.0';
+  source_release_id: string;
+  source_year: number;
+  statistical_support: string;
+  display_geometry: string;
+  cell_area_km2_by_row: number[];
+  source_artifact: {
+    filename: string;
+    archive_member: string;
+    bytes: number;
+    sha256: string;
+    crs: string;
+    width: number;
+    height: number;
+    nodata: number;
+  };
+  transformation: {
+    id: string;
+    version: string;
+    grid_degrees: 1;
+    area_method: 'WGS84_ellipsoid_geodesic_1_degree_bin_area';
+    temporal_policy: 'exact_source_year_only';
+    political_allocation: 'none';
+    source_positive_pixels: number;
+    source_total_people: number;
+    published_bin_total_people: number;
+    unassigned_outside_grid_people: number;
+    unassigned_outside_grid_pixels: number;
+    floating_point_residual_people: number;
+    covered_bin_count: number;
+    known_zero_bin_count: number;
+    no_data_bin_count: number;
+  };
+  cells: Array<[column: number, row: number, people: number]>;
+}
+
+export function validatePopulationSurfaceDataset(
+  dataset: PopulationSurfaceDataset,
+  reference: PopulationSurfaceReference,
+): void {
+  if (dataset.schema_version !== '0.1.0'
+    || dataset.source_release_id !== reference.source_release_id
+    || dataset.source_year !== reference.year
+    || dataset.source_artifact.sha256 !== reference.source_artifact_sha256
+    || dataset.transformation.version !== '1.0.0'
+    || dataset.transformation.grid_degrees !== 1
+    || dataset.transformation.political_allocation !== 'none') {
+    throw new Error('Population surface does not match its release reference');
+  }
+  const seen = new Set<number>();
+  if (dataset.cell_area_km2_by_row.length !== 180
+    || dataset.cell_area_km2_by_row.some((area) => !Number.isFinite(area) || area <= 0)
+    || dataset.transformation.area_method !== 'WGS84_ellipsoid_geodesic_1_degree_bin_area') {
+    throw new Error('Population surface has invalid physical bin areas');
+  }
+  let total = 0;
+  for (const [column, row, people] of dataset.cells) {
+    const index = row * 360 + column;
+    if (!Number.isInteger(column) || column < 0 || column >= 360
+      || !Number.isInteger(row) || row < 0 || row >= 180
+      || !Number.isFinite(people) || people < 0 || seen.has(index)) {
+      throw new Error('Population surface has an invalid or duplicate cell');
+    }
+    seen.add(index);
+    total += people;
+  }
+  if (seen.size !== reference.covered_bin_count
+    || Math.abs(total - reference.published_bin_total_people) > 0.002
+    || Math.abs(reference.source_total_people - total - reference.unassigned_outside_grid_people) > 0.002) {
+    throw new Error('Population surface fails mass accounting');
+  }
+}
+
 export interface AtlasReleaseManifest {
   schema_version: string;
   release_id: string;
@@ -136,6 +224,13 @@ export interface AtlasReleaseManifest {
     spatial_support: string;
     interpretation: string;
     reconciliation_decision_set_id: string;
+  };
+  population_surfaces: {
+    grid_degrees: 1;
+    selection_policy: 'exact_source_year_only_no_splice_or_interpolation';
+    default_source_release_id: string;
+    snapshots: PopulationSurfaceReference[];
+    interpretation: string;
   };
   reconciliation: {
     decision_set_id: string;
@@ -523,6 +618,38 @@ export function validateAtlasReleaseManifest(manifest: AtlasReleaseManifest): vo
     if (!sourceReleaseIds.has(sourceReleaseId)) {
       throw new Error(`Published layer references unknown source release ${sourceReleaseId}`);
     }
+  }
+
+  const surfaces = manifest.population_surfaces;
+  if (surfaces.grid_degrees !== 1 || surfaces.selection_policy !== 'exact_source_year_only_no_splice_or_interpolation') {
+    throw new Error('Unknown population-surface selection contract');
+  }
+  if (!sourceReleaseIds.has(surfaces.default_source_release_id)) {
+    throw new Error('Default population surface has an unknown source release');
+  }
+  const surfaceKeys = new Set<string>();
+  for (const snapshot of surfaces.snapshots) {
+    const key = `${snapshot.source_release_id}:${snapshot.year}`;
+    if (surfaceKeys.has(key)) throw new Error(`Duplicate population surface ${key}`);
+    surfaceKeys.add(key);
+    if (!sourceReleaseIds.has(snapshot.source_release_id)) {
+      throw new Error(`Population surface ${key} has an unknown source release`);
+    }
+    if (!manifest.artifacts[snapshot.data_file] || !manifest.artifacts[snapshot.download_file]) {
+      throw new Error(`Population surface ${key} references a missing artifact`);
+    }
+    if (!/^[a-f0-9]{64}$/.test(snapshot.source_artifact_sha256)) {
+      throw new Error(`Population surface ${key} has an invalid source checksum`);
+    }
+    if (snapshot.covered_bin_count <= 0 || snapshot.source_total_people < 0
+      || snapshot.unassigned_outside_grid_people < 0
+      || Math.abs(snapshot.source_total_people - snapshot.published_bin_total_people
+        - snapshot.unassigned_outside_grid_people) > 0.002) {
+      throw new Error(`Population surface ${key} fails population-mass accounting`);
+    }
+  }
+  if (!surfaces.snapshots.some((snapshot) => snapshot.source_release_id === surfaces.default_source_release_id)) {
+    throw new Error('Default population surface has no snapshot');
   }
 
   const requiredArtifacts = [

@@ -23,7 +23,7 @@ import {
   type AtlasUrlViewState,
 } from '../../../apps/web/src/viewState';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-23-r7');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-06-r8');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -53,6 +53,7 @@ describe('pinned Atlas view state', () => {
       selectedCode: 'USA',
       historicalEnabled: false,
       citiesEnabled: true,
+      surfaceSourceId: null,
       scaleMode: 'published',
       camera: { longitude: -74.123456, latitude: 40.765432, zoom: 3.4567, pitch: 22.222, bearing: -4.444 },
     };
@@ -99,6 +100,7 @@ describe('reproducible view bundle', () => {
       selectedCode: 'USA',
       historicalEnabled: true,
       citiesEnabled: true,
+      surfaceSourceId: null,
       scaleMode: 'published',
       camera: { longitude: 8, latitude: 14, zoom: 1.12, pitch: 18, bearing: 0 },
     };
@@ -111,6 +113,8 @@ describe('reproducible view bundle', () => {
       selectedSupportCode: 'USA',
       historicalBordersEnabled: true,
       historicalCitiesEnabled: true,
+      populationSurfaceSourceId: null,
+      populationSurface: null,
       camera: state.camera,
       effectiveMetricYear: 2024,
       historicalSnapshot: snapshot,

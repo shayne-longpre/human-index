@@ -7,6 +7,7 @@ import type {
   HistoricalPopulationObservation,
   PopulationEvidenceState,
   PopulationUniverse,
+  PopulationSurfaceReference,
   PublishedMetric,
   ViewRow,
 } from './release';
@@ -45,12 +46,13 @@ export interface AtlasViewBundle {
     metric_supported: boolean;
     selected_support_code: string | null;
     scale_mode: 'published';
-    layers: { historical_borders: boolean; historical_cities: boolean };
+    layers: { historical_borders: boolean; historical_cities: boolean; population_grid_source_id: string | null };
     camera: PublishedMapCamera;
     effective_dates: {
       metric: number | null;
       political_context: number | null;
       historical_cities: number | null;
+      population_grid: number | null;
     };
     pinned_query: string;
   };
@@ -63,6 +65,10 @@ export interface AtlasViewBundle {
     snapshot: HistoricalContextSnapshotReference | null;
     artifact: { bytes: number; sha256: string } | null;
     selected_source_feature_id: string | null;
+  };
+  population_surface: {
+    snapshot: PopulationSurfaceReference | null;
+    artifact: { bytes: number; sha256: string } | null;
   };
   historical_cities: Array<{ city: HistoricalCity; observation: HistoricalCityObservation }>;
   selected_historical_city_id: string | null;
@@ -90,6 +96,8 @@ export interface CreateAtlasViewBundleInput {
   selectedSupportCode: string | null;
   historicalBordersEnabled: boolean;
   historicalCitiesEnabled: boolean;
+  populationSurfaceSourceId: string | null;
+  populationSurface: PopulationSurfaceReference | null;
   camera: PublishedMapCamera;
   effectiveMetricYear: number | null;
   historicalSnapshot: HistoricalContextSnapshotReference | null;
@@ -146,12 +154,14 @@ export function createAtlasViewBundle(input: CreateAtlasViewBundleInput): AtlasV
       layers: {
         historical_borders: input.historicalBordersEnabled,
         historical_cities: input.historicalCitiesEnabled,
+        population_grid_source_id: input.populationSurfaceSourceId,
       },
       camera: input.camera,
       effective_dates: {
         metric: input.effectiveMetricYear,
         political_context: input.historicalSnapshot?.atlas_year ?? null,
         historical_cities: input.historicalCityEffectiveYear,
+        population_grid: input.populationSurface?.year ?? null,
       },
       pinned_query: input.pinnedQuery,
     },
@@ -164,6 +174,12 @@ export function createAtlasViewBundle(input: CreateAtlasViewBundleInput): AtlasV
       snapshot: input.historicalSnapshot,
       artifact,
       selected_source_feature_id: input.selectedHistoricalFeatureId,
+    },
+    population_surface: {
+      snapshot: input.populationSurface,
+      artifact: input.populationSurface
+        ? input.manifest.artifacts[input.populationSurface.data_file] ?? null
+        : null,
     },
     historical_cities: input.historicalCities,
     selected_historical_city_id: input.selectedHistoricalCityId,
@@ -205,6 +221,7 @@ export function validateAtlasViewBundle(bundle: AtlasViewBundle): void {
     ['year', String(bundle.view.requested_year)],
     ['borders', bundle.view.layers.historical_borders ? '1' : '0'],
     ['cities', bundle.view.layers.historical_cities ? '1' : '0'],
+    ['surface', bundle.view.layers.population_grid_source_id ?? 'off'],
     ['scale', bundle.view.scale_mode],
   ];
   for (const [key, expected] of expectedPinnedValues) {
@@ -212,6 +229,17 @@ export function validateAtlasViewBundle(bundle: AtlasViewBundle): void {
   }
   if (pinned.get('place') !== bundle.view.selected_support_code) {
     throw new Error('View bundle query does not pin its selected support');
+  }
+  const surface = bundle.population_surface.snapshot;
+  if (surface) {
+    if (surface.source_release_id !== bundle.view.layers.population_grid_source_id
+      || surface.year !== bundle.view.requested_year
+      || bundle.view.effective_dates.population_grid !== surface.year
+      || bundle.population_surface.artifact?.sha256 !== bundle.provenance.release_manifest.artifacts[surface.data_file]?.sha256) {
+      throw new Error('View bundle population grid does not match its release artifact');
+    }
+  } else if (bundle.view.effective_dates.population_grid !== null || bundle.population_surface.artifact !== null) {
+    throw new Error('Unavailable population grid cannot have an effective date or artifact');
   }
   const decisionSet = bundle.provenance.reconciliation_decisions as { decision_set_id?: unknown };
   if (decisionSet?.decision_set_id !== bundle.provenance.release_manifest.reconciliation.decision_set_id) {

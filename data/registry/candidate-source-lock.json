@@ -31,6 +31,22 @@
       ]
     },
     {
+      "bytes": 330878,
+      "id": "clio_infra_total_population_compact",
+      "kind": "xlsx",
+      "license": "unverified_per_artifact_terms",
+      "path": "data/raw/clio-infra/TotalPopulation_Compact.xlsx",
+      "publication_status": "acquisition_for_review_only",
+      "relative_path": "clio-infra/TotalPopulation_Compact.xlsx",
+      "retrieved_on": "2026-10-06",
+      "sha256": "fbf1c9349a10dfe115c79e5808b9b6f29631eca9c0741e0ad59d90eef435a329",
+      "source_id": "clio_infra",
+      "url": "https://clio-infra.eu/data/TotalPopulation_Compact.xlsx",
+      "verticals": [
+        "population_over_time"
+      ]
+    },
+    {
       "bytes": 701980,
       "id": "clio_infra_gdp_per_capita_compact",
       "kind": "xlsx",
@@ -207,6 +223,7 @@
       "source_id": "seshat",
       "url": "https://zenodo.org/api/records/6642230/files/seshatdb/Equinox_Data-v.1.zip/content",
       "verticals": [
+        "population_over_time",
         "institutions_and_governance"
       ]
     },
@@ -222,6 +239,7 @@
       "source_id": "seshat",
       "url": "https://zenodo.org/api/records/6642230",
       "verticals": [
+        "population_over_time",
         "institutions_and_governance"
       ]
     },
@@ -313,6 +331,7 @@
     }
   ],
   "retrieved_on": "2026-09-23",
+  "updated_on": "2026-10-06",
   "schema_version": "0.1.0",
   "status": "acquired_candidate_source_lock_not_publication_approval"
 }

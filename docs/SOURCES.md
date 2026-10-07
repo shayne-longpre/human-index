@@ -1,6 +1,6 @@
 # Source dossier
 
-**Checked: September 22, 2026.** This dossier mixes implemented release inputs
+**Checked: October 6, 2026.** This dossier mixes implemented release inputs
 with documentation-level candidates. Each section states its acquisition status.
 “Checked license” means the cited publisher page states that license;
 implementation must save the terms applying to the exact acquired artifact.
@@ -119,10 +119,11 @@ For Atlas, first evaluate concrete institutional/legal variables with explicit u
 
 ## S7 — Clio Infra: historical social and economic series
 
-- [Portal](https://clio-infra.eu/); [life-expectancy series and methodology](https://clio-infra.eu/Indicators/LifeExpectancyatBirthTotal.html).
+- [Portal](https://clio-infra.eu/); [total-population series](https://clio-infra.eu/Indicators/TotalPopulation.html); [life-expectancy series and methodology](https://clio-infra.eu/Indicators/LifeExpectancyatBirthTotal.html).
 - Critical support detail: the main portal describes historical series on **modern 2012 boundaries**. Coverage, quality codes, and observation frequency vary by indicator.
 - The life-expectancy catalog reports only **137 observations for 1500–1819**. An early start date is not dense global coverage.
 - Per-artifact licensing and source citations require checking; no blanket redistribution permission is assumed here.
+- Population candidate acquired 2026-10-06: the official compact XLSX is pinned at SHA-256 `fbf1c9349a10dfe115c79e5808b9b6f29631eca9c0741e0ad59d90eef435a329`. Its `Data Long Format` sheet has 3,221 unique country/year rows, 190 country codes, and exact dates from 1500–2000. There are 70 observations at 1500 and 190 at 1950. The workbook incorrectly declares worksheet dimensions as `A1`, so readers must inspect actual XML rows rather than trusting `max_row` in read-only mode. The metadata sheet supplies a dataset-level citation, but not row-level underlying-source references; the portal asks users to consult the working paper. Units and per-artifact reuse terms are not yet independently settled. No Clio population observations are published.
 
 Use as a curated expansion source, preserving original quality classifications and territorial support. Never paint a modern-boundary value over a historical polity merely because the names or regions seem related.
 
@@ -247,6 +248,19 @@ This provides a defensible first global timeline while HYDE access remains
 blocked. It does not provide a raster, country/polity totals, annual continuity,
 or statistical uncertainty.
 
+## S19 — European Commission JRC GHS-POP R2023A
+
+- [Official product and citation](https://human-settlement.emergency.copernicus.eu/ghs_pop2023.php): modeled residential people per cell, global 1 km Mollweide product. Estimates are released every five years from 1975 through 2020; 2025 and 2030 are separate projections. The input demographic geography includes GPWv4.11, so Atlas does not count that input again as an independent population series.
+- License: [GHSL citation and reuse page](https://human-settlement.emergency.copernicus.eu/GHSLhowToCite.php), CC BY 4.0. The ten exact estimate-year ZIP archives and separately labeled 2025/2030 projection archives are acquired and checksummed in `data/registry/population-surface-lock.json`; large ZIPs remain ignored by Git.
+- Atlas role: source-native spatial population, kept separate from World Bank country totals, UN WPP Country/Area estimates, and Cliopatria polity geometry. The 1° display-bin method, source totals, zero/NODATA distinction, physical areas, and residual audit are in [POPULATION_SURFACES.md](POPULATION_SURFACES.md).
+- Limit: no pre-1975 spatial reconstruction is implied. GHSL is model-informed disaggregation, not an observation of exact individual locations.
+
+## S20 — WorldPop Global2 R2025A v1
+
+- [Official hub record](https://hub.worldpop.org/doi/10.5258/SOTON/WP00845) and [release statement](https://data.worldpop.org/repo/prj/Global_2015_2030/R2025A/doc/Global2_Release_Statement_R2025A_v1.pdf): separate annual modeled 1 km global population reconstruction for 2015–2030, constrained to UN WPP 2024 January 1 national totals.
+- Candidate status: the official constrained global 2020 BigTIFF is acquired and pinned at SHA-256 `c6f977bf5e43b7d607ac41892e0dbb04879c487f48443711d882d39b8b16c689`. A review-only aggregation conserves 7,849,969,310.541 modeled people in 15,432 covered 1° bins, including 18 valid-zero bins; there is no outside-grid mass and only a 0.0000038-person floating residual. The raster is EPSG:4326, 43,200 × 17,280 cells, with -99999 NODATA. It is **not published**. The hub labels WorldPop datasets CC BY 4.0, but the general WorldPop terms distinguish ODbL derivatives involving Microsoft inputs; the R2025A statement explicitly names Microsoft Building Footprints as a model input. Exact applicability needs review before a redistributable derived grid enters the app.
+- This source is for comparison, not a GHSL extension, WPP replacement, or cross-release splice. Its own release statement warns about small-area patterns and non-aligned Global1/Global2 grids.
+
 ## Deferred rather than forgotten
 
-CHAT, WorldPop/GHSL, historical wages, education, homicide, D-PLACE, and archaeological regional datasets may be useful later. They are not preapproved integrations in this brief. Each must pass its own release, access, definition, scope, and licensing audit. Adding names to a source list is not the same as establishing a compatible data pipeline.
+CHAT, historical wages, education, homicide, D-PLACE, and archaeological regional datasets may be useful later. They are not preapproved integrations in this brief. Each must pass its own release, access, definition, scope, and licensing audit. Adding names to a source list is not the same as establishing a compatible data pipeline.

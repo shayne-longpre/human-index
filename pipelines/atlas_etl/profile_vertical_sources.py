@@ -185,6 +185,26 @@ def _seshat_profile(path: Path) -> dict[str, Any]:
             times.add(_as_int(row[indices["Time"]]))
             polities.add(str(row[indices["PolID"]]))
             ngas.add(str(row[indices["NGA"]]))
+
+        population_sheet = workbook["Equinox2020_CanonDat"]
+        population_rows = population_sheet.values
+        population_header = tuple(next(population_rows))
+        population_columns = {
+            name: population_header.index(name)
+            for name in ("Polity", "Variable", "Value.From", "Date.From")
+        }
+        polity_population_count = 0
+        polity_population_ids: set[str] = set()
+        missing_start_dates = 0
+        textual_start_values = 0
+        for row in population_rows:
+            if row[population_columns["Variable"]] != "Polity Population":
+                continue
+            polity_population_count += 1
+            polity_population_ids.add(str(row[population_columns["Polity"]]))
+            missing_start_dates += row[population_columns["Date.From"]] is None
+            value = row[population_columns["Value.From"]]
+            textual_start_values += value is not None and not isinstance(value, (int, float))
         workbook.close()
 
     return {
@@ -200,6 +220,13 @@ def _seshat_profile(path: Path) -> dict[str, Any]:
             "sentinel_review": "minus_999_and_fractional_codings_must_not_be_treated_as_plain_values",
         },
         "source_support": "seshat_polity_nga_time_not_modern_country_year",
+        "polity_population": {
+            "rows": polity_population_count,
+            "polity_ids": len(polity_population_ids),
+            "missing_date_from": missing_start_dates,
+            "textual_value_from": textual_start_values,
+            "publication_status": "date_value_and_polity_geometry_crosswalk_review_required",
+        },
         "publication_status": "variable_selection_and_native_status_adapter_pending",
     }
 
@@ -213,7 +240,11 @@ def build_profile(raw_root: Path, candidate_lock: Path) -> dict[str, Any]:
     vdem_release = json.loads(
         (raw_root / "vdem/v16/github-release.json").read_text(encoding="utf-8")
     )
-    clio_dir = raw_root / "clio_infra/2024-09-02"
+    clio_workbooks = sorted(
+        raw_root / item["relative_path"]
+        for item in lock["artifacts"]
+        if item["source_id"] == "clio_infra" and item["kind"] == "xlsx"
+    )
     return {
         "schema_version": "0.1.0",
         "status": "candidate_sources_profiled_not_all_publication_ready",
@@ -230,7 +261,7 @@ def build_profile(raw_root: Path, candidate_lock: Path) -> dict[str, Any]:
             },
             "clio_infra": {
                 "workbooks": [
-                    _clio_profile(path) for path in sorted(clio_dir.glob("*.xlsx"))
+                    _clio_profile(path) for path in clio_workbooks
                 ],
                 "publication_status": "review_only_terms_and_boundary_support_unresolved",
             },

@@ -3,6 +3,59 @@
   "status": "research_registry_not_ingestion_lockfile",
   "sources": [
     {
+      "id": "ghsl_ghs_pop",
+      "label": "GHSL GHS-POP R2023A",
+      "dossier": "S19",
+      "role": "modern_multitemporal_population_grid",
+      "candidate_release": "R2023A 1 km Mollweide",
+      "coverage_start": "1975 CE",
+      "coverage_end": "2020 CE estimates; 2025 and 2030 projections",
+      "license": "CC-BY-4.0",
+      "license_status": "official_product_and_citation_pages_checked",
+      "urls": [
+        "https://human-settlement.emergency.copernicus.eu/ghs_pop2023.php",
+        "https://human-settlement.emergency.copernicus.eu/GHSLhowToCite.php"
+      ],
+      "blockers": [
+        "pre_1975_spatial_population_requires_another_authorized_source",
+        "do_not_calibrate_to_world_bank_country_totals_without_a_validated_geographic_partition"
+      ],
+      "notes": "Source-native five-year global estimate rasters from 1975 to 2020 and distinct 2025/2030 projection rasters are acquired for conservative one-degree display aggregation. Source totals and outside-grid residuals are preserved; grid bins are never assigned to historical polities or silently rebased to World Bank totals.",
+      "checked_at": "2026-10-06",
+      "verification_level": "official_terms_checked_rasters_acquired_and_adapter_validated",
+      "downloaded": true,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": true
+    },
+    {
+      "id": "worldpop_global2",
+      "label": "WorldPop Global2 R2025A v1",
+      "dossier": "S20",
+      "role": "alternate_modern_population_grid",
+      "candidate_release": "R2025A v1 constrained global 1 km",
+      "coverage_start": "2015 CE",
+      "coverage_end": "2030 CE",
+      "license": null,
+      "license_status": "official_hub_cc_by_4_0_but_odbl_derivative_applicability_unresolved",
+      "urls": [
+        "https://hub.worldpop.org/doi/10.5258/SOTON/WP00845",
+        "https://data.worldpop.org/repo/prj/Global_2015_2030/R2025A/doc/Global2_Release_Statement_R2025A_v1.pdf"
+      ],
+      "blockers": [
+        "resolve_odbl_derivative_license_because_r2025a_release_statement_documents_microsoft_building_footprints_input",
+        "only_2020_global_raster_reviewed_other_years_not_acquired",
+        "do_not_splice_with_ghsl_or_un_country_area_totals"
+      ],
+      "notes": "Separate annual modeled reconstruction, constrained to UN WPP 2024 January 1 national totals; it must not be spliced into GHSL or World Bank. The official 2020 global BigTIFF is acquired and SHA-256 pinned. A review-only center-bin pass conserves 7,849,969,310.541 modeled people over 15,432 covered one-degree bins (18 valid-zero bins), with zero outside-grid count and a 0.0000038-person floating residual. The official hub calls datasets CC BY 4.0, while WorldPop's general terms note ODbL for outputs derived from Microsoft layers; this release statement explicitly documents Microsoft Building Footprints input. Exact derivative applicability must be resolved before publication.",
+      "checked_at": "2026-10-06",
+      "verification_level": "official_2020_raster_acquired_and_review_only_adapter_validated_not_published",
+      "downloaded": true,
+      "artifact_sha256": "c6f977bf5e43b7d607ac41892e0dbb04879c487f48443711d882d39b8b16c689",
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
       "id": "cliopatria",
       "label": "Cliopatria",
       "dossier": "S1",
@@ -186,9 +239,11 @@
         "select_non_evaluative_source_variables_for_first_slice",
         "preserve_native_missing_and_coded_sentinel_states",
         "review_polity_nga_and_time_links_before_map_join",
-        "do_not_crosswalk_polities_to_modern_countries_by_name"
+        "do_not_crosswalk_polities_to_modern_countries_by_name",
+        "population_polity_ids_have_no_exact_match_to_published_cliopatria_seshat_ids",
+        "parse_population_date_and_value_ranges_before_publication"
       ],
-      "notes": "The public Equinox v1 Zenodo archive and metadata are pinned. Its workbook contains source-native polity, NGA, variable, and derived time-series sheets; this is a historical research sample rather than complete global coverage. No institutional variable is published until coded sentinel values and support links are audited.",
+      "notes": "The public Equinox v1 Zenodo archive and metadata are pinned. The CanonDat sheet contains 395 Polity Population rows over 275 PolID values; 178 rows have no Date.From and 48 have textual Value.From. None of those 275 PolIDs exactly matches the 426 distinct Cliopatria SeshatID values, so no population-to-border join is published. Derived/imputed Scale_MI values are not treated as source-native population observations. This is a historical research sample, not complete global coverage.",
       "checked_at": "2026-09-23",
       "verification_level": "artifact_acquired_and_schema_profile_in_progress_not_published",
       "downloaded": true,
@@ -237,6 +292,7 @@
       "license_status": "artifact_terms_unverified",
       "urls": [
         "https://clio-infra.eu/",
+        "https://clio-infra.eu/Indicators/TotalPopulation.html",
         "https://clio-infra.eu/Indicators/GDPperCapita.html",
         "https://clio-infra.eu/Indicators/LifeExpectancyatBirthTotal.html",
         "https://clio-infra.eu/Indicators/ArmedConflictsInternational.html"
@@ -244,10 +300,11 @@
       "blockers": [
         "verify_per_artifact_terms",
         "audit_series_quality_codes_and_metadata",
-        "audit_2012_boundary_support"
+        "audit_2012_boundary_support",
+        "population_workbook_requires_unit_and_underlying_source_reference_review"
       ],
-      "notes": "Compact and broad workbooks are pinned for GDP per capita, internal conflict, international conflict, and executive-recruitment competitiveness. These candidates cover multiple verticals, but the workbooks' per-artifact reuse terms, metadata/quality fields, and use of 2012 boundary support must be resolved before publication. An early catalog date does not imply dense or global coverage.",
-      "checked_at": "2026-09-23",
+      "notes": "The Total Population compact workbook is now pinned for review: 3,221 unique country/year rows, 190 country codes, sparse exact dates from 1500 to 2000, with only 70 rows in 1500. The portal describes modern 2012 boundaries and cites multiple underlying authors. The workbook metadata gives a dataset-level citation but no row-level source sheet. Per-artifact reuse terms, exact units, underlying citations, and geographic crosswalk must be resolved before publication. Earlier GDP, conflict, and institutional workbooks are also pinned candidates. An early catalog date does not imply dense or global coverage.",
+      "checked_at": "2026-10-06",
       "verification_level": "candidate_artifacts_acquired_for_review_not_published",
       "downloaded": true,
       "artifact_sha256": "1d6330694ff58b524c36b33f8d7554f2f9cc5f0aff21071f24c65c0c260de332",
@@ -517,7 +574,7 @@
     {
       "id": "population_over_time",
       "label": "Population over time",
-      "description": "World totals, modern territorial series, future projections, and prospective gridded surfaces remain separate evidence products.",
+      "description": "World totals, modern territorial series, future projections, and source-native gridded surfaces remain separate evidence products.",
       "sources": [
         {
           "source_id": "us_census_historical_world_population",
@@ -533,6 +590,26 @@
           "source_id": "un_wpp_2024",
           "role": "Detailed estimates and projections",
           "release_ids": ["un-wpp-2024-medium-demographic-indicators"]
+        },
+        {
+          "source_id": "ghsl_ghs_pop",
+          "role": "Five-year modeled residential population grid, 1975–2020 estimates and 2025/2030 projections",
+          "release_ids": ["ghsl-ghs-pop-r2023a"]
+        },
+        {
+          "source_id": "worldpop_global2",
+          "role": "Separate annual gridded reconstruction for comparison; shares GHSL settlement inputs",
+          "release_ids": []
+        },
+        {
+          "source_id": "clio_infra",
+          "role": "Sparse historical estimates on modern 2012 country boundaries; candidate only",
+          "release_ids": []
+        },
+        {
+          "source_id": "seshat",
+          "role": "Sparse source-coded polity population estimates; ID crosswalk unresolved",
+          "release_ids": []
         },
         {
           "source_id": "hyde",

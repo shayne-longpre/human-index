@@ -1,6 +1,6 @@
 import type { Layer, PickingInfo } from '@deck.gl/core';
 import { MapboxOverlay } from '@deck.gl/mapbox';
-import { GeoJsonLayer, ScatterplotLayer } from '@deck.gl/layers';
+import { ColumnLayer, GeoJsonLayer, ScatterplotLayer } from '@deck.gl/layers';
 import {
   Map as MapLibreMap,
   NavigationControl,
@@ -8,7 +8,7 @@ import {
   type StyleSpecification,
 } from 'maplibre-gl';
 import { useEffect, useRef, useState } from 'react';
-import type { HistoricalCity, HistoricalCityObservation, MvpMetricId } from '@atlas/contracts';
+import type { HistoricalCity, HistoricalCityObservation, MvpMetricId, PopulationSurfaceDataset } from '@atlas/contracts';
 import type {
   CountryFeatureCollection,
   CountryProperties,
@@ -17,6 +17,9 @@ import type {
 } from '../data';
 import { metricColor } from '../metricViews';
 import { camerasEqual, type AtlasMapCamera } from '../viewState';
+import { surfaceColor, surfaceElevation } from '../surfaceScale';
+
+export type PopulationSurfaceCell = PopulationSurfaceDataset['cells'][number];
 
 interface MapViewProps {
   geometry: CountryFeatureCollection;
@@ -32,6 +35,10 @@ interface MapViewProps {
   citiesEnabled: boolean;
   selectedCityId: string | null;
   selectedHistoricalId: string | null;
+  populationSurface: PopulationSurfaceDataset | null;
+  populationSurfaceLabel: string | null;
+  selectedSurfaceCell: PopulationSurfaceCell | null;
+  onSurfaceSelect: (cell: PopulationSurfaceCell) => void;
   caption: string;
   caution: string;
   selectedCode: string | null;
@@ -74,6 +81,10 @@ export function MapView({
   citiesEnabled,
   selectedCityId,
   selectedHistoricalId,
+  populationSurface,
+  populationSurfaceLabel,
+  selectedSurfaceCell,
+  onSurfaceSelect,
   caption,
   caution,
   selectedCode,
@@ -92,6 +103,7 @@ export function MapView({
   const [fallback, setFallback] = useState(false);
   const knownValueCount = Array.from(valueByCode.values()).filter((value) => value !== null).length;
   const territorialValuesAvailable = knownValueCount > 0;
+  const showCountryValues = territorialValuesAvailable && !populationSurface;
 
   useEffect(() => {
     if (!elementRef.current || mapRef.current) return;
@@ -175,7 +187,7 @@ export function MapView({
           data: geometry,
           filled: true,
           stroked: true,
-          pickable: territorialValuesAvailable,
+          pickable: showCountryValues,
           autoHighlight: true,
           highlightColor: [255, 246, 220, 90],
           lineWidthUnits: 'pixels',
@@ -183,11 +195,11 @@ export function MapView({
           getLineColor: (feature) =>
             feature.properties.code === selectedCode
               ? [255, 244, 211, 255]
-              : territorialValuesAvailable
+              : showCountryValues
                 ? [8, 22, 19, 180]
                 : [39, 65, 56, 0],
           getFillColor: (feature) =>
-            territorialValuesAvailable
+            showCountryValues
               ? metricColor(metricId, valueByCode.get(feature.properties.code) ?? null)
               : [13, 36, 29, 255],
           onClick: ({ object }) => {
@@ -201,12 +213,44 @@ export function MapView({
         }),
     ];
 
+    if (populationSurface) {
+      layers.push(new ColumnLayer<PopulationSurfaceCell>({
+        id: `population-surface-${populationSurface.source_release_id}-${populationSurface.source_year}`,
+        data: populationSurface.cells.filter((cell) => cell[2] > 0),
+        diskResolution: 6,
+        extruded: true,
+        pickable: true,
+        autoHighlight: true,
+        highlightColor: [255, 247, 205, 190],
+        radius: 31000,
+        getPosition: (cell) => [cell[0] - 179.5, 89.5 - cell[1]],
+        getElevation: (cell) => surfaceElevation(cell[2], populationSurface.cell_area_km2_by_row[cell[1]]),
+        getFillColor: (cell) => surfaceColor(cell[2]),
+        getLineColor: (cell) => cell[0] === selectedSurfaceCell?.[0] && cell[1] === selectedSurfaceCell?.[1]
+          ? [255, 250, 220, 255] : [0, 0, 0, 0],
+        stroked: selectedSurfaceCell !== null,
+        onClick: ({ object }) => { if (object) onSurfaceSelect(object); },
+        updateTriggers: { getLineColor: [selectedSurfaceCell] },
+      }));
+      layers.push(new ScatterplotLayer<PopulationSurfaceCell>({
+        id: `population-surface-zero-${populationSurface.source_release_id}-${populationSurface.source_year}`,
+        data: populationSurface.cells.filter((cell) => cell[2] === 0),
+        visible: camera.zoom >= 2,
+        pickable: true,
+        radiusUnits: 'pixels',
+        getRadius: 0.75,
+        getPosition: (cell) => [cell[0] - 179.5, 89.5 - cell[1]],
+        getFillColor: [111, 128, 117, 130],
+        onClick: ({ object }) => { if (object) onSurfaceSelect(object); },
+      }));
+    }
+
     if (historicalEnabled && historicalSnapshot) {
       layers.push(
         new GeoJsonLayer<HistoricalProperties>({
           id: `historical-polities-${historicalSnapshot.atlas_year}`,
           data: historicalSnapshot,
-          filled: true,
+          filled: !populationSurface,
           stroked: true,
           pickable: true,
           autoHighlight: true,
@@ -221,6 +265,11 @@ export function MapView({
           getLineColor: (feature) => {
             if (feature.properties.source_feature_id === selectedHistoricalId) {
               return [255, 243, 204, 255];
+            }
+            if (populationSurface) {
+              return feature.properties.unresolved_overlap_count > 0
+                ? [220, 132, 105, 145]
+                : [182, 201, 166, 115];
             }
             if (feature.properties.unresolved_overlap_count > 0) {
               return [232, 132, 105, 235];
@@ -241,11 +290,11 @@ export function MapView({
               [129, 91, 69],
             ];
             const color = colors[seed % colors.length];
-            const opacity = feature.properties.source_relation_role === 'composite'
+            const opacity = populationSurface ? 5 : feature.properties.source_relation_role === 'composite'
               ? 7
               : feature.properties.unresolved_overlap_count > 0
-                ? territorialValuesAvailable ? 42 : 105
-                : territorialValuesAvailable ? 30 : 90;
+                ? showCountryValues || populationSurface ? 42 : 105
+                : showCountryValues || populationSurface ? 30 : 90;
             return [color[0], color[1], color[2], opacity];
           },
           onClick: ({ object }) => {
@@ -286,6 +335,11 @@ export function MapView({
       layers,
       getTooltip: ({ layer, object }: PickingInfo) => {
         if (!layer || !object) return null;
+        if (layer.id.startsWith('population-surface-')) {
+          const cell = object as PopulationSurfaceCell;
+          const area = populationSurface?.cell_area_km2_by_row[cell[1]] ?? 1;
+          return { text: `${(populationSurfaceLabel ?? 'Population grid')} · ${populationSurface?.source_year}\n${Math.round(cell[2]).toLocaleString()} modeled people in this 1° bin\n${(cell[2] / area).toFixed(1)} people/km² · click for source` };
+        }
         if (layer.id.startsWith('historical-cities-')) {
           const point = object as HistoricalCityPoint;
           return {
@@ -322,6 +376,11 @@ export function MapView({
     citiesEnabled,
     cityPoints,
     knownValueCount,
+    populationSurface,
+    camera.zoom,
+    populationSurfaceLabel,
+    selectedSurfaceCell,
+    onSurfaceSelect,
     metricId,
     onHistoricalSelect,
     onCitySelect,
@@ -330,6 +389,7 @@ export function MapView({
     selectedHistoricalId,
     selectedCityId,
     territorialValuesAvailable,
+    showCountryValues,
     valueByCode,
     year,
   ]);
@@ -340,7 +400,7 @@ export function MapView({
         ref={elementRef}
         className="map-canvas"
         role="region"
-        aria-label={`World map for ${year} ${metricLabel.toLocaleLowerCase()}${historicalEnabled && historicalSnapshot ? ` with ${historicalSnapshot.feature_count} Cliopatria polity features` : ''}${citiesEnabled && cityPoints.length ? ` and ${cityPoints.length} historical city observations` : ''}`}
+        aria-label={`World map for ${year} ${populationSurface ? `${populationSurfaceLabel ?? 'source-native'} population grid` : metricLabel.toLocaleLowerCase()}${historicalEnabled && historicalSnapshot ? ` with ${historicalSnapshot.feature_count} Cliopatria polity features` : ''}${citiesEnabled && cityPoints.length ? ` and ${cityPoints.length} historical city observations` : ''}`}
       />
       <button
         className="map-reset"
@@ -374,7 +434,7 @@ export function MapView({
         <span>{caution}</span>
       </div>
       <div className="map-attribution">
-        Geometry © Natural Earth · historical context © Cliopatria · cities © Reba/Modelski · CC BY 4.0
+        Geometry © Natural Earth · historical context © Cliopatria · cities © Reba/Modelski · {populationSurface ? `${populationSurfaceLabel} · ` : ''}CC BY 4.0
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ export interface AtlasUrlViewState {
   selectedCode: string | null;
   historicalEnabled: boolean;
   citiesEnabled: boolean;
+  surfaceSourceId: string | null;
   scaleMode: 'published';
   camera: AtlasMapCamera;
 }
@@ -75,12 +76,19 @@ export function parseAtlasViewState(
     && (entityCodes.has(requestedCode) || metric.id === 'population_outlook')
     ? requestedCode
     : null;
+  const requestedSurface = parameters.get('surface');
+  const surfaceSourceId = requestedSurface === 'off'
+    ? null
+    : manifest.population_surfaces.snapshots.some((snapshot) => snapshot.source_release_id === requestedSurface)
+      ? requestedSurface
+      : manifest.population_surfaces.default_source_release_id;
   return {
     metricId: metric.id,
     year,
     selectedCode,
     historicalEnabled: parameters.get('borders') !== '0',
     citiesEnabled: parameters.get('cities') !== '0',
+    surfaceSourceId,
     scaleMode: 'published',
     camera: {
       longitude: boundedNumber(parameters.get('lng'), DEFAULT_MAP_CAMERA.longitude, -180, 180),
@@ -101,6 +109,7 @@ export function atlasViewSearch(manifest: AtlasReleaseManifest, state: AtlasUrlV
   if (state.selectedCode) parameters.set('place', state.selectedCode);
   parameters.set('borders', state.historicalEnabled ? '1' : '0');
   parameters.set('cities', state.citiesEnabled ? '1' : '0');
+  parameters.set('surface', state.metricId === 'population_total' ? state.surfaceSourceId ?? 'off' : 'off');
   parameters.set('scale', state.scaleMode);
   parameters.set('lng', String(camera.longitude));
   parameters.set('lat', String(camera.latitude));

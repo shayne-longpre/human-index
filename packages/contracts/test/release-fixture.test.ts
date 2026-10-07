@@ -9,6 +9,7 @@ import {
   nearestTimelineIndex,
   resolveHistoricalSnapshot,
   validateAtlasReleaseManifest,
+  validatePopulationSurfaceDataset,
   validatePublishedMetrics,
   type AtlasEntity,
   type AtlasReleaseManifest,
@@ -18,11 +19,12 @@ import {
   type HistoricalCityDataset,
   type HistoricalPopulationDataset,
   type PopulationDataset,
+  type PopulationSurfaceDataset,
   type PopulationOutlookDataset,
   type LifeExpectancyDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-09-23-r7');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-06-r8');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -111,7 +113,7 @@ const candidateSourceLock = JSON.parse(
   readFileSync(resolve('data/registry/candidate-source-lock.json'), 'utf8'),
 ) as {
   status: string;
-  artifacts: Array<{ id: string; sha256: string; publication_status: string }>;
+  artifacts: Array<{ id: string; sha256: string; publication_status: string; verticals: string[] }>;
   blocked_sources: Array<{ source_id: string; status: string }>;
 };
 const verticalProfiles = JSON.parse(
@@ -120,7 +122,11 @@ const verticalProfiles = JSON.parse(
   status: string;
   candidate_lock: { artifact_count: number; blocked_source_count: number };
   profiles: {
-    seshat: { tsdat123: { rows: number; polity_ids: number; sentinel_review: string } };
+    clio_infra: { workbooks: Array<{ filename: string; rows: number; country_codes: number; year_range: number[]; duplicate_country_year_keys: number }> };
+    seshat: {
+      tsdat123: { rows: number; polity_ids: number; sentinel_review: string };
+      polity_population: { rows: number; polity_ids: number; missing_date_from: number; textual_value_from: number };
+    };
     ucdp: {
       ged: { event_rows: number; invalid_low_best_high_order: number; year_range: number[] };
       armed_conflict: { conflict_year_rows: number; year_range: number[] };
@@ -216,6 +222,26 @@ describe('genuine-data MVP release', () => {
     expect(resolveHistoricalSnapshot(historicalContext, 2025)).toBeNull();
     expect(resolveHistoricalSnapshot(historicalContext, 1967)?.atlas_year).toBe(1960);
     expect(resolveHistoricalSnapshot(historicalContext, 1970)?.atlas_year).toBe(1970);
+  });
+
+  it('publishes source-native GHSL grids without assigning their mass to countries or polities', () => {
+    const references = manifest.population_surfaces.snapshots;
+    expect(references.filter((reference) => reference.source_release_id === 'ghsl-ghs-pop-r2023a' && reference.evidence_state === 'modeled_estimate').map((reference) => reference.year))
+      .toEqual([1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020]);
+    expect(references.filter((reference) => reference.evidence_state === 'projection').map((reference) => reference.year))
+      .toEqual([2025, 2030]);
+    const reference = references.find((snapshot) => snapshot.year === 2020);
+    if (!reference) throw new Error('Missing 2020 GHSL snapshot');
+    const dataset = readJson<PopulationSurfaceDataset>(reference.data_file);
+    expect(() => validatePopulationSurfaceDataset(dataset, reference)).not.toThrow();
+    expect(dataset.transformation.political_allocation).toBe('none');
+    expect(dataset.transformation.known_zero_bin_count).toBeGreaterThan(0);
+    expect(dataset.transformation.no_data_bin_count).toBeGreaterThan(0);
+    expect(reference.source_total_people).toBeGreaterThan(7_000_000_000);
+    expect(reference.unassigned_outside_grid_people).toBeGreaterThan(0);
+    const altered = structuredClone(dataset);
+    altered.cells[0][2] += 10;
+    expect(() => validatePopulationSurfaceDataset(altered, reference)).toThrow(/mass accounting/);
   });
 
   it('rejects dangling taxonomy, source, universe, and artifact references', () => {
@@ -552,15 +578,26 @@ describe('genuine-data MVP release', () => {
     expect(candidateSourceLock.status).toBe(
       'acquired_candidate_source_lock_not_publication_approval',
     );
-    expect(candidateSourceLock.artifacts).toHaveLength(19);
+    expect(candidateSourceLock.artifacts).toHaveLength(20);
+    expect(candidateSourceLock.artifacts.find((artifact) => artifact.id === 'clio_infra_total_population_compact')).toMatchObject({
+      sha256: 'fbf1c9349a10dfe115c79e5808b9b6f29631eca9c0741e0ad59d90eef435a329',
+      publication_status: 'acquisition_for_review_only',
+      verticals: ['population_over_time'],
+    });
     expect(candidateSourceLock.blocked_sources.map((source) => source.source_id).sort()).toEqual([
       'hyde',
       'maddison',
       'world_historical_gazetteer',
     ]);
     expect(verticalProfiles.candidate_lock).toMatchObject({
-      artifact_count: 19,
+      artifact_count: 20,
       blocked_source_count: 3,
+    });
+    expect(verticalProfiles.profiles.clio_infra.workbooks.find((workbook) => workbook.filename === 'TotalPopulation_Compact.xlsx')).toMatchObject({
+      rows: 3_221,
+      country_codes: 190,
+      year_range: [1500, 2000],
+      duplicate_country_year_keys: 0,
     });
     expect(verticalProfiles.profiles.ucdp.ged).toMatchObject({
       event_rows: 417_968,
@@ -575,6 +612,12 @@ describe('genuine-data MVP release', () => {
       rows: 1_494,
       polity_ids: 373,
       sentinel_review: 'minus_999_and_fractional_codings_must_not_be_treated_as_plain_values',
+    });
+    expect(verticalProfiles.profiles.seshat.polity_population).toMatchObject({
+      rows: 395,
+      polity_ids: 275,
+      missing_date_from: 178,
+      textual_value_from: 48,
     });
     expect(verticalProfiles.profiles.vdem.first_candidate_variable).toMatchObject({
       id: 'v2x_suffr',

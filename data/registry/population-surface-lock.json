@@ -1,0 +1,122 @@
+{
+  "schema_version": "0.1.0",
+  "artifacts": [
+    {
+      "source": "ghsl",
+      "year": 1975,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E1975_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E1975_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E1975_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 297529739,
+      "sha256": "3804224a2456540b3420f8e0077d98d0fc306e9ef4f4b5582f50134dd8e14842",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "ghsl",
+      "year": 1980,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E1980_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E1980_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E1980_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 301666645,
+      "sha256": "91e374113a6b318cf9125fa1f41aaf09e120fa9042585df86af6eaea2fa63e25",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "ghsl",
+      "year": 1985,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E1985_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E1985_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E1985_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 306277912,
+      "sha256": "8baba63d0c5a92d743bfeae7f17d78dd0d6228b754104533186fd0c0eb389490",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "ghsl",
+      "year": 1990,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E1990_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E1990_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E1990_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 309449770,
+      "sha256": "f974cc6715b4ee9f75c9e491fc896fe5cb8e9dbf4a4afd73063dd9c244e3850d",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "ghsl",
+      "year": 1995,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E1995_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E1995_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E1995_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 311095518,
+      "sha256": "23f7efa638dbb73bc0f9b9c9a5857c32459a5a8638020311b5a6f40b5efa6274",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "ghsl",
+      "year": 2000,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2000_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2000_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E2000_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 312516037,
+      "sha256": "b9a4e166aa261a572eea8659384e98b0f2d68232b361ea11defa4a489d16bde6",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "ghsl",
+      "year": 2005,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2005_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2005_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E2005_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 315390340,
+      "sha256": "44db381dfb1eebba352e0372ec3a9efb3480b49bbd707f334e7b6f6339953aa0",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "ghsl",
+      "year": 2010,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2010_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2010_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E2010_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 317876163,
+      "sha256": "f21a7c5965b649da3274045d6b223a6903172494185c49f3669b0991cf7e835b",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "ghsl",
+      "year": 2015,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2015_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2015_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E2015_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 320436226,
+      "sha256": "2ff928428d5575020206e138a2c4d2d3f1704f5f73118e4e1099a1d0324eeaf6",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "ghsl",
+      "year": 2020,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2020_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2020_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E2020_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 322293568,
+      "sha256": "40ccf52af857a82cd327b882d1ebb901f84363b0e7e6806ccee56b0a85df6d2c",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "ghsl",
+      "year": 2025,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2025_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 323340844,
+      "sha256": "cd630f51ac65dff2a0c7ad252333bbb20c5cf9de4d85eef04e22ef3699d80c95",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "ghsl",
+      "year": 2030,
+      "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2030_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2030_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "relative_path": "ghsl/R2023A/GHS_POP_E2030_GLOBE_R2023A_54009_1000_V1_0.zip",
+      "bytes": 324363154,
+      "sha256": "d0e4fa85a89d8bc3cac641ce2515f90b301bc66f4efb1bdccd661e5be7e3760f",
+      "status": "acquired_for_validation_not_automatically_published"
+    },
+    {
+      "source": "worldpop",
+      "year": 2020,
+      "url": "https://data.worldpop.org/GIS/Population/Global_2015_2030/R2025A/2020/0_Mosaicked/v1/1km/constrained/global_pop_2020_CN_1km_R2025A_v1.tif",
+      "relative_path": "worldpop/R2025A/global_pop_2020_CN_1km_R2025A_v1.tif",
+      "bytes": 288986559,
+      "sha256": "c6f977bf5e43b7d607ac41892e0dbb04879c487f48443711d882d39b8b16c689",
+      "status": "acquired_for_validation_not_automatically_published"
+    }
+  ]
+}

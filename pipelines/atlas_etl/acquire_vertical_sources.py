@@ -64,6 +64,16 @@ ARTIFACTS: tuple[CandidateArtifact, ...] = (
         publication_status="candidate_adapter_required",
     ),
     CandidateArtifact(
+        id="clio_infra_total_population_compact",
+        source_id="clio_infra",
+        verticals=("population_over_time",),
+        url="https://clio-infra.eu/data/TotalPopulation_Compact.xlsx",
+        relative_path="clio-infra/TotalPopulation_Compact.xlsx",
+        kind="xlsx",
+        license="unverified_per_artifact_terms",
+        publication_status="acquisition_for_review_only",
+    ),
+    CandidateArtifact(
         id="clio_infra_gdp_per_capita_compact",
         source_id="clio_infra",
         verticals=("economics_over_time",),
@@ -188,7 +198,7 @@ ARTIFACTS: tuple[CandidateArtifact, ...] = (
     CandidateArtifact(
         id="seshat_equinox_v1_archive",
         source_id="seshat",
-        verticals=("institutions_and_governance",),
+        verticals=("population_over_time", "institutions_and_governance"),
         url=(
             "https://zenodo.org/api/records/6642230/files/"
             "seshatdb/Equinox_Data-v.1.zip/content"
@@ -201,7 +211,7 @@ ARTIFACTS: tuple[CandidateArtifact, ...] = (
     CandidateArtifact(
         id="seshat_equinox_v1_metadata",
         source_id="seshat",
-        verticals=("institutions_and_governance",),
+        verticals=("population_over_time", "institutions_and_governance"),
         url="https://zenodo.org/api/records/6642230",
         relative_path="seshat/equinox-v1/zenodo-record.json",
         kind="json",

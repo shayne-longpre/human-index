@@ -15,8 +15,8 @@ This is not a leaderboard of civilizations, a single “progress” score, or a 
 
 **A working first genuine-data development release now exists.**
 
-The application now presents five genuine-data measures plus two independent
-historical context layers in one timeline:
+The application presents source-distinct population and condition measures,
+plus independent historical context layers, on one timeline:
 
 - U.S. Census Bureau world-population estimate ranges at 39 published dates from
   10,000 BCE through 1950 CE;
@@ -44,6 +44,16 @@ and unplaced modern population remains in summaries and the table. Time controls
 use exact observations only. Source responses, published artifacts, hashes,
 coverage, and limitations are recorded in the release manifest and
 `data/registry/source-lock.json`.
+
+The current r8 release also offers an independent GHSL GHS-POP population-grid
+layer at ten exact modeled-estimate dates from 1975–2020, plus clearly marked
+2025/2030 projections. The grid uses source-native raster counts conservatively
+rebinned to one-degree display markers; its source total, published-bin total,
+zero/NODATA distinction, and unassigned residual are visible and downloadable.
+It is never assigned to historical borders or spliced into World Bank or UN
+totals. Clio Infra and Seshat historical population candidates are acquired for
+review but not mapped until their source terms, units, and geographic identity
+links pass the documented gates.
 
 The application also includes a dedicated **Sources** page covering both the
 inputs published in the current release and the wider research registry. Atlas
@@ -90,6 +100,20 @@ pnpm data:acquire:verticals
 pnpm data:review:verticals
 pnpm data:build
 ```
+
+The GHSL acquisition and derivation workflow is also explicit:
+
+```bash
+pnpm data:acquire:population-grids
+pnpm data:derive:population-grids
+pnpm data:publish:population-grids
+```
+
+The publisher refuses to overwrite the tracked r8 fixture. To reproduce it,
+invoke the module with an empty comparison output path; publishing a new release
+ID requires an explicit version change. Ordinary development does not run these
+large-source commands. See `docs/POPULATION_SURFACES.md` for the exact mapping
+method and limits.
 
 See `docs/BUILD_REPORT.md` for verified implementation and test status,
 `docs/MVP_SOURCE_SELECTION.md` for the source decision, and `CODEX_PROMPT.md`

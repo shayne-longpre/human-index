@@ -1,12 +1,12 @@
 # Reproducible views and browser gates
 
-Updated: 2026-09-23
+Updated: 2026-10-06
 
 ## Pinned view URL
 
 An Atlas URL now records the immutable release ID, metric, requested year,
 selected statistical support, border and city visibility, published scale mode,
-and map camera. A link that names another release fails closed instead of
+the selected population-grid source, and map camera. A link that names another release fails closed instead of
 silently opening current values.
 
 The keys are deliberately small and explicit:
@@ -18,6 +18,7 @@ The keys are deliberately small and explicit:
 | `year` | Requested astronomical year |
 | `place` | Optional statistical-support code |
 | `borders`, `cities` | Independent context-layer visibility |
+| `surface` | Source-native population grid release ID or `off`; unsupported years stay unavailable |
 | `scale` | `published`; the metric's fixed versioned scale |
 | `lng`, `lat`, `z`, `pitch`, `bearing` | Map camera |
 
@@ -36,7 +37,7 @@ browser. It contains:
   weight/status/locator;
 - the exact summary shown by the application;
 - the applicable deep-time world estimate, political-snapshot reference and
-  checksum, and exact-date historical city observations;
+  checksum, exact-date historical city observations, and the selected population-grid snapshot and checksum;
 - the full reconciliation decision artifact;
 - the immutable release manifest, source releases, transformations, citations,
   and source-specific license notices; and

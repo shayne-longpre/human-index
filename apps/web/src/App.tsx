@@ -12,6 +12,7 @@ import {
   type LifeExpectancyDataset,
   type GdpPerCapitaDataset,
   type PopulationOutlookDataset,
+  type PopulationSurfaceDataset,
 } from '@atlas/contracts';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { DataTable } from './components/DataTable';
@@ -25,6 +26,7 @@ import { LifeExpectancyDistribution } from './components/LifeExpectancyDistribut
 import { PopulationBar } from './components/PopulationBar';
 import { PopulationTimeline } from './components/PopulationTimeline';
 import { PopulationOutlookSummary } from './components/PopulationOutlookSummary';
+import { PopulationSurfacePanel } from './components/PopulationSurfacePanel';
 import { TerritorialCoverageSummary } from './components/TerritorialCoverageSummary';
 import { SourcesPage } from './components/SourcesPage';
 import { ReviewPage } from './components/ReviewPage';
@@ -33,9 +35,11 @@ import {
   historicalPopulationDownloadUrl,
   loadHistoricalSnapshot,
   loadMetricData,
+  loadPopulationSurface,
   loadReconciliationDecisions,
   loadReleaseBase,
   manifestUrl,
+  releaseRoot,
   prefetchHistoricalSnapshot,
   type HistoricalFeatureCollection,
   type HistoricalProperties,
@@ -68,6 +72,11 @@ export function App() {
   const [playing, setPlaying] = useState(false);
   const [historicalEnabled, setHistoricalEnabled] = useState(true);
   const [citiesEnabled, setCitiesEnabled] = useState(true);
+  const [surfaceSourceId, setSurfaceSourceId] = useState<string | null>(null);
+  const [populationSurface, setPopulationSurface] = useState<PopulationSurfaceDataset | null>(null);
+  const [surfaceLoading, setSurfaceLoading] = useState(false);
+  const [surfaceError, setSurfaceError] = useState<string | null>(null);
+  const [selectedSurfaceCell, setSelectedSurfaceCell] = useState<PopulationSurfaceDataset['cells'][number] | null>(null);
   const [camera, setCamera] = useState<AtlasMapCamera>(DEFAULT_MAP_CAMERA);
   const [historicalSnapshot, setHistoricalSnapshot] = useState<HistoricalFeatureCollection | null>(null);
   const [historicalLoading, setHistoricalLoading] = useState(false);
@@ -116,6 +125,7 @@ export function App() {
         setSelectedCode(initial.selectedCode);
         setHistoricalEnabled(initial.historicalEnabled);
         setCitiesEnabled(initial.citiesEnabled);
+        setSurfaceSourceId(initial.surfaceSourceId);
         setCamera(initial.camera);
         setMetricDatasets({ population_total: loaded.population });
         void loadMetricData('access_to_electricity', loaded.manifest).then((dataset) => {
@@ -145,11 +155,12 @@ export function App() {
       selectedCode,
       historicalEnabled,
       citiesEnabled,
+      surfaceSourceId,
       scaleMode: 'published',
       camera,
     });
     window.history.replaceState(null, '', `${window.location.pathname}${search}`);
-  }, [camera, citiesEnabled, historicalEnabled, metricId, page, release, selectedCode, year]);
+  }, [camera, citiesEnabled, historicalEnabled, metricId, page, release, selectedCode, surfaceSourceId, year]);
 
   useEffect(() => {
     if (!release || page !== 'atlas') return;
@@ -166,6 +177,7 @@ export function App() {
         setSelectedCode(restored.selectedCode);
         setHistoricalEnabled(restored.historicalEnabled);
         setCitiesEnabled(restored.citiesEnabled);
+        setSurfaceSourceId(restored.surfaceSourceId);
         setCamera(restored.camera);
         setError(null);
       } catch (cause: unknown) {
@@ -198,6 +210,34 @@ export function App() {
     () => release ? resolveHistoricalSnapshot(release.historicalContext, year) : null,
     [release, year],
   );
+
+  const surfaceReference = useMemo(
+    () => metricId === 'population_total' && surfaceSourceId && release
+      ? release.manifest.population_surfaces.snapshots.find(
+        (snapshot) => snapshot.source_release_id === surfaceSourceId && snapshot.year === year,
+      ) ?? null
+      : null,
+    [metricId, release, surfaceSourceId, year],
+  );
+
+  useEffect(() => {
+    setSelectedSurfaceCell(null);
+    setSurfaceError(null);
+    setPopulationSurface(null);
+    if (!surfaceReference) {
+      setSurfaceLoading(false);
+      return;
+    }
+    let active = true;
+    setSurfaceLoading(true);
+    loadPopulationSurface(surfaceReference)
+      .then((dataset) => { if (active) setPopulationSurface(dataset); })
+      .catch((cause: unknown) => {
+        if (active) setSurfaceError(cause instanceof Error ? cause.message : 'Could not load population grid');
+      })
+      .finally(() => { if (active) setSurfaceLoading(false); });
+    return () => { active = false; };
+  }, [surfaceReference]);
 
   useEffect(() => {
     setSelectedHistorical(null);
@@ -307,7 +347,12 @@ export function App() {
   }, [release, year]);
 
   const displayedSummary = useMemo(() => {
-    if (!metric || !supported) return null;
+    if (!metric) return null;
+    if (metric.id === 'population_total' && surfaceReference) return {
+        selected_population_surface: surfaceReference,
+        separate_world_bank_territorial_reference: populationSummary,
+    };
+    if (!supported) return null;
     if (metric.id === 'population_total') {
       return year < 1960 ? historicalPopulationObservation : populationSummary;
     }
@@ -326,6 +371,7 @@ export function App() {
     populationSummary,
     prevalenceSummary,
     supported,
+    surfaceReference,
     year,
   ]);
 
@@ -359,6 +405,7 @@ export function App() {
     selectedCode,
     historicalEnabled,
     citiesEnabled,
+    surfaceSourceId,
     scaleMode: 'published',
     camera,
   }) : '';
@@ -366,7 +413,7 @@ export function App() {
   useEffect(() => {
     setBundleStatus('idle');
     setShareStatus('idle');
-  }, [camera, citiesEnabled, historicalEnabled, metricId, selectedCode, year]);
+  }, [camera, citiesEnabled, historicalEnabled, metricId, selectedCode, surfaceSourceId, year]);
 
   const downloadViewBundle = useCallback(async () => {
     if (!release || !metric) return;
@@ -381,6 +428,8 @@ export function App() {
         selectedSupportCode: selectedCode,
         historicalBordersEnabled: historicalEnabled,
         historicalCitiesEnabled: citiesEnabled,
+        populationSurfaceSourceId: metric.id === 'population_total' ? surfaceSourceId : null,
+        populationSurface: surfaceReference,
         camera: normalizeAtlasMapCamera(camera),
         effectiveMetricYear: supported ? year : null,
         historicalSnapshot: historicalEnabled ? historicalReference : null,
@@ -425,6 +474,8 @@ export function App() {
     selectedCityPoint,
     selectedCode,
     selectedHistorical,
+    surfaceSourceId,
+    surfaceReference,
     supported,
     year,
   ]);
@@ -474,9 +525,11 @@ export function App() {
     Math.abs(candidate - year) < Math.abs(nearest - year) ? candidate : nearest,
   );
   const deepTimePopulation = metric.id === 'population_total' && year < 1960;
-  const download = deepTimePopulation
-    ? historicalPopulationDownloadUrl(release.manifest)
-    : downloadUrl(metric.id, release.manifest);
+  const download = surfaceReference
+    ? `${releaseRoot}/${surfaceReference.download_file}`
+    : deepTimePopulation
+      ? historicalPopulationDownloadUrl(release.manifest)
+      : downloadUrl(metric.id, release.manifest);
   const atlasUrl = pinnedSearch;
   const sourcesUrl = `?page=sources&release=${encodeURIComponent(release.manifest.release_id)}`;
   const reviewUrl = `?page=review&release=${encodeURIComponent(release.manifest.release_id)}`;
@@ -582,8 +635,12 @@ export function App() {
               citiesEnabled={citiesEnabled}
               selectedCityId={selectedCityPoint?.city.id ?? null}
               selectedHistoricalId={selectedHistorical?.source_feature_id ?? null}
-              caption={deepTimePopulation ? 'Global population estimate only' : view.mapCaption}
-              caution={deepTimePopulation ? 'No historical population is assigned to these polities.' : view.mapCaution}
+              populationSurface={populationSurface}
+              populationSurfaceLabel={surfaceSourceId?.startsWith('ghsl-') ? 'GHSL GHS-POP' : surfaceSourceId?.startsWith('worldpop-') ? 'WorldPop Global2' : null}
+              selectedSurfaceCell={selectedSurfaceCell}
+              onSurfaceSelect={(cell) => setSelectedSurfaceCell(cell)}
+              caption={populationSurface ? 'Source-native modeled population grid' : deepTimePopulation ? 'Global population estimate only' : view.mapCaption}
+              caution={populationSurface ? 'Columns mark 1° bins; no population is assigned to political borders.' : deepTimePopulation ? 'No historical population is assigned to these polities.' : view.mapCaution}
               selectedCode={selectedCode}
               onSelect={select}
               onHistoricalSelect={selectHistorical}
@@ -593,7 +650,7 @@ export function App() {
               onCameraChange={(nextCamera) => setCamera(normalizeAtlasMapCamera(nextCamera))}
             />
           </Suspense>
-          <Legend metric={metric} unavailable={deepTimePopulation} />
+          <Legend metric={metric} unavailable={deepTimePopulation} surface={populationSurface !== null} />
 
           <div className="date-display" aria-label={`Requested date ${formatAstronomicalYear(year)}`}>
             <span>Requested date</span>
@@ -618,6 +675,18 @@ export function App() {
             onClose={() => setSelectedCityPoint(null)}
           />
         </section>
+
+        {metric.id === 'population_total' ? <PopulationSurfacePanel
+          manifest={release.manifest}
+          year={year}
+          sourceId={surfaceSourceId}
+          onSourceChange={(id) => { pushViewHistory(); setSurfaceSourceId(id); }}
+          reference={surfaceReference}
+          dataset={populationSurface}
+          loading={surfaceLoading}
+          error={surfaceError}
+          selectedCell={selectedSurfaceCell}
+        /> : null}
 
         <section className="time-panel" aria-labelledby="time-title">
           <div className="time-heading">
@@ -683,7 +752,7 @@ export function App() {
             date is shared, while each layer applies its own stated policy. Measurements and city estimates are
             exact-date only; political context uses the latest published snapshot within Cliopatria coverage.
           </p>
-          <div className="layer-date-grid" aria-label="Effective evidence dates">
+          <div className={metric.id === 'population_total' ? 'layer-date-grid layer-date-grid-four' : 'layer-date-grid'} aria-label="Effective evidence dates">
             <article className={supported ? 'layer-date-available' : 'layer-date-unavailable'}>
               <span>Selected measure</span>
             <strong>
@@ -695,6 +764,11 @@ export function App() {
             </strong>
               <small>{metric.label} · {metric.available_years.length} published dates</small>
             </article>
+            {metric.id === 'population_total' ? <article className={surfaceReference && !surfaceError ? 'layer-date-available' : 'layer-date-unavailable'}>
+              <span>Population grid</span>
+              <strong>{!surfaceSourceId ? 'Layer hidden' : surfaceError ? 'Grid unavailable' : surfaceReference ? `Exact · ${formatAstronomicalYear(surfaceReference.year)}` : 'No exact grid'}</strong>
+              <small>{surfaceSourceId?.startsWith('ghsl-') ? 'GHSL GHS-POP' : surfaceSourceId?.startsWith('worldpop-') ? 'WorldPop Global2' : 'Source-native raster'}</small>
+            </article> : null}
             <article className={historicalEnabled && historicalReference && !historicalError ? 'layer-date-available' : 'layer-date-unavailable'}>
               <span>Political context</span>
               <strong>
@@ -718,7 +792,9 @@ export function App() {
           </div>
           {!supported ? (
             <div className="unsupported-year" role="status">
-              <span>{metric.label} has no published observation for {formatAstronomicalYear(year)}.</span>
+              <span>{surfaceReference
+                ? `The territorial ${metric.label.toLowerCase()} series has no observation for ${formatAstronomicalYear(year)}; the selected population grid is a separate ${surfaceReference.evidence_state}.`
+                : `${metric.label} has no published observation for ${formatAstronomicalYear(year)}.`}</span>
               <button type="button" onClick={() => { pushViewHistory(); setYear(nearestYear); }}>
                 Show {formatAstronomicalYear(nearestYear)}
               </button>
@@ -733,6 +809,8 @@ export function App() {
             historicalDownload={historicalPopulationDownloadUrl(release.manifest)}
             year={year}
             entityCount={release.entities.length}
+            surfaceReferences={release.manifest.population_surfaces.snapshots}
+            selectedSurfaceSourceId={surfaceSourceId}
           />
         ) : metric.id === 'population_outlook' && populationOutlookSummary ? (
           <PopulationOutlookSummary summary={populationOutlookSummary} />
@@ -756,19 +834,27 @@ export function App() {
         <section className="method-strip" id="sources" aria-labelledby="method-title">
           <div>
             <span className="eyebrow">What this view means</span>
-            <h2 id="method-title">{metric.safe_summary}</h2>
+            <h2 id="method-title">{surfaceReference
+              ? `${surfaceSourceId?.startsWith('ghsl-') ? 'GHSL' : 'WorldPop'} ${surfaceReference.year} ${surfaceReference.evidence_state === 'projection' ? 'projected' : 'modeled'} raster population is displayed in one-degree bins.`
+              : metric.safe_summary}</h2>
           </div>
           <p>
-            {metric.definition} {deepTimePopulation
+            {surfaceReference
+              ? 'The grid is a separately sourced population reconstruction. Color shows people per 1° bin and height shows people divided by full-bin geodesic area. The country series, historical polities, and grid are not joined or added.'
+              : metric.definition} {surfaceReference
+              ? 'The physical source total, bin total, outside-grid residual, and original raster checksum are recorded in the release.'
+              : deepTimePopulation
               ? 'Historical values use world support only; political geometry is a separate context layer.'
               : metric.id === 'population_outlook'
                 ? 'Values remain on the source-native UN Country/Area support; modern display geometry is only a visual placement.'
                 : 'Modern values are shown at their World Bank country or territory support.'}
-            {' '}This view must not be interpreted as {metric.prohibited_interpretations.join(', ')}.
+            {' '}This view must not be interpreted as {surfaceReference
+              ? 'exact residential locations, population assigned to historical polities, or measured local settlement density'
+              : metric.prohibited_interpretations.join(', ')}.
           </p>
           <div className="method-actions">
             <a className="primary-action" href={download} download>
-              Download {deepTimePopulation ? 'historical world estimates' : 'full series'} · CSV
+              Download {surfaceReference ? 'selected grid bins' : deepTimePopulation ? 'historical world estimates' : 'full series'} · CSV
             </a>
             <button
               type="button"

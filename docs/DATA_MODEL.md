@@ -174,6 +174,8 @@ Disable global humanity shares by default for sparse sampled facts and event lay
 
 Use actual count p_j and physical area A_j to define density d_j = p_j / A_j. Display height may be a documented transformation of density; numeric totals always use the original counts.
 
+The published GHSL display bins follow this rule with a deliberately coarse support: source-pixel counts are centre-assigned to 1° WGS84 bins, and `A_j` is the full geodesic bin area, including water. Colour encodes bin count; height encodes full-bin density on a fixed logarithmic scale. Source totals, covered zeros, NODATA, and the tiny outside-grid residual are separate audit fields. This is not a fine local settlement-density estimate; see [population-surface methodology](POPULATION_SURFACES.md).
+
 Population-only mode uses the selected reconstruction without silently changing totals. To show a modern condition on a population surface, optionally create a separate calibrated derivative:
 
 ```text

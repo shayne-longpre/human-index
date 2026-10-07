@@ -14,7 +14,11 @@ from pipelines.atlas_etl.acquire_vertical_sources import (
 class CandidateSourceAcquisitionTests(unittest.TestCase):
     def test_catalog_has_unique_safe_targets(self) -> None:
         validate_catalog()
-        self.assertEqual(len(ARTIFACTS), 19)
+        self.assertEqual(len(ARTIFACTS), 20)
+        self.assertEqual(
+            next(item for item in ARTIFACTS if item.id == "clio_infra_total_population_compact").verticals,
+            ("population_over_time",),
+        )
         self.assertTrue(all(not Path(item.relative_path).is_absolute() for item in ARTIFACTS))
 
     def test_payload_validation_rejects_source_error_pages(self) -> None:

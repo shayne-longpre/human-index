@@ -302,6 +302,29 @@ def validate_release_manifest(
     ):
         raise ValidationError("Published layers disagree on reconciliation decision set")
 
+    surfaces = manifest.get("population_surfaces")
+    if surfaces is not None:
+        if surfaces["grid_degrees"] != 1 or surfaces["selection_policy"] != "exact_source_year_only_no_splice_or_interpolation":
+            raise ValidationError("Unknown population-surface selection contract")
+        if surfaces["default_source_release_id"] not in source_ids:
+            raise ValidationError("Default population surface has an unknown source release")
+        keys: set[tuple[str, int]] = set()
+        for snapshot in surfaces["snapshots"]:
+            key = (snapshot["source_release_id"], snapshot["year"])
+            if key in keys:
+                raise ValidationError(f"Duplicate population surface {key}")
+            keys.add(key)
+            if snapshot["source_release_id"] not in source_ids:
+                raise ValidationError(f"Population surface {key} has an unknown source release")
+            if snapshot["source_artifact_id"] not in input_artifact_ids:
+                raise ValidationError(f"Population surface {key} has an unknown source artifact")
+            if not {snapshot["data_file"], snapshot["download_file"]}.issubset(artifacts):
+                raise ValidationError(f"Population surface {key} has a missing output artifact")
+            if abs(snapshot["source_total_people"] - snapshot["published_bin_total_people"] - snapshot["unassigned_outside_grid_people"]) > 0.002:
+                raise ValidationError(f"Population surface {key} fails mass accounting")
+        if not any(source == surfaces["default_source_release_id"] for source, _ in keys):
+            raise ValidationError("Default population surface has no snapshot")
+
     for transformation in manifest["transformations"]:
         if not set(transformation["input_artifact_ids"]).issubset(input_artifact_ids):
             raise ValidationError(

@@ -1,3 +1,4 @@
+import { validatePopulationSurfaceDataset } from '@atlas/contracts';
 import type {
   AtlasEntity,
   AtlasReleaseManifest,
@@ -12,6 +13,8 @@ import type {
   MvpMetricId,
   PopulationOutlookDataset,
   PopulationDataset,
+  PopulationSurfaceDataset,
+  PopulationSurfaceReference,
 } from '@atlas/contracts';
 import type { FeatureCollection, Geometry } from 'geojson';
 
@@ -96,7 +99,7 @@ export interface ReconciliationDecisionArtifact {
   [key: string]: unknown;
 }
 
-export const releaseRoot = '/atlas/releases/atlas-mvp-2026-09-23-r7';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-10-06-r8';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {
@@ -154,6 +157,24 @@ export function downloadUrl(metricId: MvpMetricId, manifest: AtlasReleaseManifes
 
 export function historicalPopulationDownloadUrl(manifest: AtlasReleaseManifest): string {
   return `${releaseRoot}/${manifest.deep_time_population.download_file}`;
+}
+
+const surfaceCache = new Map<string, Promise<PopulationSurfaceDataset>>();
+
+export function loadPopulationSurface(reference: PopulationSurfaceReference): Promise<PopulationSurfaceDataset> {
+  const existing = surfaceCache.get(reference.data_file);
+  if (existing) return existing;
+  const pending = getJson<PopulationSurfaceDataset>(`${releaseRoot}/${reference.data_file}`)
+    .then((dataset) => {
+      validatePopulationSurfaceDataset(dataset, reference);
+      return dataset;
+    })
+    .catch((error: unknown) => {
+      surfaceCache.delete(reference.data_file);
+      throw error;
+    });
+  surfaceCache.set(reference.data_file, pending);
+  return pending;
 }
 
 let reconciliationCache: Promise<ReconciliationDecisionArtifact> | null = null;
