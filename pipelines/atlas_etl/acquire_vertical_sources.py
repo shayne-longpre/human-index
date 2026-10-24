@@ -205,8 +205,8 @@ ARTIFACTS: tuple[CandidateArtifact, ...] = (
         ),
         relative_path="seshat/equinox-v1/Equinox_Data-v.1.zip",
         kind="zip",
-        license="CC-BY-4.0",
-        publication_status="candidate_case_study_review_required",
+        license="conflicting_archive_notices",
+        publication_status="candidate_license_conflict_review_only",
     ),
     CandidateArtifact(
         id="seshat_equinox_v1_metadata",
@@ -215,8 +215,8 @@ ARTIFACTS: tuple[CandidateArtifact, ...] = (
         url="https://zenodo.org/api/records/6642230",
         relative_path="seshat/equinox-v1/zenodo-record.json",
         kind="json",
-        license="CC-BY-4.0",
-        publication_status="candidate_case_study_review_required",
+        license="conflicting_archive_notices",
+        publication_status="candidate_license_conflict_review_only",
     ),
     CandidateArtifact(
         id="ucdp_ged_26_1_csv_archive",

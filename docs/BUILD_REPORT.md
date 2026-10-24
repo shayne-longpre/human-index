@@ -1,5 +1,116 @@
 # Build report: evidence-aware temporal-map MVP
 
+## Local cross-source research view — verified October 24, 2026
+
+The pinned CCP ZIPs produced a 3,396,553-byte ignored local slice
+(`1fb95795818d32f710451da2d81aeb0bd6e14b0d81db5237f55b47beb2728af6`)
+with all 21,735 Characteristics source rows and 20,638 Chronology rows,
+original row locators, imputation/availability flags, and narrow religion-policy
+columns. A separate 465,207-byte ignored decision artifact
+(`be932c41f594edde0cf905897dd24fdd6fae2c4614e358f809765349879a514f`)
+records 1,960 WRP rows with exact COW-style-code/year CCP candidates. The
+candidate disposition explicitly leaves territorial support unreviewed.
+No WRP, CCP, or Seshat values were added to the public release or Git.
+
+The development-only `?page=research` view opens the three ignored source
+stages and candidate decisions. It keeps estimated affiliations, written
+constitutional provisions, and sampled historical polity claims separate.
+The four allowlisted local endpoints served over loopback; a direct generic
+Vite `@fs` request for ignored derived data returned HTTP 403. The production
+build had no WRP/CCP/Seshat source artifacts. This is not a scored or mapped
+institutional layer.
+
+Commands actually run this increment: the CCP stage and reconciliation ETL
+modules (passed), Python unittest discovery (30 passed), `pnpm test` (44
+passed), `pnpm build` (passed with the existing large MapView chunk warning),
+and `pnpm exec playwright test` (10 passed, including the local research view
+and accessibility scan). The local development server needed approved loopback
+binding after the sandbox returned `EPERM` on the first attempt.
+
+## Local religion and constitutional research stages — verified October 24, 2026
+
+The pinned World Religion Project v1.1 national CSV and codebook produced an
+ignored local derived artifact with all 84 source columns and 1,995 source
+rows. A receipt records both input hashes, transformation ID/version/parameters,
+and the 794,808-byte output SHA-256
+`93f71f215ede19075f64a7719ee9a16535a0ac2ef2538a895557b7a377e858d0`.
+Source row locators, blanks, coded zeros, dual-religion and source-method flags
+remain separate. No WRP values were added to r12 or its web bundle. The
+user-facing and redistribution decision is recorded in
+`INSTITUTIONAL_RELIGION_EVIDENCE.md`.
+
+Official CCP Chronology v6 and Characteristics v5 archives were acquired from
+the public download links and SHA-256 pinned. A streaming read of the embedded
+CSVs and codebooks found 20,638 chronology rows (6 columns, 1789–2025) and
+21,735 characteristics rows (2,030 columns, 1789–2023); 4,054 characteristics
+rows have the source `coding_imputed=1` flag. The ZIP files remain ignored
+local raw inputs, not browser artifacts. Seshat Equinox's source workbook was
+also locally staged for 11,202 relevant CanonDat rows, preserving all twelve
+source cells and workbook row locators; the 2,163,261-byte staged artifact has
+SHA-256 `705dba3229907632b02975bf11bde1d79bda9b45e89b1cfd656538fde6daa708`.
+Neither CCP nor Seshat values were added to r12.
+
+Commands run for this increment: `uv run --offline python -m
+pipelines.atlas_etl.stage_world_religion_project`, `acquire_ccp`,
+`profile_constitution_candidates`, `stage_seshat_institutions`, and
+`profile_vertical_sources` modules; `uv run --offline python -m unittest
+discover -s pipelines/tests -q` (29 passed); `pnpm test` (44 passed),
+`pnpm build` (passed, existing MapView chunk-size warning), and
+`pnpm exec playwright test` (9 passed). The first browser attempt could not
+bind 127.0.0.1:4174 in the sandbox; the approved loopback run passed.
+
+## Release r12 institutional first slice — verified October 24, 2026
+
+The pinned V-Dem v16 RData and codebook pass checksum verification. A
+source-native adapter published four separate country-year tables with 111,556
+known values over 28,092 source rows and 202 coding units. The
+Institutions & religion page exposes exact source years, original RData row
+locators, coded zeros, and explicit blank values. It does not map V-Dem coding
+units onto Cliopatria borders or create an Atlas political score. The
+source-wide span does not imply every variable has every country-year.
+
+The official World Religion Project v1.1 national CSV and codebook were
+acquired for review, checksummed, and profiled: 1,995 rows, 200 state IDs,
+14 five-year dates (1945–2010), no duplicate state-year keys, and 58 rows with
+the source's nonzero `dualrelig` flag. These files remain unpublished because
+redistribution terms and source-imputation semantics require review.
+
+Commands run for this slice: `npm run data:derive:institutions` equivalent via
+`uv run --offline python -m pipelines.atlas_etl.institutional_evidence`,
+`uv run --offline python -m pipelines.atlas_etl.publish_institutional_evidence`,
+`uv run --offline python -m pipelines.atlas_etl.acquire_religion_candidates`,
+`uv run --offline python -m pipelines.atlas_etl.profile_religion_candidates`,
+`uv run --offline python -m unittest discover -s pipelines/tests -v`,
+`pnpm test`, `pnpm build`, and `pnpm exec playwright test`. Results: 24 Python
+tests, 44 Vitest tests, production build, and 9 Playwright tests passed.
+Playwright also refreshed and visually inspected the mobile method-strip
+snapshot after the release-wide citation list was relabeled and collapsed.
+The production build still warns about a large MapView chunk; this is a
+delivery-size concern, not a failed test.
+
+## Releases r10–r11 economic expansion — verified October 24, 2026
+
+The official PIP version `20260922_2021_01_02_PROD` CSV was acquired and
+SHA-256 pinned (2,588 source rows). Five national-survey measures publish
+2,479 values each, keeping 88 additional surveys in duplicate country-years
+separate and retaining 109 subnational rows in the CSV. The official PWT 11.0
+XLSX was also acquired and pinned after a GET succeeded despite a HEAD 403.
+Its seven selected variables publish 63,955 source-native values; the source
+`Data` and `Legend` sheets, 185 supports, 13,690 country/year rows, units, and
+selected `i_cig`/`i_outlier` flags were checked. Release r11 has 26 economic tables and 196,337
+known source values; no spatialization to historical polities, ratio derivation,
+or cross-source splice was made. `ECONOMIC_INDICATORS.md` documents coverage,
+definitions, and remaining gates.
+
+Checks actually run: `.venv/bin/python -m pipelines.atlas_etl.acquire_pip`,
+`pip_evidence`, `publish_pip`, `acquire_pwt`, `pwt_evidence`, and `publish_pwt`;
+`pnpm test` (41 pass), `.venv/bin/python -m unittest discover pipelines/tests`
+(20 pass), `pnpm build` (pass with pre-existing lazy-map-chunk warning), and
+`pnpm test:browser` (8 pass after the source-citation screenshot baseline was
+reviewed and updated). An initial PWT browser test selected an unknown source
+row and was corrected to select a known USA observation. No economic coverage
+benchmark or claim of complete deep-history coverage was produced.
+
 ## Release r9 economic evidence — verified October 24, 2026
 
 Release `atlas-mvp-2026-10-24-r9` extends r8 with fourteen source-native economic

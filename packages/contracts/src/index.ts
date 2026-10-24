@@ -1,6 +1,7 @@
 export * from './calibration';
 export * from './dates';
 export * from './distribution';
+export * from './evidence';
 export * from './metrics';
 export * from './prevalence';
 export * from './release';

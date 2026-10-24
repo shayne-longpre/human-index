@@ -1,0 +1,13 @@
+{
+  "bytes": 1305619,
+  "id": "world-bank-pip-20260922-2021-surveys",
+  "license": "CC BY 4.0 (World Bank Poverty and Equity Database catalog)",
+  "license_url": "https://datacatalog.worldbank.org/search/dataset/0038020/poverty-and-equity-database-poverty-and-inequality-platform",
+  "path": "data/raw/pip/20260922_2021_01_02_PROD/surveys-3usd.csv",
+  "retrieved_on": "2026-10-24",
+  "schema_version": "0.1.0",
+  "sha256": "d1147750f873731ebc157595337758de6941c102d27a3c541b9209256c0e4339",
+  "source_rows": 2588,
+  "url": "https://api.worldbank.org/pip/v1/pip?country=ALL&povline=3&version=20260922_2021_01_02_PROD&fill_gaps=false&format=csv",
+  "version": "20260922_2021_01_02_PROD"
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": "0.1.0",
+  "source_id": "comparative_constitutions_project",
+  "source_page": "https://comparativeconstitutionsproject.org/download-data/",
+  "retrieved_on": "2026-10-24",
+  "publication_status": "local_research_only_republication_terms_unresolved",
+  "artifacts": {
+    "chronology_v6": {
+      "path": "data/raw/ccp/chronology-v6-characteristics-v5/ccpcce_v6.zip",
+      "url": "https://utexas.app.box.com/public/static/qzs6irrpbfzspvv6sq94r98yw9rsh5lz.zip",
+      "bytes": 829263,
+      "sha256": "ab04078953ae56b92eec21167f355746f36f50cf84d49851fe1c9e3af2b19ba2",
+      "data_member": "ccpcce_v6/ccpcce/ccpcce_v6.csv",
+      "codebook_member": "ccpcce_v6/ccpcce/codebook_v6.pdf"
+    },
+    "characteristics_v5": {
+      "path": "data/raw/ccp/chronology-v6-characteristics-v5/ccpcnc_v5.zip",
+      "url": "https://utexas.app.box.com/public/static/cpgysqaogi1590ucv5x0wn59urqm00x3.zip",
+      "bytes": 118231611,
+      "sha256": "761308d6addd1cfca493540911c223067aa00a7ba863ec500490073185f4af6d",
+      "data_member": "ccpcnc_v5/ccpcnc/ccpcnc_v5.csv",
+      "codebook_member": "ccpcnc_v5/ccpcnc/codebook_v5.pdf"
+    }
+  }
+}

@@ -2,7 +2,49 @@
 
 Updated: 2026-10-24
 
-## Current release r9 — economics extension
+## Current release r12 — institutional first slice
+
+Release r12 adds an Institutions & religion page with four pinned V-Dem v16
+source-native country-year variables: statutory adult suffrage, legislature
+chambers, freedom of religion, and religious-organization repression. The
+source has 28,092 country-ID/year rows over 202 coding units, 1789–2025; the
+four selected variables contain 111,556 non-null values. The source's ordinal
+religion-policy categories are not religious affiliation, individual-rights
+percentages, or an Atlas ranking. Raw values, blank cells, original row
+locators, and source flags remain in downloadable CSVs. No V-Dem observation
+is assigned to Cliopatria borders or population weights.
+
+The official WRP v1.1 national CSV and codebook are acquired. All 84 national
+fields and 1,995 rows are now in a checksum-recorded, ignored local research
+stage for religion composition; none are in the public web release pending
+redistribution, source-imputation, and presentation review. Pew needs the user's account/terms acceptance;
+ARDA/RAS have download agreements; Seshat Equinox has contradictory license
+notices inside the acquired archive, so its 11,202 locally staged institution
+and religion rows are not published. CCP Chronology v6 and Characteristics v5
+are acquired and pinned as local-only archives, with a streaming profile; they
+are not in r12. Exact gates and source links are in
+`INSTITUTIONAL_RELIGION_EVIDENCE.md`.
+
+For local development, the new `?page=research` view reads ignored WRP, CCP,
+and Seshat stages and a checksummed WRP↔CCP candidate decision set. It shows
+1,960 exact COW-style-code/year candidate overlaps, all still unresolved for
+territorial equivalence. The CCP slice keeps all original year rows but only
+selected identity/coding/religion fields; the full original stays in its raw
+ZIP. This research view and its source artifacts are absent from production.
+No Atlas-authored ancient religion or government status is backfilled.
+
+## Current release r11 — economics extension
+
+Release r11 extends r9 with a pinned 2021-PPP World Bank PIP national-survey
+response (five poverty/distribution measures, 12,395 source-native values)
+and the official Penn World Table 11.0 workbook (seven output, labor, TFP,
+capital, and compensation measures, 63,955 source-native values). The current
+Economics page has 26 independent tables and 196,337 known values. PIP keeps
+multiple national surveys in one country-year separate; PWT preserves workbook
+cell locators and quality flags in CSV. See `ECONOMIC_INDICATORS.md` and
+`INFERRED_EVIDENCE.md` for the indicator set and bounded historical-claim
+contract. Neither source is mapped to an ancient polity, and no cross-source
+economic score or labor-productivity ratio is implied.
 
 The current release retains r8's Atlas and GHSL population-grid views and adds
 an Economics page with fourteen source-native tables: Maddison Project Database
@@ -21,8 +63,8 @@ exact release, dataset-level redistribution terms, and concept/percentile/
 quality metadata. No source covers economics for every human population back
 to 10,000 BCE; Maddison's earliest known GDP-per-capita values are in 1 CE.
 
-Sections below describe the earlier r7 baseline and its prior acquisition
-state; this r9 section supersedes its Maddison-access conclusion.
+Sections below describe earlier baseline releases and their prior acquisition
+state; this r11 section supersedes their Maddison/PWT-access conclusions.
 
 ## MVP release
 

@@ -1,0 +1,12 @@
+{
+  "bytes": 5839841,
+  "id": "penn-world-table-11.0-workbook",
+  "license": "CC BY 4.0",
+  "license_url": "https://www.rug.nl/ggdc/productivity/pwt/?lang=en",
+  "path": "data/raw/pwt/11.0/pwt110.xlsx",
+  "retrieved_on": "2026-10-24",
+  "schema_version": "0.1.0",
+  "sha256": "7b337e94f39dfe304bc459e433f8ce0624496c812707ae0c924888f5142b3ab3",
+  "url": "https://dataverse.nl/api/access/datafile/554105",
+  "version": "11.0"
+}

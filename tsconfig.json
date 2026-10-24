@@ -19,7 +19,7 @@
     "paths": {
       "@atlas/contracts": ["packages/contracts/src/index.ts"]
     },
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals", "vite/client"]
   },
   "include": [
     "apps/web/src",

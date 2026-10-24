@@ -221,6 +221,66 @@
       "release_ready": true
     },
     {
+      "id": "world_bank_pip",
+      "label": "World Bank Poverty and Inequality Platform",
+      "dossier": "S22",
+      "role": "survey_poverty_and_distribution",
+      "candidate_release": "20260922_2021_01_02_PROD",
+      "coverage_start": "1963 CE for some national surveys",
+      "coverage_end": "2025 CE for some national surveys",
+      "license": "CC-BY-4.0",
+      "license_status": "world_bank_poverty_and_equity_catalog_checked",
+      "urls": ["https://pip.worldbank.org/about", "https://datacatalog.worldbank.org/search/dataset/0038020/poverty-and-equity-database-poverty-and-inequality-platform"],
+      "blockers": ["income_and_consumption_welfare_are_not_one_concept", "national_surveys_do_not_cover_every_country_year", "survey_support_is_not_historical_polity_geography"],
+      "notes": "The exact 2021-PPP version and $3/day, no-fill-gaps API response is pinned. Release r10 publishes five source-native measures for every national survey row, retains duplicate country-years, and keeps subnational rows in downloadable CSVs. No annual interpolation or source merger is performed.",
+      "checked_at": "2026-10-24",
+      "verification_level": "official_artifact_acquired_audited_and_source_native_tables_published",
+      "downloaded": true,
+      "artifact_sha256": "d1147750f873731ebc157595337758de6941c102d27a3c541b9209256c0e4339",
+      "terms_snapshot_sha256": null,
+      "release_ready": true
+    },
+    {
+      "id": "penn_world_table",
+      "label": "Penn World Table 11.0",
+      "dossier": "S23",
+      "role": "modern_productivity_inputs",
+      "candidate_release": "11.0, 1950–2023",
+      "coverage_start": "1950 CE, variable-specific",
+      "coverage_end": "2023 CE, variable-specific",
+      "license": "CC-BY-4.0",
+      "license_status": "official_release_page_checked",
+      "urls": ["https://www.rug.nl/ggdc/productivity/pwt/?lang=en", "https://dataverse.nl/api/access/datafile/554105"],
+      "blockers": ["published_source_values_are_not_a_derived_labor_productivity_ratio", "no_cross_source_splicing_or_historical_polity_join"],
+      "notes": "The publisher-linked PWT 11 workbook was acquired with GET, pinned, and its Data/Legend sheets profiled. A HEAD request returned 403, but actual GET succeeds. Release r11 publishes seven separate source-native tables with original workbook locators and selected i_cig/i_outlier flags in CSV. No cross-source merge or labor-productivity ratio is claimed.",
+      "checked_at": "2026-10-24",
+      "verification_level": "official_artifact_acquired_audited_and_source_native_tables_published",
+      "downloaded": true,
+      "artifact_sha256": "7b337e94f39dfe304bc459e433f8ce0624496c812707ae0c924888f5142b3ab3",
+      "terms_snapshot_sha256": null,
+      "release_ready": true
+    },
+    {
+      "id": "ilostat_direct_labor",
+      "label": "ILOSTAT direct labor statistics",
+      "dossier": "S24",
+      "role": "labor_force_hours_and_earnings_candidate",
+      "candidate_release": "Select a fixed ILOSTAT table and source vintage",
+      "coverage_start": null,
+      "coverage_end": null,
+      "license": null,
+      "license_status": "exact_table_and_reuse_terms_not_pinned",
+      "urls": ["https://ilostat.ilo.org/data/", "https://webapps.ilo.org/ilostat-files/Documents/ILOSTAT_BulkDownload_Guidelines.pdf"],
+      "blockers": ["select_exact_indicator_table_release_and_dimensions", "verify_asset_level_reuse_terms", "keep_observed_and_ILO_modeled_series_distinct"],
+      "notes": "The official ILOSTAT portal offers participation, employment, unemployment, hours and earnings data, including bulk CSVs. Atlas currently uses WDI's modeled ILO unemployment and PWT labor inputs; no direct ILOSTAT artifact is acquired or published.",
+      "checked_at": "2026-10-24",
+      "verification_level": "official_catalog_and_bulk_route_checked_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
       "id": "wid_distributional_economics",
       "label": "World Inequality Database",
       "dossier": "S21",
@@ -248,23 +308,24 @@
       "candidate_release": "Equinox Data v1 (Zenodo 6642230)",
       "coverage_start": "source-coded -13600 in TSDat123; variable-specific and not yet date-normalized",
       "coverage_end": "2000 CE in selected derived tables",
-      "license": "CC-BY-4.0",
-      "license_status": "exact_zenodo_archive_license_acquired",
+      "license": null,
+      "license_status": "conflict_between_zenodo_cc_by_archive_readme_noncommercial_and_embedded_license_cc0",
       "urls": [
         "https://zenodo.org/records/6642230",
         "https://seshat-db.com/terms/current/"
       ],
       "blockers": [
-        "select_non_evaluative_source_variables_for_first_slice",
+        "resolve_equinox_archive_license_conflict_before_publication",
+        "review_locally_staged_variable_meanings_before_publication",
         "preserve_native_missing_and_coded_sentinel_states",
         "review_polity_nga_and_time_links_before_map_join",
         "do_not_crosswalk_polities_to_modern_countries_by_name",
         "population_polity_ids_have_no_exact_match_to_published_cliopatria_seshat_ids",
         "parse_population_date_and_value_ranges_before_publication"
       ],
-      "notes": "The public Equinox v1 Zenodo archive and metadata are pinned. The CanonDat sheet contains 395 Polity Population rows over 275 PolID values; 178 rows have no Date.From and 48 have textual Value.From. None of those 275 PolIDs exactly matches the 426 distinct Cliopatria SeshatID values, so no population-to-border join is published. Derived/imputed Scale_MI values are not treated as source-native population observations. This is a historical research sample, not complete global coverage.",
-      "checked_at": "2026-09-23",
-      "verification_level": "artifact_acquired_and_schema_profile_in_progress_not_published",
+      "notes": "The pinned Equinox v1 Zenodo metadata reports CC BY 4.0, its embedded README says CC BY-NC-SA, and its embedded LICENSE is CC0. A local-only, ignored stage retains 11,202 canonical religion and institution rows with original cells and workbook row locators; no values are in the web release. CanonDat has source-native present/absent/inferred/unknown states but often lacks exact dates; TSDat123 contains century fillers, -999 sentinels, and numeric inference codes, so it is not a direct observation table. The 275 CanonDat population PolIDs have no exact match to published Cliopatria SeshatIDs. This is a historical research sample, not complete global coverage.",
+      "checked_at": "2026-10-24",
+      "verification_level": "artifact_and_relevant_canonical_rows_locally_staged_publication_blocked_by_terms_and_temporal_semantics",
       "downloaded": true,
       "artifact_sha256": "bf38dd49dcec9881e4f1ba9651e11bd60fd4400450b301e5b579553386729e14",
       "terms_snapshot_sha256": null,
@@ -286,16 +347,115 @@
         "https://v-dem.net/documents/70/codebook_v16.pdf"
       ],
       "blockers": [
-        "select_descriptive_variables",
-        "parse_and_profile_the_large_rdata_object_reproducibly",
-        "verify_country_year_support_and_historical_entity_crosswalks",
-        "preserve_estimates_and_uncertainty_fields_without_recasting_source_indexes_as_atlas_scores"
+        "review_variable_specific_uncertainty_before_latent_estimate_publication",
+        "review_country_year_coding_units_before_any_spatial_join",
+        "do_not_recast_source_indexes_as_atlas_scores"
       ],
-      "notes": "The provider-owned v16 RData package, official v16 codebook, and release metadata are pinned. The first candidate variable is v2x_suffr, a de-jure adult-citizen suffrage share; it is not yet published because the large RData object and entity support still require a reproducible adapter audit. No cross-release splicing or Atlas-authored democracy score is allowed.",
-      "checked_at": "2026-09-23",
-      "verification_level": "artifacts_and_codebook_acquired_adapter_pending",
+      "notes": "Four bounded v16 source-native tables are published: de-jure adult-citizen suffrage, chamber count, and two source-authored ordinal religion-policy categories. The v16 RData has 28,092 unique country-ID/year rows over 202 coding units (1789–2025). These are not joined to historical borders or population weights. Other latent estimates and uncertainty fields need variable-specific review; no cross-release splice or Atlas-created political score is allowed.",
+      "checked_at": "2026-10-24",
+      "verification_level": "bounded_source_native_tables_published",
       "downloaded": true,
       "artifact_sha256": "39b412d39a061c18f20c98e4ad4d6355b05a0441df31be4ee9aec420dc3d95ea",
+      "terms_snapshot_sha256": null,
+      "release_ready": true
+    },
+    {
+      "id": "comparative_constitutions_project",
+      "label": "Comparative Constitutions Project",
+      "dossier": "S29",
+      "role": "constitutional_events_and_text_features",
+      "candidate_release": "Chronology v6.0 and Characteristics v5.0",
+      "coverage_start": "1789 CE for constitutional chronology",
+      "coverage_end": "2025 CE for chronology; 2023 CE for characteristics",
+      "license": null,
+      "license_status": "dataset_and_text_reuse_terms_unverified",
+      "urls": ["https://comparativeconstitutionsproject.org/download-data/", "https://utexas.app.box.com/public/static/qzs6irrpbfzspvv6sq94r98yw9rsh5lz.zip", "https://utexas.app.box.com/public/static/cpgysqaogi1590ucv5x0wn59urqm00x3.zip"],
+      "blockers": ["verify_data_and_constitution_text_reuse_terms_separately", "review_public_interaction_and_download_policy", "audit_duplicate_state_years_and_imputed_codes", "do_not_treat_written_right_as_right_in_practice"],
+      "notes": "The official Chronology v6 and Characteristics v5 ZIPs are locally acquired and pinned in ccp-source-lock.json, with all source files kept inside ignored raw archives. The profile finds 20,638 chronology rows (1789–2025) and 21,735 characteristics rows (1789–2023). The latter has 2,030 source columns and 4,054 source rows flagged coding_imputed=1. These describe texts and legal forms, not enforcement. No CCP values or copyrighted constitution texts are published.",
+      "checked_at": "2026-10-24",
+      "verification_level": "official_archives_acquired_pinned_and_locally_profiled_not_published",
+      "downloaded": true,
+      "artifact_sha256": "ab04078953ae56b92eec21167f355746f36f50cf84d49851fe1c9e3af2b19ba2",
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "pew_global_religious_composition",
+      "label": "Pew Global Religious Composition",
+      "dossier": "S25",
+      "role": "modern_religious_affiliation_estimates",
+      "candidate_release": "2010 and 2020 dataset, updated February 2026",
+      "coverage_start": "2010 CE",
+      "coverage_end": "2020 CE",
+      "license": null,
+      "license_status": "account_agreement_and_redistribution_scope_unresolved",
+      "urls": ["https://www.pewresearch.org/dataset/dataset-of-global-religious-composition-estimates-for-2010-and-2020/", "https://www.pewresearch.org/about/terms-and-conditions/"],
+      "blockers": ["user_account_and_terms_acceptance_required", "verify_dataset_republication_scope", "preserve_rounded_small_counts_and_2010_2020_only"],
+      "notes": "Official dataset describes seven affiliation categories for 201 countries and territories. The downloadable workbook requires a Pew account; Atlas has not acquired or published it. Rounded small counts must not be converted into fabricated exact counts.",
+      "checked_at": "2026-10-24",
+      "verification_level": "official_dataset_page_and_terms_checked_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "world_religion_project",
+      "label": "World Religion Project",
+      "dossier": "S26",
+      "role": "historical_religious_adherence_estimates",
+      "candidate_release": "World Religion Data v1.1",
+      "coverage_start": "1945 CE",
+      "coverage_end": "2010 CE",
+      "license": null,
+      "license_status": "citation_requested_republication_terms_not_explicit",
+      "urls": ["https://correlatesofwar.org/data-sets/world-religion-data/", "https://correlatesofwar.org/wp-content/uploads/wrp-codebook-bibliography.pdf"],
+      "blockers": ["verify_derived_table_redistribution_terms", "review_public_interaction_and_download_policy", "retain_source_imputation_and_religion_tree", "audit_state_support_before_other_series_join"],
+      "notes": "The official COW-hosted v1.1 national CSV and codebook are pinned. All 84 columns and 1,995 state-year rows are staged in an ignored local research artifact with source row locators and a checksum receipt. Its own methods reconcile sources and impute missing cases. No values are in the public web release because the source page requests attribution but does not state dataset redistribution terms. User-facing interaction and visibility require a separate review.",
+      "checked_at": "2026-10-24",
+      "verification_level": "official_artifacts_acquired_and_locally_staged_not_published",
+      "downloaded": true,
+      "artifact_sha256": "ba1f3b73fdccbee9f3591d20326d14d86169eb6c40d4b196cf78b6c1678eba60",
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "arda_rcs_dem",
+      "label": "ARDA Religious Characteristics of States",
+      "dossier": "S27",
+      "role": "religious_demography_estimates",
+      "candidate_release": "RCS-Dem 2.0, countries only",
+      "coverage_start": "often 1800 CE; variable and state specific",
+      "coverage_end": "2015 CE",
+      "license": null,
+      "license_status": "download_agreement_and_republication_scope_unresolved",
+      "urls": ["https://www.thearda.com/data-archive?fid=RCSDEM2"],
+      "blockers": ["user_acceptance_of_download_agreement", "verify_republication_scope", "retain_source_interpolation_extrapolation_and_overlap_notes"],
+      "notes": "Official documentation describes 42,747 state-year estimates and roughly 100 denominations for 1900–2015, often earlier. Estimates include source interpolation and extrapolation; state and dependency supports can overlap. No artifact is acquired or published.",
+      "checked_at": "2026-10-24",
+      "verification_level": "official_archive_and_codebook_pages_checked_only",
+      "downloaded": false,
+      "artifact_sha256": null,
+      "terms_snapshot_sha256": null,
+      "release_ready": false
+    },
+    {
+      "id": "religion_and_state_project",
+      "label": "Religion and State Project",
+      "dossier": "S28",
+      "role": "government_religion_policy",
+      "candidate_release": "Round 3",
+      "coverage_start": "1990 CE",
+      "coverage_end": "2014 CE",
+      "license": null,
+      "license_status": "download_agreement_and_republication_scope_unresolved",
+      "urls": ["https://ras.thearda.com/", "https://ras.thearda.com/ras-downloads"],
+      "blockers": ["user_acceptance_of_download_agreement", "verify_republication_scope", "select_noncomposite_policy_fields_and_preserve_country_support"],
+      "notes": "The official project describes annual government-religion-policy data for 183 states and independent territories from 1990–2014. Candidate complements V-Dem; no acquisition or publication is claimed.",
+      "checked_at": "2026-10-24",
+      "verification_level": "official_project_and_download_pages_checked_only",
+      "downloaded": false,
+      "artifact_sha256": null,
       "terms_snapshot_sha256": null,
       "release_ready": false
     },
@@ -621,6 +781,21 @@
           "release_ids": []
         },
         {
+          "source_id": "world_bank_pip",
+          "role": "Published source-native national survey poverty, poverty gap, Gini, and decile welfare shares; income and consumption remain distinct",
+          "release_ids": ["world-bank-pip-20260922-2021-surveys"]
+        },
+        {
+          "source_id": "penn_world_table",
+          "role": "Published source-native GDP, employment, hours, TFP, capital-stock, and labor-share inputs",
+          "release_ids": ["penn-world-table-11.0"]
+        },
+        {
+          "source_id": "ilostat_direct_labor",
+          "role": "Direct participation, employment, hours, and earnings series after table and terms selection",
+          "release_ids": []
+        },
+        {
           "source_id": "clio_infra",
           "role": "Sparse historical estimates on modern 2012 country boundaries; candidate only",
           "release_ids": []
@@ -764,14 +939,32 @@
         },
         {
           "source_id": "vdem",
-          "role": "Modern and historical institutional variables candidate",
-          "release_ids": []
+          "role": "Published legal suffrage and legislature-chamber variables",
+          "release_ids": ["vdem-country-year-v16"]
         },
         {
           "source_id": "clio_infra",
           "role": "Executive-recruitment and other historical institutional candidates",
           "release_ids": []
+        },
+        {
+          "source_id": "comparative_constitutions_project",
+          "role": "Constitutional event and written-provision candidates",
+          "release_ids": []
         }
+      ]
+    },
+    {
+      "id": "religion_and_policy",
+      "label": "Religion and state policy over time",
+      "description": "Religious affiliation, ancient normative practices, and government policy are different constructs; Atlas does not merge their categories by name.",
+      "sources": [
+        {"source_id": "vdem", "role": "Published religion-freedom and organization-repression categories", "release_ids": ["vdem-country-year-v16"]},
+        {"source_id": "pew_global_religious_composition", "role": "2010/2020 affiliation composition candidate", "release_ids": []},
+        {"source_id": "world_religion_project", "role": "1945–2010 adherence candidate", "release_ids": []},
+        {"source_id": "arda_rcs_dem", "role": "Longer-run denomination estimates candidate", "release_ids": []},
+        {"source_id": "religion_and_state_project", "role": "1990–2014 state religion policy candidate", "release_ids": []},
+        {"source_id": "seshat", "role": "Ancient polity religion-practice codes, blocked by license conflict", "release_ids": []}
       ]
     },
     {

@@ -30,8 +30,8 @@ computed independently from the active release manifest.
 | --- | --- | --- | --- |
 | Population | U.S. Census world estimates; World Bank territories; UN WPP estimates/projections | HYDE sample only | Keep world, territorial, projection, and grid products separate. Never allocate a world total without a mass-conserving model. |
 | Borders and names | Cliopatria context; Natural Earth display geometry | CShapes; WHG documented but token/dataset selection blocked | Political context, statistical geography, and display geometry are separate. Source hierarchy can annotate overlaps; it does not authorize geometry union. |
-| Economics | World Bank GDP per capita on the map; thirteen more WDI tables and Maddison 2023 GDP per capita in r9 | Clio GDP workbooks; WID distribution series not pinned | Do not splice constant-dollar, PPP, or differently based historical series. Show source-native series side by side until an explicit rebase contract exists. |
-| Institutions | None yet | V-Dem v16; Seshat Equinox v1; Clio XRCOMP | Start with V-Dem legal suffrage share as a descriptive de-jure fact. Do not create an Atlas democracy score or merge distinct institutional concepts. |
+| Economics | World Bank GDP per capita on the map; thirteen more WDI tables, Maddison GDP per capita, five PIP survey measures, and seven PWT 11 measures in r11 | Clio GDP workbooks; WID distribution series not pinned | Do not splice constant-dollar, PPP, income/consumption survey, or differently based historical series. Show source-native tables side by side until an explicit reconciliation contract exists. |
+| Institutions and religion policy | V-Dem v16: four source-native legal, legislative, and religion-policy tables in r12; WRP v1.1 national table, Seshat Equinox canonical slice, and CCP v6/v5 archives staged/profiled locally, not published | Clio XRCOMP; Pew; ARDA/RAS | Keep legal structure, expert-coded state policy, religion affiliation, and ancient polity traits separate. No Atlas democracy or religion score. Review public display/download terms and taxonomies before publication. |
 | Conflict | None yet | UCDP GED 26.1; UCDP/PRIO ACD 26.1; Clio internal/international conflict | Events, conflict-years, parties, and binary historical context are distinct supports. Do not infer population exposure. |
 
 ## Findings that block naive merges
@@ -42,8 +42,9 @@ computed independently from the active release manifest.
 - Seshat Equinox contains polity/NGA/time data and source-native sentinel and
   fractional codes. `-999` cannot be published as a measurement.
 - V-Dem `v2x_suffr` is a legal eligibility share, not participation in practice
-  and not an overall judgement of government. Its v16 RData support still needs
-  a bounded parser and entity audit.
+  and not an overall judgement of government. The bounded v16 adapter now
+  preserves source IDs and exact years, but no historical-polity or population
+  crosswalk is approved. See `INSTITUTIONAL_RELIGION_EVIDENCE.md`.
 - UCDP GED has 417,968 event rows for 1989–2025. The audit found 5,075 rows where
   `low`, `best`, and `high` are not monotonic, so any fatality measure needs an
   explicit source-field decision. The 2,816-row UCDP/PRIO conflict-year product
@@ -62,3 +63,6 @@ Release r9 extends this with fourteen independently pinned source-native tables;
 see `ECONOMIC_EVIDENCE.md`. Maddison 2023 is now acquired and published in a
 table, not spatialized. The new WDI source update is 2026-10-08 and remains
 separate from the July 2026 map series. Clio and WID publication gates remain.
+Release r11 additionally publishes five PIP national-survey tables and seven
+PWT 11 source-variable tables. See `ECONOMIC_INDICATORS.md` for exact coverage
+and the remaining wealth, deep-history, and redistribution gaps.

@@ -151,6 +151,7 @@ export interface EconomicDatasetReference {
   label: string;
   unit: string;
   support_type: string;
+  observation_grain?: 'survey_record';
   temporal_policy: 'exact_source_year_only';
   available_years: number[];
   source_row_count: number;
@@ -166,15 +167,17 @@ export interface EconomicEvidenceDataset {
   source_artifact_id: string;
   source_artifact_sha256: string;
   source_sheet: string;
+  source_column?: string;
   indicator: string;
   label: string;
   unit: string;
   support_type: string;
+  observation_grain?: 'survey_record';
   temporal_policy: 'exact_source_year_only';
   transformation: { id: string; version: string; policy: string };
   source_note: string;
   source_citation_url: string;
-  source_supports: Array<{ code: string; name: string; region: string | null }>;
+  source_supports: Array<{ code: string; name: string; region: string | null; country_code?: string; welfare_type?: string; reporting_year?: number }>;
   source_references: Array<{ source_sheet: string; source_row: number; countrycode: string | null; period_as_written: string | null; citation_as_written: string }>;
   global_source_note?: string;
   source_row_count: number;
@@ -184,13 +187,92 @@ export interface EconomicEvidenceDataset {
   observations: Array<[code: string, year: number, value: number, source_row: number, companion_population_thousands?: number | null]>;
 }
 
+export interface InstitutionalDatasetReference {
+  id: string;
+  domain: 'government_institutions' | 'religion_policy';
+  source_release_id: string;
+  source_artifact_id: string;
+  source_artifact_sha256: string;
+  source_variable: string;
+  label: string;
+  unit: string;
+  kind: 'fraction' | 'ordinal';
+  available_years: number[];
+  source_row_count: number;
+  known_value_count: number;
+  data_file: string;
+  download_file: string;
+}
+
+export interface InstitutionalEvidenceDataset extends Omit<InstitutionalDatasetReference, 'data_file' | 'download_file'> {
+  schema_version: '0.1.0';
+  category_labels: Record<string, string> | null;
+  codebook_page: number;
+  meaning: string;
+  support_type: string;
+  temporal_policy: 'exact_source_year_only';
+  transformation: { id: 'vdem-source-native-institutions-v1'; version: '1.0.0'; policy: string };
+  source_citation_url: string;
+  source_supports: Array<{ code: string; source_text_id: string; name: string }>;
+  source_rows: Array<[support_id: string, year: number, source_row: number]>;
+  known_by_year: Record<string, number>;
+  observations: Array<[support_id: string, year: number, value: number, source_row: number]>;
+}
+
+export function validateInstitutionalEvidenceDataset(
+  dataset: InstitutionalEvidenceDataset,
+  reference: InstitutionalDatasetReference,
+): void {
+  if (dataset.schema_version !== '0.1.0' || dataset.id !== reference.id
+    || dataset.domain !== reference.domain || dataset.source_release_id !== reference.source_release_id
+    || dataset.source_artifact_id !== reference.source_artifact_id
+    || dataset.source_artifact_sha256 !== reference.source_artifact_sha256
+    || dataset.source_variable !== reference.source_variable || dataset.kind !== reference.kind
+    || dataset.source_row_count !== reference.source_row_count
+    || dataset.observations.length !== reference.known_value_count
+    || JSON.stringify(dataset.available_years) !== JSON.stringify(reference.available_years)
+    || dataset.temporal_policy !== 'exact_source_year_only'
+    || dataset.transformation.id !== 'vdem-source-native-institutions-v1'
+    || dataset.transformation.version !== '1.0.0') {
+    throw new Error(`Institutional dataset ${reference.id} does not match its release reference`);
+  }
+  const supports = new Set(dataset.source_supports.map((item) => item.code));
+  if (supports.size !== dataset.source_supports.length || dataset.source_rows.length !== reference.source_row_count) {
+    throw new Error(`Invalid institutional supports or source rows in ${reference.id}`);
+  }
+  const sourceRows = new Map<string, number>();
+  for (const [code, year, sourceRow] of dataset.source_rows) {
+    const key = `${code}:${year}`;
+    if (!supports.has(code) || sourceRows.has(key) || !Number.isInteger(year) || !Number.isInteger(sourceRow) || sourceRow < 1) {
+      throw new Error(`Invalid institutional source row in ${reference.id}`);
+    }
+    sourceRows.set(key, sourceRow);
+  }
+  const seen = new Set<string>();
+  const counts = new Map<number, number>();
+  for (const [code, year, value, sourceRow] of dataset.observations) {
+    const key = `${code}:${year}`;
+    if (sourceRows.get(key) !== sourceRow || seen.has(key) || !Number.isInteger(year) || !Number.isInteger(sourceRow)
+      || sourceRow < 1 || !Number.isFinite(value)
+      || (reference.kind === 'fraction' && (value < 0 || value > 1))
+      || (reference.kind === 'ordinal' && (!Number.isInteger(value) || !(String(value) in (dataset.category_labels ?? {}))))) {
+      throw new Error(`Invalid institutional observation in ${reference.id}`);
+    }
+    seen.add(key);
+    counts.set(year, (counts.get(year) ?? 0) + 1);
+  }
+  if (dataset.available_years.some((year) => counts.get(year) !== dataset.known_by_year[String(year)])) {
+    throw new Error(`Institutional yearly coverage differs in ${reference.id}`);
+  }
+}
+
 export function validateEconomicEvidenceDataset(dataset: EconomicEvidenceDataset, reference: EconomicDatasetReference): void {
   if (dataset.schema_version !== '0.1.0' || dataset.id !== reference.id
     || dataset.source_release_id !== reference.source_release_id
     || dataset.source_artifact_id !== reference.source_artifact_id
     || dataset.source_artifact_sha256 !== reference.source_artifact_sha256
     || dataset.temporal_policy !== 'exact_source_year_only'
-    || dataset.transformation.id !== 'economic-source-native-table-v1'
+    || !['economic-source-native-table-v1', 'pip-source-native-survey-table-v1', 'pwt-source-native-table-v1'].includes(dataset.transformation.id)
     || dataset.transformation.version !== '1.0.0'
     || dataset.observations.length !== reference.known_value_count
     || dataset.source_row_count !== reference.source_row_count
@@ -198,6 +280,9 @@ export function validateEconomicEvidenceDataset(dataset: EconomicEvidenceDataset
     throw new Error(`Economic dataset ${reference.id} does not match its release reference`);
   }
   const supports = new Set(dataset.source_supports.map((support) => support.code));
+  if (supports.size !== dataset.source_supports.length || dataset.observation_grain !== reference.observation_grain) {
+    throw new Error(`Economic dataset ${reference.id} has invalid supports or grain`);
+  }
   const seen = new Set<string>();
   const counts = new Map<number, number>();
   for (const [code, year, value, row] of dataset.observations) {
@@ -308,6 +393,11 @@ export interface AtlasReleaseManifest {
     selection_policy: 'exact_source_year_only_no_geographic_or_release_splice';
     interpretation: string;
     datasets: EconomicDatasetReference[];
+  };
+  institutional_evidence?: {
+    selection_policy: 'exact_source_year_only_no_geographic_or_release_splice';
+    interpretation: string;
+    datasets: InstitutionalDatasetReference[];
   };
   reconciliation: {
     decision_set_id: string;
@@ -744,6 +834,24 @@ export function validateAtlasReleaseManifest(manifest: AtlasReleaseManifest): vo
         || dataset.available_years.length === 0
         || dataset.available_years.some((year, index) => index > 0 && year <= dataset.available_years[index - 1])) {
         throw new Error(`Invalid economic dataset reference ${dataset.id}`);
+      }
+    }
+  }
+
+  if (manifest.institutional_evidence) {
+    const evidence = manifest.institutional_evidence;
+    if (evidence.selection_policy !== 'exact_source_year_only_no_geographic_or_release_splice') {
+      throw new Error('Unknown institutional evidence selection policy');
+    }
+    uniqueIds('institutional dataset', evidence.datasets.map((dataset) => dataset.id));
+    for (const dataset of evidence.datasets) {
+      if (!sourceReleaseIds.has(dataset.source_release_id)
+        || !manifest.artifacts[dataset.data_file] || !manifest.artifacts[dataset.download_file]
+        || !/^[a-f0-9]{64}$/.test(dataset.source_artifact_sha256)
+        || dataset.known_value_count > dataset.source_row_count
+        || dataset.available_years.length === 0
+        || dataset.available_years.some((year, index) => index > 0 && year <= dataset.available_years[index - 1])) {
+        throw new Error(`Invalid institutional dataset reference ${dataset.id}`);
       }
     }
   }

@@ -1,5 +1,17 @@
 # Economic evidence release r9
 
+Release r11 further adds seven separate Penn World Table 11.0 output,
+employment, hours, TFP, capital-stock, and labor-share tables from the
+publisher-linked workbook. See `ECONOMIC_INDICATORS.md` for coverage and
+reproduction. No Atlas labor-productivity ratio has been derived.
+
+Release r10 extends this unchanged r9 base with five World Bank PIP
+national-survey tables. See `ECONOMIC_INDICATORS.md` for the core indicator
+selection, exact new coverage, reproducible commands, and outstanding gates.
+The tables retain duplicate national surveys in a country-year rather than
+silently selecting one. They do not form a uniform income series: PIP welfare
+may be income or consumption, displayed per survey.
+
 Release `atlas-mvp-2026-10-24-r9` adds a source-native economics explorer to the
 r8 atlas. This is a bounded, genuinely acquired first set of major economic
 indicator families, **not** a claim to every economic variable or all humanity

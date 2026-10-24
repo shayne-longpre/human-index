@@ -340,6 +340,21 @@ def validate_release_manifest(
             if item["temporal_policy"] != "exact_source_year_only" or item["known_value_count"] > item["source_row_count"]:
                 raise ValidationError(f"Invalid coverage for economic dataset {item['id']}")
 
+    institutions = manifest.get("institutional_evidence")
+    if institutions is not None:
+        if institutions["selection_policy"] != "exact_source_year_only_no_geographic_or_release_splice":
+            raise ValidationError("Unknown institutional-evidence selection policy")
+        unique("institutional dataset", [item["id"] for item in institutions["datasets"]])
+        for item in institutions["datasets"]:
+            if item["source_release_id"] not in source_ids or item["source_artifact_id"] not in input_artifact_ids:
+                raise ValidationError(f"Unknown source for institutional dataset {item['id']}")
+            if not {item["data_file"], item["download_file"]}.issubset(artifacts):
+                raise ValidationError(f"Missing artifact for institutional dataset {item['id']}")
+            if not item["available_years"] or item["available_years"] != sorted(set(item["available_years"])):
+                raise ValidationError(f"Invalid available years for institutional dataset {item['id']}")
+            if item["known_value_count"] > item["source_row_count"]:
+                raise ValidationError(f"Invalid coverage for institutional dataset {item['id']}")
+
     for transformation in manifest["transformations"]:
         if not set(transformation["input_artifact_ids"]).issubset(input_artifact_ids):
             raise ValidationError(

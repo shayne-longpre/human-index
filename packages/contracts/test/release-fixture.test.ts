@@ -24,7 +24,7 @@ import {
   type LifeExpectancyDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-24-r9');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-24-r12');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -592,7 +592,10 @@ describe('genuine-data MVP release', () => {
     expect(verticalProfiles.candidate_lock).toMatchObject({
       artifact_count: 20,
       blocked_source_count: 3,
+      sha256: createHash('sha256').update(readFileSync(resolve('data/registry/candidate-source-lock.json'))).digest('hex'),
     });
+    expect(candidateSourceLock.artifacts.find((artifact) => artifact.id === 'seshat_equinox_v1_archive')?.publication_status)
+      .toBe('candidate_license_conflict_review_only');
     expect(verticalProfiles.profiles.clio_infra.workbooks.find((workbook) => workbook.filename === 'TotalPopulation_Compact.xlsx')).toMatchObject({
       rows: 3_221,
       country_codes: 190,

@@ -1,4 +1,4 @@
-import type { HistoricalPopulationObservation } from '@atlas/contracts';
+import { resolveEvidence, type EvidenceClaim, type HistoricalPopulationObservation } from '@atlas/contracts';
 import type { HistoricalFeatureCollection } from '../data';
 import { formatInteger } from '../format';
 import type { HistoricalCityPoint } from './MapView';
@@ -7,6 +7,7 @@ interface HistoricalPopulationTableProps {
   observation: HistoricalPopulationObservation | null;
   historicalSnapshot: HistoricalFeatureCollection | null;
   cityPoints: HistoricalCityPoint[];
+  populationArtifactSha256: string;
 }
 
 function estimateValue(estimate: { lower: number; upper?: number }): string {
@@ -25,7 +26,19 @@ export function HistoricalPopulationTable({
   observation,
   historicalSnapshot,
   cityPoints,
+  populationArtifactSha256,
 }: HistoricalPopulationTableProps) {
+  const rangeClaim: EvidenceClaim[] = observation?.status === 'source_disagreement_range' && observation.upper !== null ? [{
+    id: `census-world-population-${observation.year}`,
+    metric_id: 'population_total',
+    scope: { support_system: 'world', support_id: 'world', start_year: observation.year,
+      end_year_exclusive: observation.year + 1, temporal_basis: 'exact_source_year' },
+    value: { kind: 'numeric_range', lower: observation.lower, upper: observation.upper,
+      unit: 'people', semantics: 'source_disagreement' },
+    provenance: { kind: 'source_reported', source_release_id: 'us-census-historical-world-population-2026-09-20',
+      original_record_locator: observation.original_record_locator, record_artifact_sha256: populationArtifactSha256 },
+  }] : [];
+  const range = observation ? resolveEvidence(rangeClaim, 'population_total', 'world', 'world', observation.year) : null;
   return (
     <section className="table-section" aria-labelledby="historical-evidence-title">
       <div className="table-heading">
@@ -34,6 +47,10 @@ export function HistoricalPopulationTable({
           <h2 id="historical-evidence-title">Historical evidence table</h2>
         </div>
       </div>
+      {range?.status === 'single' ? <p className="scope-note">
+        Source disagreement envelope: {formatInteger(observation!.lower)}–{formatInteger(observation!.upper!)} people.
+        This spans published estimates; it is not a statistical confidence interval or a value for intervening years.
+      </p> : null}
 
       <div className="table-scroll historical-table-scroll" role="region" aria-label="Scrollable historical population evidence" tabIndex={0}>
         <table>

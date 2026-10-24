@@ -1,0 +1,22 @@
+{
+  "files": {
+    "codebook": {
+      "bytes": 863250,
+      "path": "data/raw/world_religion_project/v1.1/wrp-codebook-bibliography.pdf",
+      "sha256": "c159d918c05ac0cb13aaf242fb1a9d444849871df48a3724e37cc3861fa0d12e",
+      "url": "https://correlatesofwar.org/wp-content/uploads/wrp-codebook-bibliography.pdf"
+    },
+    "national": {
+      "bytes": 870713,
+      "path": "data/raw/world_religion_project/v1.1/WRP_national.csv",
+      "sha256": "ba1f3b73fdccbee9f3591d20326d14d86169eb6c40d4b196cf78b6c1678eba60",
+      "url": "https://correlatesofwar.org/wp-content/uploads/WRP_national.csv"
+    }
+  },
+  "publication_status": "review_only_republication_terms_unresolved",
+  "release": "World Religion Data v1.1",
+  "retrieved_on": "2026-10-24",
+  "schema_version": "0.1.0",
+  "source_id": "world_religion_project",
+  "source_page": "https://correlatesofwar.org/data-sets/world-religion-data/"
+}

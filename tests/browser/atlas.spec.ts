@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import axe from 'axe-core';
 
-const releaseId = 'atlas-mvp-2026-10-24-r9';
+const releaseId = 'atlas-mvp-2026-10-24-r12';
 
 async function waitForRelease(page: Page): Promise<void> {
   await expect(page.getByText(`Atlas release ${releaseId}`, { exact: true })).toBeVisible();
@@ -152,6 +152,62 @@ test('economic source tables expose exact dates, missing coverage, and original 
   await page.getByLabel('Exact source year').selectOption('2020');
   await expect(page.getByText('70 / 217')).toBeVisible();
   await expect(page.getByText('percent of population · 2020 CE')).toBeVisible();
+});
+
+test('PIP survey tables retain source records and disclose welfare basis', async ({ page }) => {
+  await page.goto(`/?page=economics&release=${releaseId}&indicator=pip-gini-2021-ppp&year=2020`);
+  await expect(page.getByRole('heading', { name: 'National survey records at 2020 CE' })).toBeVisible();
+  await expect(page.locator('.economics-context')).toContainText('72');
+  await page.locator('.economics-table-scroll tbody button').first().click();
+  await expect(page.getByText(/Welfare basis: (income|consumption)/)).toBeVisible();
+  await expect(page.getByText(/PIP API CSV row \d+/)).toBeVisible();
+  await expectNoSeriousAccessibilityViolations(page);
+});
+
+test('PWT tables show source units and original workbook cells', async ({ page }) => {
+  await page.goto(`/?page=economics&release=${releaseId}&indicator=pwt11-ctfp&year=2020`);
+  await expect(page.getByRole('heading', { name: 'Total factor productivity level, PWT 11' })).toBeVisible();
+  await page.getByRole('button', { name: /United States USA/ }).click();
+  await expect(page.getByText(/Original locator: Data!Q\d+/)).toBeVisible();
+  await expectNoSeriousAccessibilityViolations(page);
+});
+
+test('institutional tables keep zero, unknown, and religion policy distinct from affiliation', async ({ page }) => {
+  await page.goto(`/?page=institutions&release=${releaseId}&indicator=vdem16-v2x_suffr&year=1789`);
+  await expect(page.getByRole('heading', { name: 'What institutions did—and what we can document.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Legal suffrage among statutory adults' })).toBeVisible();
+  await expect(page.locator('.economics-table-scroll tbody')).toContainText('0% of statutory adults');
+  await expect(page.locator('.economics-table-scroll tbody')).toContainText('Unknown / not reported');
+  await page.locator('.economics-table-scroll tbody button').first().click();
+  await expect(page.getByText(/vdem.RData::vdem\[\d+\]::v2x_suffr/)).toBeVisible();
+  await page.getByLabel('Source variable').selectOption('vdem16-v2clrelig_ord');
+  await expect(page.getByText(/not a share of people or religious affiliation/)).toBeVisible();
+  await expect(page.locator('.economics-table-scroll tbody')).toContainText(/respected/);
+  await expect(page).toHaveURL(/indicator=vdem16-v2clrelig_ord&year=1789/);
+  await expectNoSeriousAccessibilityViolations(page);
+});
+
+test('local research keeps religion, written law, and sampled historical claims separate', async ({ page }) => {
+  const staged = await Promise.all(['wrp', 'ccp', 'seshat', 'candidates'].map(async (name) =>
+    (await page.request.get(`/local-research/${name}.json`)).ok()));
+  await page.goto(`/?page=research&release=${releaseId}`);
+  await expect(page.getByRole('heading', { name: 'Three sources. Different questions.' })).toBeVisible();
+  if (!staged.every(Boolean)) {
+    await expect(page.getByRole('alert')).toContainText('Run the local stage commands');
+    return;
+  }
+  await expect(page.getByText(/1,960 WRP records have at least one CCP/)).toBeVisible();
+  await page.getByLabel('Find source place, code, or variable').fill('USA');
+  await page.getByLabel('Exact source year').selectOption('2000');
+  await page.locator('.economics-table-scroll tbody button').first().click();
+  await expect(page.getByRole('heading', { name: 'Same-code, same-year CCP candidates' })).toBeVisible();
+  await expect(page.getByText(/territorial identity is unreviewed/)).toBeVisible();
+  await page.getByRole('button', { name: 'Comparative Constitutions' }).click();
+  await expect(page.getByRole('heading', { name: 'Constitution characteristics' })).toBeVisible();
+  await page.getByRole('button', { name: 'Seshat Equinox' }).click();
+  await page.getByLabel('Find source place, code, or variable').fill('Impeachment');
+  await expect(page.locator('.economics-table-scroll tbody')).toContainText('Impeachment');
+  await expectNoSeriousAccessibilityViolations(page);
 });
 
 test('fails closed when a pinned release is unavailable', async ({ page }) => {

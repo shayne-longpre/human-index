@@ -29,6 +29,14 @@ unknown source rows and original record locators. This is not an Atlas metric
 aggregation contract or a historical-polity crosswalk. See
 `ECONOMIC_EVIDENCE.md`.
 
+Release r10 adds PIP national **survey-record** supports. Duplicate surveys in
+one country-year remain separate records; income and consumption welfare are
+not silently merged. The cross-domain bounded-evidence contract is documented
+in `INFERRED_EVIDENCE.md`. It represents source ranges and reviewed inferred
+possibility sets without turning missing support into a guessed value.
+Release r11 adds PWT 11.0 country/year source values with workbook cell
+locators and the original quality flags in the downloadable CSV.
+
 Do not start with a graph database. These are conceptual distinctions that work in typed records and Parquet.
 
 ## 2. Metric contract
@@ -130,6 +138,21 @@ source  1 -> internal 1  (1 CE)
 Confirm each adapter's convention before applying this conversion. Quarantine a source year 0 until its meaning is established. Convert inclusive source ranges to internal half-open intervals only after year conversion. The inclusive range 1 BCE through 1 CE becomes [0, 2), covering two calendar years.
 
 A reference year does not imply a valid multiyear interval. Store uncertain event dates separately from the duration of an institution or the reference period of a statistic. Keep requested date, effective population date, indicator date, and boundary date in the published view manifest.
+
+Institutional and religion-policy observations now use source-native V-Dem
+country IDs and exact years. A legal suffrage fraction, a legislature category,
+and two expert-derived ordinal religion-policy categories are separate measure
+contracts; an ordinal 0 is not missing and is not a percent of people. The
+download retains nulls and original record locators. The tables do not inherit
+Cliopatria display geometry, World Bank populations, or another source's
+religion taxonomy. See `INSTITUTIONAL_RELIGION_EVIDENCE.md`.
+
+Local research additionally records WRP↔CCP same-COW-code/exact-year candidates
+as unresolved support decisions, not observations or geography crosswalks.
+CCP written-provision categories, WRP estimated affiliation, V-Dem expert
+coding, and Seshat sampled polity claims remain independent measurement
+families. Their joint presence in an inspector does not create a combined
+rights, religion, or institutional score.
 
 ## 5. Exclusive population accounting
 

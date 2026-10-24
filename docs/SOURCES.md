@@ -1,9 +1,76 @@
 # Source dossier
 
-**Checked: October 6, 2026.** This dossier mixes implemented release inputs
+**Checked: October 24, 2026.** This dossier mixes implemented release inputs
 with documentation-level candidates. Each section states its acquisition status.
 “Checked license” means the cited publisher page states that license;
 implementation must save the terms applying to the exact acquired artifact.
+
+For the 2026-10-24 economic source audit, including newly published PIP
+national-survey evidence and PWT/WID gates, see `ECONOMIC_INDICATORS.md`.
+
+## S22 — World Bank Poverty and Inequality Platform
+
+- Pinned version: `20260922_2021_01_02_PROD`, 2021 PPPs, $3/day line,
+  `fill_gaps=false`; official [method/citation page](https://pip.worldbank.org/about)
+  and [dataset catalog/license](https://datacatalog.worldbank.org/search/dataset/0038020/poverty-and-equity-database-poverty-and-inequality-platform).
+- Acquired official API CSV: 2,588 survey rows; 2,479 national rows in 171
+  countries, 1963–2025 for some supports. Release r10 publishes headcount,
+  poverty gap, Gini, and bottom/top decile shares as five separate tables.
+- National and subnational rows, duplicate country-years, income versus
+  consumption welfare, original locators, and missingness remain explicit.
+  A source-wide span does not establish annual coverage for all countries.
+
+## S23 — Penn World Table 11.0
+
+- [Official release, methods, citation and CC BY 4.0 license](https://www.rug.nl/ggdc/productivity/pwt/?lang=en).
+- Acquired publisher-linked workbook `pwt110.xlsx`, SHA-256
+  `7b337e94f39dfe304bc459e433f8ce0624496c812707ae0c924888f5142b3ab3`.
+  The endpoint's HEAD response was 403 but the full GET succeeded; the file
+  was validated as XLSX and its Data/Legend sheets were profiled.
+- Release r11 publishes seven source-native output, employment, hours, TFP,
+  capital-stock, and labor-share variables over 185 source country codes and
+  13,690 rows (1950–2023, variable-specific coverage). Workbook cell locators
+  and quality flags survive in downloads. TFP is not output per hour. No
+  country value is assigned to an ancient polity.
+
+## S24 — ILOSTAT direct labor statistics
+
+- The [official data portal](https://ilostat.ilo.org/data/) lists labor-force
+  participation, employment, unemployment, hours, and earnings series and a
+  bulk-download facility. Source/model, frequency, sex/age dimensions, and
+  geography vary by exact table.
+- Candidate only: no exact table release, artifact, and asset-level reuse terms
+  are pinned. The WDI modeled ILO unemployment and PWT labor inputs are
+  published separately; they do not stand in for direct ILOSTAT survey data.
+
+## S25 — Pew Global Religious Composition
+
+- [Official 2010/2020 dataset](https://www.pewresearch.org/dataset/dataset-of-global-religious-composition-estimates-for-2010-and-2020/) estimates seven affiliation groups in 201 countries and territories. Its February 2026 update added diversity fields; Atlas will not treat these as an Atlas ranking.
+- The downloadable workbook requires a Pew account and terms agreement. No artifact was acquired and its republication scope has not been approved. Preserve rounded small counts rather than fabricating exact values.
+
+## S26 — World Religion Project v1.1
+
+- [Official COW-hosted release and codebook](https://correlatesofwar.org/data-sets/world-religion-data/), 1945–2010 at five-year dates.
+- National CSV and codebook acquired on 2026-10-24, pinned in `data/registry/religion-source-lock.json`. All 84 original columns and 1,995 state-year rows are typed and staged with source row locators in an ignored, local-only derived artifact. This is a source-created reconstruction with imputation, not 1,995 direct censuses.
+- The source asks for versioned citation but does not specify redistributable dataset terms. No values are in the public app release pending that review. The presentation and download policy is a tracked question in `INSTITUTIONAL_RELIGION_EVIDENCE.md`.
+- The local development research view exposes the source-native rows beside exact-code/year CCP **candidates** for review; it does not assert matching territory or combine affiliation with constitutional law.
+
+## S27 — ARDA RCS-Dem 2.0
+
+- [Official countries-only archive and codebook](https://www.thearda.com/data-archive?fid=RCSDEM2) describes 42,747 state-years of denomination estimates, mostly 1900–2015 and sometimes earlier. Its methods include interpolation and extrapolation and some geographic overlaps.
+- The download agreement has not been accepted by the user, and republication terms are unresolved. No artifact is acquired or published.
+
+## S28 — Religion and State Project RAS3
+
+- [Official project and downloads](https://ras.thearda.com/ras-downloads) describe 183 states and independent territories, 1990–2014, for government-religion policy.
+- Candidate only. Review its download terms and noncomposite source fields; do not splice its policy index into V-Dem or religious-affiliation tables.
+
+## S29 — Comparative Constitutions Project
+
+- [Official downloads](https://comparativeconstitutionsproject.org/download-data/) list Constitutional Chronology v6.0 through 2025 and Characteristics v5.0 for constitutional features in over 200 countries.
+- Both public ZIP archives are now acquired in ignored `data/raw/ccp` and pinned in `data/registry/ccp-source-lock.json`. The streaming local profile records 20,638 Chronology rows (1789–2025, 6 columns) and 21,735 Characteristics rows (1789–2023, 2,030 columns). Characteristics has 4,054 rows with its source `coding_imputed` flag set. Both source archives retain their embedded codebooks. The v6 ZIP's manifest still says “Version 5”; use the archive name, data member, and codebook rather than that stale line.
+- Neither coded characteristics nor constitution texts are in the web release. The source page distinguishes copyrighted constitutional texts, and the dataset's republication terms remain unverified. A written provision is not evidence that it was enforced.
+- A local-only staged slice preserves all Characteristics and Chronology rows with selected coded religion-policy columns and source locators. The exact-year COW-code candidate decision set and development-only inspection page are documented in `INSTITUTIONAL_RELIGION_EVIDENCE.md`; no CCP value is in the public build.
 
 ## S1 — Cliopatria: historical political geometry
 
@@ -101,21 +168,21 @@ The workbook `Notes` labels GDP per capita as real 2011 dollars and its companio
 
 ## S5 — Seshat: historical institutional and technological observations
 
-- Public-data terms: **CC BY-SA 4.0**; current website downloads require a free account and explicit agreement. Private work-in-progress entries must not be redistributed.
+- The acquired Equinox v1 package has conflicting license notices: Zenodo metadata says **CC BY**, its embedded README says **CC BY-NC-SA**, and its embedded LICENSE is **CC0**. Publication is blocked pending source clarification. Current website downloads require a free account and explicit agreement. Private work-in-progress entries must not be redistributed.
 - [Terms](https://seshat-db.com/terms/current/), [social-complexity variable inventory](https://seshat-db.com/sc/scvars/), [downloads](https://seshat-db.com/downloads_page/), [codebook](https://seshat-db.com/codebook).
 - Start with released observations such as written records, formal legal codes, roads, irrigation, or markets; first verify which fields actually exist and are populated in the chosen release.
-- A stable Equinox package is referenced by the site's terms at [DOI 10.5281/zenodo.6642229](https://doi.org/10.5281/zenodo.6642229), but that archive was not successfully inspected here. Its exact artifact/terms require checking.
+- Equinox v1 is acquired and profiled. A local-only ignored stage now retains 11,202 religion and institution rows from `Equinox2020_CanonDat`, with all twelve source cells, original workbook row locators, and the 163-row variable inventory. It does not decode present/absent/inferred/unknown into yearly values: many source rows lack exact dates. `TSDat123` includes 100-year fillers, numeric inference encodings, and `-999` sentinels. Neither can be mapped to historical polygons or population weights without a reviewed adapter. See `INSTITUTIONAL_RELIGION_EVIDENCE.md`.
 
 The public variable interface distinguishes present, absent, uncertain/unknown, and uncoded states. Preserve these. Polity coverage is a historical research sample, not a ready-made census of every human society. Use reviewed case studies before attempting global population summaries. Writing in a polity does not measure literacy among its residents; a road's existence does not measure access to transport.
 
 ## S6 — V-Dem / Historical V-Dem: modern institutional evidence
 
-- Candidate: **v16, March 2026**, **CC BY-SA 4.0**; official ZIPs include codebooks, cautions, changes, and citation information.
+- Published bounded v16 source-native tables in r12: legal suffrage share, legislature chambers, freedom-of-religion ordinal category, and religious-organization repression ordinal category. **CC BY-SA 4.0**.
 - [Dataset and version cautions](https://www.v-dem.net/data/the-v-dem-dataset/), [Historical V-Dem](https://www.v-dem.net/about/historical-v-dem/).
 - Historical V-Dem extends selected indicators to 1789 for roughly 80 polities, not every variable everywhere.
 - Pin one complete release. Its maintainers warn against comparisons made by concatenating absolute values from different releases.
 
-For Atlas, first evaluate concrete institutional/legal variables with explicit units and scope, such as documented franchise eligibility or legislative arrangements. Keep legal entitlement distinct from practice. Identify and link source-authored composite indexes in the source explorer rather than presenting an Atlas ranking of political systems. Do not convert a latent expert measure into a literal percentage of people enjoying a right.
+The pinned RData has 28,092 country-ID/year rows over 202 coding units (1789–2025). These four variables have 111,556 known source values in total; their exact-year support varies by variable and coding unit. They appear in a separate evidence table and are not mapped to historical borders or populations. Keep legal entitlement distinct from practice. Identify and link source-authored composite indexes rather than presenting an Atlas ranking of political systems. Do not convert a latent expert measure into a literal percentage of people enjoying a right. See `INSTITUTIONAL_RELIGION_EVIDENCE.md`.
 
 ## S7 — Clio Infra: historical social and economic series
 

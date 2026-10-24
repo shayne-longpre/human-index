@@ -1,6 +1,8 @@
 import { formatAstronomicalYear, type AtlasReleaseManifest } from '@atlas/contracts';
 import sourceRegistry from '../../../../data/registry/sources.json';
 import candidateSourceLock from '../../../../data/registry/candidate-source-lock.json';
+import religionSourceLock from '../../../../data/registry/religion-source-lock.json';
+import ccpSourceLock from '../../../../data/registry/ccp-source-lock.json';
 import { releaseRoot } from '../data';
 
 interface RegistrySource {
@@ -53,6 +55,9 @@ function humanize(value: string): string {
 
 function releaseRole(id: string): string {
   if (id === 'world-bank-wdi-economics-2026-10-08') return 'Thirteen source-native economic indicator tables';
+  if (id === 'world-bank-pip-20260922-2021-surveys') return 'Five source-native poverty and survey-distribution tables';
+  if (id === 'penn-world-table-11.0') return 'Seven source-native output, labor, productivity, and capital tables';
+  if (id === 'vdem-country-year-v16') return 'Four source-native legal, legislative, and religion-policy tables';
   if (id.startsWith('world-bank-wdi-economics')) return 'Published territorial GDP-per-capita context';
   if (id.startsWith('maddison-project')) return 'Historical source-native GDP per capita table';
   if (id.startsWith('world-bank')) return 'Modern population, electricity, and life-expectancy observations';
@@ -78,7 +83,9 @@ function SourceStatus({ complete, label }: { complete: boolean; label: string })
 }
 
 export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
-  const economicArtifactCount = manifest.transformations.find((item) => item.id === 'economic-source-native-table-v1')?.input_artifact_ids.length ?? 0;
+  const economicArtifactCount = manifest.transformations
+    .filter((item) => ['economic-source-native-table-v1', 'pip-source-native-survey-table-v1', 'pwt-source-native-table-v1'].includes(item.id))
+    .reduce((count, item) => count + item.input_artifact_ids.length, 0);
   return (
     <main id="main-content" className="sources-page">
       <header className="sources-hero">
@@ -100,7 +107,7 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
       <section className="source-section" aria-labelledby="source-matrix-title">
         <div className="section-intro">
           <span className="eyebrow">
-            Coverage ledger · {verticals.length} data verticals · {candidateLock.artifacts.length + economicArtifactCount} pinned source artifacts
+            Coverage ledger · {verticals.length} data verticals · {candidateLock.artifacts.length + Object.keys(religionSourceLock.files).length + Object.keys(ccpSourceLock.artifacts).length + economicArtifactCount} pinned source artifacts
           </span>
           <h2 id="source-matrix-title">What is in—and what is still outstanding</h2>
           <p>

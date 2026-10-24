@@ -1,10 +1,12 @@
-import { validateEconomicEvidenceDataset, validatePopulationSurfaceDataset } from '@atlas/contracts';
+import { validateEconomicEvidenceDataset, validateInstitutionalEvidenceDataset, validatePopulationSurfaceDataset } from '@atlas/contracts';
 import type {
   AtlasEntity,
   AtlasReleaseManifest,
   ElectricityDataset,
   EconomicDatasetReference,
   EconomicEvidenceDataset,
+  InstitutionalDatasetReference,
+  InstitutionalEvidenceDataset,
   GdpPerCapitaDataset,
   HistoricalCityDataset,
   HistoricalContextIndex,
@@ -101,7 +103,7 @@ export interface ReconciliationDecisionArtifact {
   [key: string]: unknown;
 }
 
-export const releaseRoot = '/atlas/releases/atlas-mvp-2026-10-24-r9';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-10-24-r12';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {
@@ -194,6 +196,24 @@ export function loadEconomicDataset(reference: EconomicDatasetReference): Promis
       throw error;
     });
   economicCache.set(reference.id, pending);
+  return pending;
+}
+
+const institutionalCache = new Map<string, Promise<InstitutionalEvidenceDataset>>();
+
+export function loadInstitutionalDataset(reference: InstitutionalDatasetReference): Promise<InstitutionalEvidenceDataset> {
+  const existing = institutionalCache.get(reference.id);
+  if (existing) return existing;
+  const pending = getJson<InstitutionalEvidenceDataset>(`${releaseRoot}/${reference.data_file}`)
+    .then((dataset) => {
+      validateInstitutionalEvidenceDataset(dataset, reference);
+      return dataset;
+    })
+    .catch((error: unknown) => {
+      institutionalCache.delete(reference.id);
+      throw error;
+    });
+  institutionalCache.set(reference.id, pending);
   return pending;
 }
 
