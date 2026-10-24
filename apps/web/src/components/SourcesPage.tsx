@@ -52,7 +52,9 @@ function humanize(value: string): string {
 }
 
 function releaseRole(id: string): string {
+  if (id === 'world-bank-wdi-economics-2026-10-08') return 'Thirteen source-native economic indicator tables';
   if (id.startsWith('world-bank-wdi-economics')) return 'Published territorial GDP-per-capita context';
+  if (id.startsWith('maddison-project')) return 'Historical source-native GDP per capita table';
   if (id.startsWith('world-bank')) return 'Modern population, electricity, and life-expectancy observations';
   if (id.startsWith('us-census')) return 'Deep-time global population estimates and source ranges';
   if (id.startsWith('cliopatria')) return 'Historical political context geometry and names';
@@ -76,6 +78,7 @@ function SourceStatus({ complete, label }: { complete: boolean; label: string })
 }
 
 export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
+  const economicArtifactCount = manifest.transformations.find((item) => item.id === 'economic-source-native-table-v1')?.input_artifact_ids.length ?? 0;
   return (
     <main id="main-content" className="sources-page">
       <header className="sources-hero">
@@ -97,7 +100,7 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
       <section className="source-section" aria-labelledby="source-matrix-title">
         <div className="section-intro">
           <span className="eyebrow">
-            Coverage ledger · {verticals.length} data verticals · {candidateLock.artifacts.length} pinned candidate artifacts
+            Coverage ledger · {verticals.length} data verticals · {candidateLock.artifacts.length + economicArtifactCount} pinned source artifacts
           </span>
           <h2 id="source-matrix-title">What is in—and what is still outstanding</h2>
           <p>
@@ -206,6 +209,14 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
           ))}
         </div>
       </section>
+
+      {manifest.economic_evidence ? <section className="source-section" aria-labelledby="economic-datasets-title">
+        <div className="section-intro"><span className="eyebrow">Source-native economics</span><h2 id="economic-datasets-title">Published economic tables</h2><p>{manifest.economic_evidence.interpretation}</p></div>
+        <div className="metric-source-list">{manifest.economic_evidence.datasets.map((dataset) => <article key={dataset.id}>
+          <div><span className="eyebrow">{dataset.source_release_id}</span><h3>{dataset.label}</h3><p>{dataset.support_type}</p></div>
+          <dl><div><dt>Known / source rows</dt><dd>{dataset.known_value_count.toLocaleString()} / {dataset.source_row_count.toLocaleString()}</dd></div><div><dt>Years with values</dt><dd>{formatAstronomicalYear(dataset.available_years[0])}–{formatAstronomicalYear(dataset.available_years.at(-1) ?? dataset.available_years[0])}</dd></div><div><dt>Unit</dt><dd>{dataset.unit}</dd></div><div><dt>Open</dt><dd><a href={`?page=economics&indicator=${dataset.id}&year=${dataset.available_years.at(-1)}`}>Explore exact years ↗</a></dd></div></dl>
+        </article>)}</div>
+      </section> : null}
 
       <section className="source-section" aria-labelledby="catalog-title">
         <div className="section-intro">

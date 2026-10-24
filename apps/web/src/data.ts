@@ -1,8 +1,10 @@
-import { validatePopulationSurfaceDataset } from '@atlas/contracts';
+import { validateEconomicEvidenceDataset, validatePopulationSurfaceDataset } from '@atlas/contracts';
 import type {
   AtlasEntity,
   AtlasReleaseManifest,
   ElectricityDataset,
+  EconomicDatasetReference,
+  EconomicEvidenceDataset,
   GdpPerCapitaDataset,
   HistoricalCityDataset,
   HistoricalContextIndex,
@@ -99,7 +101,7 @@ export interface ReconciliationDecisionArtifact {
   [key: string]: unknown;
 }
 
-export const releaseRoot = '/atlas/releases/atlas-mvp-2026-10-06-r8';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-10-24-r9';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {
@@ -174,6 +176,24 @@ export function loadPopulationSurface(reference: PopulationSurfaceReference): Pr
       throw error;
     });
   surfaceCache.set(reference.data_file, pending);
+  return pending;
+}
+
+const economicCache = new Map<string, Promise<EconomicEvidenceDataset>>();
+
+export function loadEconomicDataset(reference: EconomicDatasetReference): Promise<EconomicEvidenceDataset> {
+  const existing = economicCache.get(reference.id);
+  if (existing) return existing;
+  const pending = getJson<EconomicEvidenceDataset>(`${releaseRoot}/${reference.data_file}`)
+    .then((dataset) => {
+      validateEconomicEvidenceDataset(dataset, reference);
+      return dataset;
+    })
+    .catch((error: unknown) => {
+      economicCache.delete(reference.id);
+      throw error;
+    });
+  economicCache.set(reference.id, pending);
   return pending;
 }
 

@@ -30,6 +30,7 @@ import { PopulationSurfacePanel } from './components/PopulationSurfacePanel';
 import { TerritorialCoverageSummary } from './components/TerritorialCoverageSummary';
 import { SourcesPage } from './components/SourcesPage';
 import { ReviewPage } from './components/ReviewPage';
+import { EconomicsPage } from './components/EconomicsPage';
 import {
   downloadUrl,
   historicalPopulationDownloadUrl,
@@ -59,9 +60,9 @@ import {
 const MapView = lazy(() => import('./components/MapView').then((module) => ({ default: module.MapView })));
 
 export function App() {
-  const [page] = useState<'atlas' | 'sources' | 'review'>(() => {
+  const [page] = useState<'atlas' | 'sources' | 'review' | 'economics'>(() => {
     const requested = new URLSearchParams(window.location.search).get('page');
-    return requested === 'sources' || requested === 'review' ? requested : 'atlas';
+    return requested === 'sources' || requested === 'review' || requested === 'economics' ? requested : 'atlas';
   });
   const [release, setRelease] = useState<ReleaseBase | null>(null);
   const [metricDatasets, setMetricDatasets] = useState<Partial<Record<MvpMetricId, MetricDataset>>>({});
@@ -532,6 +533,7 @@ export function App() {
       : downloadUrl(metric.id, release.manifest);
   const atlasUrl = pinnedSearch;
   const sourcesUrl = `?page=sources&release=${encodeURIComponent(release.manifest.release_id)}`;
+  const economicsUrl = `?page=economics&release=${encodeURIComponent(release.manifest.release_id)}`;
   const reviewUrl = `?page=review&release=${encodeURIComponent(release.manifest.release_id)}`;
   const dateMagnitude = year <= 0 ? 1 - year : year;
   const dateEra = year <= 0 ? 'BCE' : 'CE';
@@ -545,13 +547,14 @@ export function App() {
         </a>
         <nav className="site-tabs" aria-label="Primary navigation">
           <a href={atlasUrl} aria-current={page === 'atlas' ? 'page' : undefined}>Atlas</a>
+          <a href={economicsUrl} aria-current={page === 'economics' ? 'page' : undefined}>Economics</a>
           <a href={sourcesUrl} aria-current={page === 'sources' ? 'page' : undefined}>Sources</a>
           <a href={reviewUrl} aria-current={page === 'review' ? 'page' : undefined}>Review</a>
           {page === 'atlas' ? <a href={download} download>Download data</a> : null}
         </nav>
       </header>
 
-      {page === 'sources' ? <SourcesPage manifest={release.manifest} /> : page === 'review' ? <ReviewPage /> : (
+      {page === 'sources' ? <SourcesPage manifest={release.manifest} /> : page === 'review' ? <ReviewPage /> : page === 'economics' ? <EconomicsPage manifest={release.manifest} /> : (
       <main id="main-content">
         <section className="hero-copy">
           <div>

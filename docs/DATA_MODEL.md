@@ -21,6 +21,14 @@ Maintain these logical tables, even if several are initially stored in one small
 - `transformations`: input IDs, versioned algorithm, parameters, outputs, and validation report.
 - `published_views`: immutable manifests connecting UI state, display artifacts, summaries, and downloadable data.
 
+The r9 `economic_evidence` manifest is a deliberately source-native branch of
+this model: each dataset reference pins a source release and artifact checksum,
+unit, support type, exact available years, known/source-row counts, and JSON/CSV
+checksums. Its compact JSON lists only known values; the full CSV retains
+unknown source rows and original record locators. This is not an Atlas metric
+aggregation contract or a historical-polity crosswalk. See
+`ECONOMIC_EVIDENCE.md`.
+
 Do not start with a graph database. These are conceptual distinctions that work in typed records and Parquet.
 
 ## 2. Metric contract

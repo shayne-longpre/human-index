@@ -24,7 +24,7 @@ import {
   type LifeExpectancyDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-06-r8');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-24-r9');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;

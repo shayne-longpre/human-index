@@ -55,6 +55,15 @@ totals. Clio Infra and Seshat historical population candidates are acquired for
 review but not mapped until their source terms, units, and geographic identity
 links pass the documented gates.
 
+The current r9 release adds an **Economics** page with fourteen source-native
+tables: Maddison 2023 historical GDP per capita and thirteen additional World Bank
+indicators covering GDP, PPP, consumption, poverty, inequality, labor, inflation,
+trade, investment, public consumption, and sector composition. It shows
+exact-year coverage and unknowns, original record locators, source references,
+and full CSV downloads. It does not assign these values to historical borders
+or splice the July and October 2026 World Bank updates. See
+`docs/ECONOMIC_EVIDENCE.md` for the acquisition, units, provenance, and gaps.
+
 The application also includes a dedicated **Sources** page covering both the
 inputs published in the current release and the wider research registry. Atlas
 state is shareable through `metric`, `year`, and `place` URL parameters. A
@@ -107,6 +116,15 @@ The GHSL acquisition and derivation workflow is also explicit:
 pnpm data:acquire:population-grids
 pnpm data:derive:population-grids
 pnpm data:publish:population-grids
+```
+
+Economic source acquisition and publication are similarly explicit (the
+publisher refuses to overwrite the tracked r9 fixture):
+
+```bash
+pnpm data:acquire:economics
+pnpm data:derive:economics
+pnpm data:publish:economics
 ```
 
 The publisher refuses to overwrite the tracked r8 fixture. To reproduce it,

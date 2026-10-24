@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import axe from 'axe-core';
 
-const releaseId = 'atlas-mvp-2026-10-06-r8';
+const releaseId = 'atlas-mvp-2026-10-24-r9';
 
 async function waitForRelease(page: Page): Promise<void> {
   await expect(page.getByText(`Atlas release ${releaseId}`, { exact: true })).toBeVisible();
@@ -131,6 +131,27 @@ test('respects reduced motion and exposes core pages without serious accessibili
   await waitForRelease(page);
   await expect(page.getByText('336 linked · 15 rejected · 2 unresolved')).toBeVisible();
   await expectNoSeriousAccessibilityViolations(page);
+});
+
+test('economic source tables expose exact dates, missing coverage, and original locators', async ({ page }) => {
+  await page.goto(`/?page=economics&release=${releaseId}&indicator=maddison-gdppc-2011-international-dollars&year=1820`);
+  await expect(page.getByRole('heading', { name: 'What we know about material life.' })).toBeVisible();
+  await expect(page.getByText('55 / 169')).toBeVisible();
+  await expect(page.locator('.economics-controls')).toHaveScreenshot('economics-controls-desktop.png');
+  await page.getByRole('button', { name: /United Kingdom GBR/ }).click();
+  await expect(page.getByText(/Full data!A\d+:F\d+/)).toBeVisible();
+  await expectNoSeriousAccessibilityViolations(page);
+
+  await page.getByLabel('Indicator').selectOption('wdi-si-pov-gini');
+  await page.getByLabel('Exact source year').selectOption('2025');
+  await expect(page.getByText('4 / 217')).toBeVisible();
+  await expect(page.getByText('Unknown / not reported').first()).toBeVisible();
+  await expect(page).toHaveURL(/indicator=wdi-si-pov-gini&year=2025/);
+
+  await page.getByLabel('Indicator').selectOption('wdi-si-pov-dday');
+  await page.getByLabel('Exact source year').selectOption('2020');
+  await expect(page.getByText('70 / 217')).toBeVisible();
+  await expect(page.getByText('percent of population · 2020 CE')).toBeVisible();
 });
 
 test('fails closed when a pinned release is unavailable', async ({ page }) => {

@@ -93,11 +93,11 @@ global life-table estimate.
 
 ## S4 — Maddison Project Database: long-run GDP per capita
 
-- Candidate: **MPD 2023**, 169 countries, through 2022; Excel/Stata; **CC BY 4.0**.
+- Published source-native table in r9: **MPD 2023**, 169 source country/economy codes, through 2022; Excel; **CC BY 4.0**.
 - [Official release](https://www.rug.nl/ggdc/historicaldevelopment/maddison/releases/maddison-project-database-2023?lang=en), [dataset DOI](https://doi.org/10.34894/INZBF2).
-- The publisher requires original papers from the source sheet to be cited when data are shown graphically. Ingest that sheet and associate references with observations rather than displaying only the MPD headline citation.
+- The publisher requires original papers from the source sheet to be cited when data are shown graphically. The official workbook was acquired on 2026-10-24; its `Sources` and `Maddison original sources` rows are retained with locators. They are country-level citation candidates, not verified per-observation paper assignments.
 
-Audit the workbook's exact units, population scale, PPP basis, territorial definitions, and earliest actual observations before implementation. Do not silently splice it to a modern PPP series with a different base. This supports distributions of people across **economies with different average GDP per capita**, not distributions of individual income, wealth, or consumption.
+The workbook `Notes` labels GDP per capita as real 2011 dollars and its companion population as mid-year thousands. The published GDP-per-capita table has only 14 known values in 1 CE; it does not extend to 10,000 BCE. Do not silently splice it to a modern PPP series with a different base or treat it as a distribution of individual income, wealth, or consumption. See `ECONOMIC_EVIDENCE.md`.
 
 ## S5 — Seshat: historical institutional and technological observations
 

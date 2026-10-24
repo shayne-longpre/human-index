@@ -1,5 +1,29 @@
 # Build report: evidence-aware temporal-map MVP
 
+## Release r9 economic evidence — verified October 24, 2026
+
+Release `atlas-mvp-2026-10-24-r9` extends r8 with fourteen source-native economic
+tables: one official Maddison Project Database 2023 workbook and thirteen World
+Bank WDI indicators from source update 2026-10-08. Acquisition pinned fifteen
+original artifacts including World Bank country metadata. Derived publication
+contains 119,987 known values; full CSVs preserve unknown source rows. The
+Maddison workbook provides 21,366 known GDP-per-capita values, 14 in 1 CE, and
+none before 1 CE. No economic value is assigned to Cliopatria polygons. The
+source lock, units, citations, transformation, per-indicator coverage, and
+unresolved Clio/WID gates are in `ECONOMIC_EVIDENCE.md`.
+
+Checks actually run for r9: explicit acquisition (fifteen artifacts), derivation
+(fourteen datasets), immutable publication, `.venv/bin/python -m unittest
+discover -s pipelines/tests -v` (16 pass), `pnpm test` (33 pass), `pnpm build`
+(pass, with the pre-existing large lazy-map-chunk warning), and
+`pnpm test:browser:update` (six pass after updating the mobile evidence-footer
+snapshot for two added source citations and adding an Economics controls
+visual regression), followed by a normal `pnpm test:browser` run (six pass).
+The first ordinary browser-test run
+had five pass and one expected snapshot difference; its new Economics table,
+exact-year/missingness, and accessibility test passed. No rendering benchmark
+or claim of complete economic coverage was made.
+
 ## Release r8 population mapping — verified October 6, 2026
 
 Release `atlas-mvp-2026-10-06-r8` adds source-native GHSL GHS-POP R2023A map grids at ten exact estimate dates, 1975–2020, and two separately labeled projection dates, 2025/2030. All twelve official 1 km ZIP archives were acquired with URL, size, and SHA-256 recorded in `data/registry/population-surface-lock.json`. The application publishes only one-degree display bins (25 MB across JSON and CSV files), not the multi-gigabyte source rasters. The 2020 source raster totals 7,840,952,947.014 modeled people; the published bins total 7,840,952,852.707, with 94.307 people recorded outside the display grid. Its 19,284 covered bins include valid zeros distinct from NODATA. The method, CRS, physical-area calculation, source/projection distinction, and conservation tolerance are documented in `POPULATION_SURFACES.md`.

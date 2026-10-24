@@ -1,0 +1,144 @@
+{
+  "artifacts": [
+    {
+      "bytes": 4903804,
+      "id": "maddison_2023_workbook",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/maddison/2023/mpd2023_web.xlsx",
+      "retrieved_on": "2026-10-24",
+      "sha256": "ecc5916ca12789b983fc4be437f8a354bbf4291323605324ac3e0aea4c57cbb6",
+      "url": "https://dataverse.nl/api/access/datafile/421302"
+    },
+    {
+      "bytes": 113954,
+      "id": "world_bank_economic_country_metadata",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/countries.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "ba006d57b1fb243ff5a6d13a9fd1283e0a758ab6750cc4159eebbd454a98b462",
+      "url": "https://api.worldbank.org/v2/country?format=json&per_page=500"
+    },
+    {
+      "bytes": 3800408,
+      "id": "world_bank_economic_ny_gdp_mktp_kd",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-ny.gdp.mktp.kd.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "cdd541d89bd0c7820f7afc8a1ed820ffb692d97dcdc0b072ef613b5aebf46c10",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.MKTP.KD?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 4275452,
+      "id": "world_bank_economic_ny_gdp_pcap_pp_kd",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-ny.gdp.pcap.pp.kd.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "443d48d7ad913864df0f0ba964aedf96844479712a1a42c7f04e5aa71493f75f",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.PCAP.PP.KD?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 4822811,
+      "id": "world_bank_economic_ne_con_prvt_pc_kd",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-ne.con.prvt.pc.kd.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "7771181b4141e38e0ea9c6c32300baa222deb4f71d8f5635425054b784e22e8a",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/NE.CON.PRVT.PC.KD?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 3346665,
+      "id": "world_bank_economic_si_pov_gini",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-si.pov.gini.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "ff284dac0d2b322516464b71f82659ad7a992e4b9bd2b836035eb811bdad0681",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/SI.POV.GINI?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 4426832,
+      "id": "world_bank_economic_sl_uem_totl_zs",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-sl.uem.totl.zs.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "1b96b706f582a97d134eef0fad42b914ae4626a75e90b2f26a224cde6cb76007",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/SL.UEM.TOTL.ZS?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 4012597,
+      "id": "world_bank_economic_fp_cpi_totl_zg",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-fp.cpi.totl.zg.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "a92fa6e0c5093b7be6b4aac3966997b57a2fdb30146a7e266f8db9eb3138272a",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/FP.CPI.TOTL.ZG?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 3637997,
+      "id": "world_bank_economic_ne_trd_gnfs_zs",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-ne.trd.gnfs.zs.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "a71187a97bafaba8975ea67a44532544497c401517a8d006d1aba8d234819b1e",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/NE.TRD.GNFS.ZS?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 4345134,
+      "id": "world_bank_economic_si_pov_dday",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-si.pov.dday.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "638b7b256fa5f8d53155571f207f411465b2e8a1ff3bda8aaab02d5be81371c5",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/SI.POV.DDAY?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 3949947,
+      "id": "world_bank_economic_ne_gdi_totl_zs",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-ne.gdi.totl.zs.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "669312d5711604e667807e8e18401e9d5d558a8643919eafc4dd45f25c83dd1d",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/NE.GDI.TOTL.ZS?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 4391102,
+      "id": "world_bank_economic_ne_con_govt_zs",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-ne.con.govt.zs.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "971a8de706c5fccd1f88abbc12d6bcb8981dcde0efda6bb7b1b61124e4e600f7",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/NE.CON.GOVT.ZS?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 4378116,
+      "id": "world_bank_economic_nv_agr_totl_zs",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-nv.agr.totl.zs.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "b89dda04dbd0fc404584d3291d846909707448c4b1271c054487631b40369e19",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/NV.AGR.TOTL.ZS?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 3993420,
+      "id": "world_bank_economic_nv_ind_manf_zs",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-nv.ind.manf.zs.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "faeec80f3479e4d5e6205019c1a192119d527ea30be7ce73d41cd92bb6306d16",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/NV.IND.MANF.ZS?format=json&date=1960:2025&per_page=20000"
+    },
+    {
+      "bytes": 3913899,
+      "id": "world_bank_economic_nv_srv_totl_zs",
+      "license": "CC-BY-4.0",
+      "path": "data/raw/world_bank/2026-10-24/economics-nv.srv.totl.zs.json",
+      "retrieved_on": "2026-10-24",
+      "sha256": "27848b84e9057271fa9e78f848662bbf3c9fabd5f4a424b4aaf946ffa6cfa412",
+      "url": "https://api.worldbank.org/v2/country/all/indicator/NV.SRV.TOTL.ZS?format=json&date=1960:2025&per_page=20000"
+    }
+  ],
+  "maddison_source_release_id": "maddison-project-database-2023-v1",
+  "schema_version": "0.1.0",
+  "status": "acquired_raw_artifacts_not_publication_approval",
+  "world_bank_country_metadata_update": null,
+  "world_bank_source_update": "2026-10-08"
+}

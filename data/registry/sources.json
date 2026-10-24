@@ -170,7 +170,7 @@
       "label": "World Bank World Development Indicators — economics",
       "dossier": "S18",
       "role": "modern_territorial_economic_context",
-      "candidate_release": "API source update 2026-07-13; retrieved 2026-09-23",
+      "candidate_release": "API source updates 2026-07-13 and 2026-10-08",
       "coverage_start": "1960 CE",
       "coverage_end": "2025 CE",
       "license": "CC-BY-4.0",
@@ -180,14 +180,14 @@
         "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.PCAP.KD?format=json&date=1960:2025&per_page=20000"
       ],
       "indicators": [
-        "NY.GDP.PCAP.KD"
+        "NY.GDP.PCAP.KD", "NY.GDP.MKTP.KD", "NY.GDP.PCAP.PP.KD", "NE.CON.PRVT.PC.KD", "SI.POV.GINI", "SL.UEM.TOTL.ZS", "FP.CPI.TOTL.ZG", "NE.TRD.GNFS.ZS", "SI.POV.DDAY", "NE.GDI.TOTL.ZS", "NE.CON.GOVT.ZS", "NV.AGR.TOTL.ZS", "NV.IND.MANF.ZS", "NV.SRV.TOTL.ZS"
       ],
       "blockers": [
-        "historical_extension_requires_maddison_or_another_source_native_series",
+        "no_wdi_indicator_claims_coverage_for_every_support_in_every_year",
         "do_not_splice_constant_usd_and_ppp_series_without_an_explicit_rebase_contract"
       ],
-      "notes": "The exact API response and matching country metadata are pinned in the candidate lock and published in release r7. Atlas shows source-native territorial GDP per capita in constant 2015 US dollars and reports coverage counts only; it does not construct a global average or treat the measure as individual income, wealth, or PPP welfare.",
-      "checked_at": "2026-09-23",
+      "notes": "The r7 Atlas map retains its July 2026 GDP-per-capita release. Thirteen additional indicator responses and country metadata from the October 2026 update are pinned separately in economic-source-lock.json and published as source-native tables in r9. They are not cross-release spliced or assigned to historical borders.",
+      "checked_at": "2026-10-24",
       "verification_level": "artifact_acquired_profiled_and_fixture_published",
       "downloaded": true,
       "artifact_sha256": "60bdf145e781d722bffa9e9ea4eb0b3b74f220dcdba36f7d391b1f2c048dc930",
@@ -200,7 +200,7 @@
       "dossier": "S4",
       "role": "context_distribution",
       "candidate_release": "2023",
-      "coverage_start": null,
+      "coverage_start": "1 CE (14 supports with GDP per capita; 10000 BCE not covered)",
       "coverage_end": "2022 CE",
       "license": "CC-BY-4.0",
       "license_status": "release_page_checked",
@@ -209,13 +209,32 @@
         "https://doi.org/10.34894/INZBF2"
       ],
       "blockers": [
-        "authorized_workbook_access_through_dataversenl_antibot",
-        "read_source_sheet",
-        "verify_units_ppp_and_territories"
+        "source_sheet_citations_are_country_level_candidates_not_exact_per_observation_lineage",
+        "no_pre_1_CE_or_universal_historical_coverage"
       ],
-      "notes": "The University of Groningen release page verifies MPD 2023, 169 countries, coverage through 2022, CC BY 4.0, and a requirement to cite original papers from the workbook source sheet for graphical use. A normal browser download and direct official file request were retried on 2026-09-22; DataverseNL still returned its Anubis protection page rather than the workbook, and no bypass was attempted. This is territorial GDP-per-capita context, not individual income.",
-      "checked_at": "2026-09-22",
-      "verification_level": "documentation_only",
+      "notes": "The official 2023 workbook was acquired via the publisher-linked Dataverse file endpoint on 2026-10-24. Its Full data sheet supplies GDP per capita in 2011 international dollars; its Sources and Maddison original sources sheets are retained in the r9 dataset as candidate original-paper references. The source values are published as a separate source-native table, without a border join, global mean, or graphical claim of per-row paper provenance.",
+      "checked_at": "2026-10-24",
+      "verification_level": "official_artifact_acquired_audited_and_source_native_table_published",
+      "downloaded": true,
+      "artifact_sha256": "ecc5916ca12789b983fc4be437f8a354bbf4291323605324ac3e0aea4c57cbb6",
+      "terms_snapshot_sha256": null,
+      "release_ready": true
+    },
+    {
+      "id": "wid_distributional_economics",
+      "label": "World Inequality Database",
+      "dossier": "S21",
+      "role": "income_and_wealth_distribution_candidate",
+      "candidate_release": "Current downloadable WID series, version not pinned",
+      "coverage_start": null,
+      "coverage_end": null,
+      "license": null,
+      "license_status": "download_route_documented_dataset_redistribution_terms_unresolved",
+      "urls": ["https://wid.world/data/", "https://wid.world/codes-dictionary/", "https://wid.world/data-quality/"],
+      "blockers": ["pin_exact_series_and_release", "verify_dataset_level_redistribution_terms", "retain_concept_percentile_population_and_quality_metadata"],
+      "notes": "WID is a priority candidate for income and wealth shares, quantiles, and national income. Its concepts, population units, quality grades, and source methods cannot be collapsed into a World Bank Gini row or reused under a report-level license. No WID data is claimed acquired or published.",
+      "checked_at": "2026-10-24",
+      "verification_level": "official_download_and_metadata_documentation_checked_only",
       "downloaded": false,
       "artifact_sha256": null,
       "terms_snapshot_sha256": null,
@@ -679,17 +698,22 @@
       "sources": [
         {
           "source_id": "world_bank_economics",
-          "role": "Published modern territorial GDP per capita",
-          "release_ids": ["world-bank-wdi-economics-2026-07-13"]
+          "role": "Published modern GDP, PPP, consumption, poverty, inequality, labor, inflation, trade, investment, public consumption, and sector tables; July GDP-per-capita map kept separate",
+          "release_ids": ["world-bank-wdi-economics-2026-07-13", "world-bank-wdi-economics-2026-10-08"]
         },
         {
           "source_id": "maddison",
-          "role": "Historical territorial GDP per capita candidate",
-          "release_ids": []
+          "role": "Published historical source-native GDP per capita, sparse before 1820",
+          "release_ids": ["maddison-project-database-2023-v1"]
         },
         {
           "source_id": "clio_infra",
           "role": "Historical economic and social indicator candidates",
+          "release_ids": []
+        },
+        {
+          "source_id": "wid_distributional_economics",
+          "role": "Income and wealth distributions pending exact release and terms",
           "release_ids": []
         }
       ]

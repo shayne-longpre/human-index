@@ -325,6 +325,21 @@ def validate_release_manifest(
         if not any(source == surfaces["default_source_release_id"] for source, _ in keys):
             raise ValidationError("Default population surface has no snapshot")
 
+    economics = manifest.get("economic_evidence")
+    if economics is not None:
+        if economics["selection_policy"] != "exact_source_year_only_no_geographic_or_release_splice":
+            raise ValidationError("Unknown economic-evidence selection policy")
+        unique("economic dataset", [item["id"] for item in economics["datasets"]])
+        for item in economics["datasets"]:
+            if item["source_release_id"] not in source_ids or item["source_artifact_id"] not in input_artifact_ids:
+                raise ValidationError(f"Unknown source for economic dataset {item['id']}")
+            if not {item["data_file"], item["download_file"]}.issubset(artifacts):
+                raise ValidationError(f"Missing artifact for economic dataset {item['id']}")
+            if not item["available_years"] or item["available_years"] != sorted(set(item["available_years"])):
+                raise ValidationError(f"Invalid available years for economic dataset {item['id']}")
+            if item["temporal_policy"] != "exact_source_year_only" or item["known_value_count"] > item["source_row_count"]:
+                raise ValidationError(f"Invalid coverage for economic dataset {item['id']}")
+
     for transformation in manifest["transformations"]:
         if not set(transformation["input_artifact_ids"]).issubset(input_artifact_ids):
             raise ValidationError(

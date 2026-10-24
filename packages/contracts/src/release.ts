@@ -142,6 +142,78 @@ export interface PopulationSurfaceDataset {
   cells: Array<[column: number, row: number, people: number]>;
 }
 
+export interface EconomicDatasetReference {
+  id: string;
+  source_release_id: string;
+  source_artifact_id: string;
+  source_artifact_sha256: string;
+  indicator: string;
+  label: string;
+  unit: string;
+  support_type: string;
+  temporal_policy: 'exact_source_year_only';
+  available_years: number[];
+  source_row_count: number;
+  known_value_count: number;
+  data_file: string;
+  download_file: string;
+}
+
+export interface EconomicEvidenceDataset {
+  schema_version: '0.1.0';
+  id: string;
+  source_release_id: string;
+  source_artifact_id: string;
+  source_artifact_sha256: string;
+  source_sheet: string;
+  indicator: string;
+  label: string;
+  unit: string;
+  support_type: string;
+  temporal_policy: 'exact_source_year_only';
+  transformation: { id: string; version: string; policy: string };
+  source_note: string;
+  source_citation_url: string;
+  source_supports: Array<{ code: string; name: string; region: string | null }>;
+  source_references: Array<{ source_sheet: string; source_row: number; countrycode: string | null; period_as_written: string | null; citation_as_written: string }>;
+  global_source_note?: string;
+  source_row_count: number;
+  known_value_count: number;
+  available_years: number[];
+  known_by_year: Record<string, number>;
+  observations: Array<[code: string, year: number, value: number, source_row: number, companion_population_thousands?: number | null]>;
+}
+
+export function validateEconomicEvidenceDataset(dataset: EconomicEvidenceDataset, reference: EconomicDatasetReference): void {
+  if (dataset.schema_version !== '0.1.0' || dataset.id !== reference.id
+    || dataset.source_release_id !== reference.source_release_id
+    || dataset.source_artifact_id !== reference.source_artifact_id
+    || dataset.source_artifact_sha256 !== reference.source_artifact_sha256
+    || dataset.temporal_policy !== 'exact_source_year_only'
+    || dataset.transformation.id !== 'economic-source-native-table-v1'
+    || dataset.transformation.version !== '1.0.0'
+    || dataset.observations.length !== reference.known_value_count
+    || dataset.source_row_count !== reference.source_row_count
+    || JSON.stringify(dataset.available_years) !== JSON.stringify(reference.available_years)) {
+    throw new Error(`Economic dataset ${reference.id} does not match its release reference`);
+  }
+  const supports = new Set(dataset.source_supports.map((support) => support.code));
+  const seen = new Set<string>();
+  const counts = new Map<number, number>();
+  for (const [code, year, value, row] of dataset.observations) {
+    const key = `${code}:${year}`;
+    if (!supports.has(code) || !Number.isInteger(year) || !Number.isFinite(value)
+      || !Number.isInteger(row) || row < 1 || seen.has(key)) {
+      throw new Error(`Economic dataset ${reference.id} has invalid or duplicate observations`);
+    }
+    seen.add(key);
+    counts.set(year, (counts.get(year) ?? 0) + 1);
+  }
+  if (dataset.available_years.some((year) => counts.get(year) !== dataset.known_by_year[String(year)])) {
+    throw new Error(`Economic dataset ${reference.id} has inconsistent yearly coverage`);
+  }
+}
+
 export function validatePopulationSurfaceDataset(
   dataset: PopulationSurfaceDataset,
   reference: PopulationSurfaceReference,
@@ -231,6 +303,11 @@ export interface AtlasReleaseManifest {
     default_source_release_id: string;
     snapshots: PopulationSurfaceReference[];
     interpretation: string;
+  };
+  economic_evidence?: {
+    selection_policy: 'exact_source_year_only_no_geographic_or_release_splice';
+    interpretation: string;
+    datasets: EconomicDatasetReference[];
   };
   reconciliation: {
     decision_set_id: string;
@@ -650,6 +727,25 @@ export function validateAtlasReleaseManifest(manifest: AtlasReleaseManifest): vo
   }
   if (!surfaces.snapshots.some((snapshot) => snapshot.source_release_id === surfaces.default_source_release_id)) {
     throw new Error('Default population surface has no snapshot');
+  }
+
+  if (manifest.economic_evidence) {
+    const economics = manifest.economic_evidence;
+    if (economics.selection_policy !== 'exact_source_year_only_no_geographic_or_release_splice') {
+      throw new Error('Unknown economic evidence selection policy');
+    }
+    uniqueIds('economic dataset', economics.datasets.map((dataset) => dataset.id));
+    for (const dataset of economics.datasets) {
+      if (!sourceReleaseIds.has(dataset.source_release_id)
+        || !manifest.artifacts[dataset.data_file] || !manifest.artifacts[dataset.download_file]
+        || !/^[a-f0-9]{64}$/.test(dataset.source_artifact_sha256)
+        || dataset.temporal_policy !== 'exact_source_year_only'
+        || dataset.known_value_count > dataset.source_row_count
+        || dataset.available_years.length === 0
+        || dataset.available_years.some((year, index) => index > 0 && year <= dataset.available_years[index - 1])) {
+        throw new Error(`Invalid economic dataset reference ${dataset.id}`);
+      }
+    }
   }
 
   const requiredArtifacts = [

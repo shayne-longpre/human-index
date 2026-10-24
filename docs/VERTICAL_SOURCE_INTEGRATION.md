@@ -30,7 +30,7 @@ computed independently from the active release manifest.
 | --- | --- | --- | --- |
 | Population | U.S. Census world estimates; World Bank territories; UN WPP estimates/projections | HYDE sample only | Keep world, territorial, projection, and grid products separate. Never allocate a world total without a mass-conserving model. |
 | Borders and names | Cliopatria context; Natural Earth display geometry | CShapes; WHG documented but token/dataset selection blocked | Political context, statistical geography, and display geometry are separate. Source hierarchy can annotate overlaps; it does not authorize geometry union. |
-| Economics | World Bank GDP per capita, constant 2015 US$, 1960–2025 | Clio GDP workbooks; Maddison documented but download blocked | Do not splice constant-dollar, PPP, or differently based historical series. Show source-native series side by side until an explicit rebase contract exists. |
+| Economics | World Bank GDP per capita on the map; thirteen more WDI tables and Maddison 2023 GDP per capita in r9 | Clio GDP workbooks; WID distribution series not pinned | Do not splice constant-dollar, PPP, or differently based historical series. Show source-native series side by side until an explicit rebase contract exists. |
 | Institutions | None yet | V-Dem v16; Seshat Equinox v1; Clio XRCOMP | Start with V-Dem legal suffrage share as a descriptive de-jure fact. Do not create an Atlas democracy score or merge distinct institutional concepts. |
 | Conflict | None yet | UCDP GED 26.1; UCDP/PRIO ACD 26.1; Clio internal/international conflict | Events, conflict-years, parties, and binary historical context are distinct supports. Do not infer population exposure. |
 
@@ -57,3 +57,8 @@ nonaggregate World Bank support IDs as the population release, validates the
 source update, preserves missing values, and emits 14,322 entity-year rows.
 The map uses a fixed logarithmic display scale. The summary reports support
 coverage only; it does not construct a global GDP-per-capita average.
+
+Release r9 extends this with fourteen independently pinned source-native tables;
+see `ECONOMIC_EVIDENCE.md`. Maddison 2023 is now acquired and published in a
+table, not spatialized. The new WDI source update is 2026-10-08 and remains
+separate from the July 2026 map series. Clio and WID publication gates remain.

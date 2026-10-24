@@ -1,6 +1,28 @@
 # Implementation status
 
-Updated: 2026-09-23
+Updated: 2026-10-24
+
+## Current release r9 — economics extension
+
+The current release retains r8's Atlas and GHSL population-grid views and adds
+an Economics page with fourteen source-native tables: Maddison Project Database
+2023 real GDP per capita and thirteen World Bank WDI indicators spanning GDP,
+PPP, consumption, poverty, inequality, labor, inflation, trade, investment,
+public consumption, and sector composition. All fourteen original indicator
+artifacts plus World Bank country metadata are SHA-256 pinned. The publication
+has 119,987 exact-date known source values; downloadable CSVs retain unknown
+source rows. Country/economy labels are not joined to historical-polity map
+geometry. See `ECONOMIC_EVIDENCE.md` for per-indicator coverage, terms,
+original-record references, reproduction, and remaining gaps.
+
+Clio Infra GDP remains blocked by exact workbook reuse terms and underlying
+source citation review. WID distributional series remain unpinned pending an
+exact release, dataset-level redistribution terms, and concept/percentile/
+quality metadata. No source covers economics for every human population back
+to 10,000 BCE; Maddison's earliest known GDP-per-capita values are in 1 CE.
+
+Sections below describe the earlier r7 baseline and its prior acquisition
+state; this r9 section supersedes its Maddison-access conclusion.
 
 ## MVP release
 
@@ -83,10 +105,10 @@ an unavailable release ID fails closed.
   not published: the license file and README disagree (CC BY-NC 4.0 versus CC
   BY 3.0), latest-year descriptions conflict, and full masks/scenarios plus
   conservation checks are still needed.
-- Maddison Project Database 2023 remains unacquired. The official page verifies
-  169-country coverage through 2022, CC BY 4.0, and source-sheet attribution;
-  the official download currently returns DataverseNL's Anubis page. No bypass
-  was attempted.
+- Maddison Project Database 2023 was unavailable in the earlier pass; it was
+  subsequently acquired from the official Dataverse endpoint and published
+  source-natively in r9. Its original-source references are retained but do
+  not establish per-observation paper provenance.
 - The bounded vertical acquisition pass pins 19 additional candidate artifacts:
   World Bank economics, eight Clio Infra workbooks, V-Dem v16 data/codebook/
   release metadata, Seshat Equinox v1 data/metadata, and both UCDP 26.1
@@ -137,8 +159,8 @@ axe, and desktop/mobile screenshot checks.
    descriptive de-jure suffrage candidate.
 2. Build the UCDP Gleditsch-Ward crosswalk and decide how to handle the 5,075
    non-monotonic fatality-bound rows before publishing a conflict measure.
-3. Resolve Clio artifact terms and Maddison access before any historical GDP
-   extension; keep their series source-native rather than splicing silently.
+3. Resolve Clio artifact terms and review Maddison's original-paper mapping
+   before historical graphical reuse; keep their series source-native.
 4. Resolve HYDE licensing and validate one matched baseline/lower/upper gridded
    population slice with masks and mass conservation.
 5. Extend bounded border candidate scans without auto-resolving unsupported
