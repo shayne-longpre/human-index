@@ -156,6 +156,15 @@ download retains nulls and original record locators. The tables do not inherit
 Cliopatria display geometry, World Bank populations, or another source's
 religion taxonomy. See `INSTITUTIONAL_RELIGION_EVIDENCE.md`.
 
+R14 also keeps UCDP/PRIO conflict-year rows and OrganizedViolenceCY
+Gleditsch–Ward country-year rows in separate source-native products. ACD
+intensity is a source-defined conflict category; OrganizedViolenceCY occurrence
+flags and best fatality estimates are within-border summaries, not individual
+exposure. Its low, best, and high fields are retained as separate source
+estimates, not a confidence interval, including four nonmonotonic triplets.
+Neither product is joined to historical polity geometry or current-country
+population by name. Missing ACD rows are not converted to zero violence.
+
 Local research additionally records WRP↔CCP same-COW-code/exact-year candidates
 as unresolved support decisions, not observations or geography crosswalks.
 CCP written-provision categories, WRP estimated affiliation, V-Dem expert
@@ -259,6 +268,14 @@ The current city contract may link source records to a stable canonical place
 ID for navigation. It does not make their dates, urban extents, definitions, or
 population estimates interchangeable. A canonical place cluster therefore
 contains source record IDs, not a synthesized population series.
+
+R13 publishes three Reba city series with distinct source-release IDs and
+source-row locators. At a shared date the map may show overlapping point
+estimates, but each point, table row, inspector, and export retains its own
+source value. It does not create a city time series across compilers. Two
+Chandler literal-zero cells are represented as quarantined source records with
+unknown numeric population rather than zero-valued map points. Unresolved
+place identities stay source-only and do not block source-native publication.
 
 The current border contract can distinguish a source-declared composite/member
 relationship from an unexplained geometric overlap. Its only allowed effects

@@ -1,0 +1,11 @@
+{
+  "status": "acquired_source_native_release_inputs",
+  "retrieved_on": "2026-09-20",
+  "artifacts": [
+    {"id": "reba_chandler_v2_csv", "path": "data/raw/reba_cities/2016/chandlerV2.csv", "url": "https://ndownloader.figshare.com/files/5407640", "bytes": 1416656, "sha256": "5b8df64e46988b216988eef18b46ebc2cba57ecc1adc8a5c2e1e6d5b78068031", "license": "CC BY 4.0"},
+    {"id": "reba_chandler_v2_metadata", "path": "data/raw/reba_cities/2016/chandler.metadata.json", "url": "https://api.figshare.com/v2/articles/2059494", "bytes": 3168, "sha256": "1136fdfb3e8add5f3f4f9b3f3b1c6d30abe3e21d9706b9b45fbe9ed3014be044", "license": "CC BY 4.0"},
+    {"id": "reba_modelski_modern_v2_csv", "path": "data/raw/reba_cities/2016/modelskiModernV2.csv", "url": "https://ndownloader.figshare.com/files/5407637", "bytes": 15054, "sha256": "927ee6a9122be6aded1a2f71ff5bb6f36312aae6a778574af47f4e8c65265726", "license": "CC BY 4.0"},
+    {"id": "reba_modelski_modern_v2_metadata", "path": "data/raw/reba_cities/2016/modelski-modern.metadata.json", "url": "https://api.figshare.com/v2/articles/2059500", "bytes": 3125, "sha256": "b1a2acc1bf0352c54058dbd6e77f2ff87eb34c9fef7bcad58329d4763840bbe3", "license": "CC BY 4.0"},
+    {"id": "reconciliation_decisions_v1", "path": "data/decisions/reconciliation-decisions-v1.json", "bytes": 410718, "sha256": "15fa6d70eaf93f9bd29fb3faa75ee1dc4dff4ee60e30398e6fd083bc29d2b829", "license": "Atlas-authored decision artifact"}
+  ]
+}

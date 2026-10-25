@@ -38,6 +38,7 @@ const release: ReleaseBase = {
   historicalPopulation: readJson<HistoricalPopulationDataset>('historical-population.json'),
   historicalContext: readJson<HistoricalContextIndex>('historical-context.json'),
   historicalCities: readJson<HistoricalCityDataset>('historical-cities.json'),
+  historicalCityCompanions: [],
 };
 const electricity = readJson<ElectricityDataset>('electricity.json');
 const populationOutlook = readJson<PopulationOutlookDataset>('population-outlook.json');

@@ -32,6 +32,7 @@ import { SourcesPage } from './components/SourcesPage';
 import { ReviewPage } from './components/ReviewPage';
 import { EconomicsPage } from './components/EconomicsPage';
 import { InstitutionsPage } from './components/InstitutionsPage';
+import { ConflictPage } from './components/ConflictPage';
 import {
   downloadUrl,
   historicalPopulationDownloadUrl,
@@ -64,10 +65,10 @@ const ResearchPage = import.meta.env.DEV
   : null;
 
 export function App() {
-  const [page] = useState<'atlas' | 'sources' | 'review' | 'economics' | 'institutions' | 'research'>(() => {
+  const [page] = useState<'atlas' | 'sources' | 'review' | 'economics' | 'institutions' | 'conflict' | 'research'>(() => {
     const requested = new URLSearchParams(window.location.search).get('page');
     if (requested === 'research' && import.meta.env.DEV) return 'research';
-    return requested === 'sources' || requested === 'review' || requested === 'economics' || requested === 'institutions' ? requested : 'atlas';
+    return requested === 'sources' || requested === 'review' || requested === 'economics' || requested === 'institutions' || requested === 'conflict' ? requested : 'atlas';
   });
   const [release, setRelease] = useState<ReleaseBase | null>(null);
   const [metricDatasets, setMetricDatasets] = useState<Partial<Record<MvpMetricId, MetricDataset>>>({});
@@ -118,6 +119,7 @@ export function App() {
           loaded.manifest,
           loaded.historicalContext,
           loaded.historicalCities,
+          loaded.historicalCityCompanions,
         );
         const initial = parseAtlasViewState(
           window.location.search,
@@ -148,7 +150,7 @@ export function App() {
 
   const timelineYears = useMemo(
     () => release
-      ? buildEvidenceTimelineYears(release.manifest, release.historicalContext, release.historicalCities)
+      ? buildEvidenceTimelineYears(release.manifest, release.historicalContext, release.historicalCities, release.historicalCityCompanions)
       : [2024],
     [release],
   );
@@ -343,8 +345,9 @@ export function App() {
   );
   const cityPoints = useMemo<HistoricalCityPoint[]>(() => {
     if (!release) return [];
-    const cityById = new Map(release.historicalCities.cities.map((city) => [city.id, city]));
-    return release.historicalCities.observations
+    const datasets = [release.historicalCities, ...release.historicalCityCompanions];
+    const cityById = new Map(datasets.flatMap((dataset) => dataset.cities).map((city) => [city.id, city]));
+    return datasets.flatMap((dataset) => dataset.observations)
       .filter((observation) => observation.year === year)
       .flatMap((observation) => {
         const city = cityById.get(observation.city_id);
@@ -540,6 +543,7 @@ export function App() {
   const sourcesUrl = `?page=sources&release=${encodeURIComponent(release.manifest.release_id)}`;
   const economicsUrl = `?page=economics&release=${encodeURIComponent(release.manifest.release_id)}`;
   const institutionsUrl = `?page=institutions&release=${encodeURIComponent(release.manifest.release_id)}`;
+  const conflictUrl = `?page=conflict&release=${encodeURIComponent(release.manifest.release_id)}`;
   const reviewUrl = `?page=review&release=${encodeURIComponent(release.manifest.release_id)}`;
   const researchUrl = `?page=research&release=${encodeURIComponent(release.manifest.release_id)}`;
   const dateMagnitude = year <= 0 ? 1 - year : year;
@@ -556,6 +560,7 @@ export function App() {
           <a href={atlasUrl} aria-current={page === 'atlas' ? 'page' : undefined}>Atlas</a>
           <a href={economicsUrl} aria-current={page === 'economics' ? 'page' : undefined}>Economics</a>
           <a href={institutionsUrl} aria-current={page === 'institutions' ? 'page' : undefined}>Institutions & religion</a>
+          <a href={conflictUrl} aria-current={page === 'conflict' ? 'page' : undefined}>Conflict</a>
           <a href={sourcesUrl} aria-current={page === 'sources' ? 'page' : undefined}>Sources</a>
           <a href={reviewUrl} aria-current={page === 'review' ? 'page' : undefined}>Review</a>
           {import.meta.env.DEV ? <a href={researchUrl} aria-current={page === 'research' ? 'page' : undefined}>Local research</a> : null}
@@ -563,7 +568,7 @@ export function App() {
         </nav>
       </header>
 
-      {page === 'sources' ? <SourcesPage manifest={release.manifest} /> : page === 'review' ? <ReviewPage /> : page === 'economics' ? <EconomicsPage manifest={release.manifest} /> : page === 'institutions' ? <InstitutionsPage manifest={release.manifest} /> : page === 'research' && ResearchPage ? <Suspense fallback={<main id="main-content"><p role="status">Opening local research view…</p></main>}><ResearchPage /></Suspense> : (
+      {page === 'sources' ? <SourcesPage manifest={release.manifest} /> : page === 'review' ? <ReviewPage /> : page === 'economics' ? <EconomicsPage manifest={release.manifest} /> : page === 'institutions' ? <InstitutionsPage manifest={release.manifest} /> : page === 'conflict' ? <ConflictPage manifest={release.manifest} /> : page === 'research' && ResearchPage ? <Suspense fallback={<main id="main-content"><p role="status">Opening local research view…</p></main>}><ResearchPage /></Suspense> : (
       <main id="main-content">
         <section className="hero-copy">
           <div>
@@ -571,7 +576,7 @@ export function App() {
             <h1>Where people lived.<br />What the evidence can tell us.</h1>
           </div>
           <p>
-            Explore population through deep time, changing political maps, ancient city estimates, electricity access,
+            Explore population through deep time, changing political maps, source-specific city estimates, electricity access,
             life expectancy, and GDP per person. Missing observations stay visible and time is never filled silently.
           </p>
         </section>
@@ -623,7 +628,7 @@ export function App() {
                 }}
               >
                 <span className="city-dot" aria-hidden="true" />
-                Ancient city estimates
+                City estimates
               </button>
               <div className="release-badge">
                 <span className="release-dot" aria-hidden="true" />
@@ -799,7 +804,7 @@ export function App() {
               <strong>
                 {!citiesEnabled ? 'Layer hidden' : cityPoints.length ? `Exact · ${formatAstronomicalYear(year)}` : 'No exact observation'}
               </strong>
-              <small>{cityPoints.length ? `${cityPoints.length} published city estimates` : 'Modelski Ancient · exact dates only'}</small>
+              <small>{cityPoints.length ? `${cityPoints.length} source-specific city estimates` : 'Reba city series · exact dates only'}</small>
             </article>
           </div>
           {!supported ? (

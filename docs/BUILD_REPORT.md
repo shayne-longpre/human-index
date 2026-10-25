@@ -1,9 +1,36 @@
 # Build report: evidence-aware temporal-map MVP
 
-## Sources indicator roadmap — verified October 24, 2026
+## R14 addendum — verified October 24, 2026
 
-The Sources matrix now shows Data vertical, Indicators, Sources, Acquired,
-and In release. The registry defines 49 indicators across ten verticals and
+The current Sources ledger has 50 indicators across ten verticals: 19 planned
+source sets ready, nine still needing a source selection. R13 added Chandler
+v2 and Modelski Modern v2 as separate city series, with 9,729 positive
+estimates and two quarantined Chandler zero cells. R14 added a source-native
+Conflict page with 2,816 UCDP/PRIO conflict-years and 7,132 UCDP
+OrganizedViolenceCY country-years. GED events, historical conflict context,
+and displacement/exposure remain outstanding; a country-year is not an event
+location or a person-level exposure estimate.
+Pleiades v4.1 GIS exports were acquired and profiled separately, moving that
+source to Acquired: Yes but not In release: its name and location year fields
+are uncertain termini, and 12,084 place records have rough location precision.
+The matching OWID long-run life-expectancy CSV and metadata were also acquired
+and profiled, but not redistributed because underlying HMD/Zijdeman rights
+and the source-switch lineage remain unresolved.
+
+Checks actually run for r14 and the subsequent Pleiades/OWID acquisition
+review: `pnpm typecheck` (pass), `pnpm test` (51 pass), Python unittest
+discovery (30 pass), `pnpm build` (pass, existing MapView chunk-size warning),
+and `pnpm test:browser` (13 pass, including accessibility checks), plus one
+targeted shared-year city browser check (pass). A stable one-pixel mobile
+method-panel height change was visually reviewed and its screenshot baseline
+updated before the final passing browser run. The first sandboxed browser
+attempt could not bind the local port; the approved rerun passed. These
+checks do not establish completeness of source coverage.
+
+## Sources indicator roadmap — r12 verification, October 24, 2026
+
+The r12 Sources matrix showed Data vertical, Indicators, Sources, Acquired,
+and In release. Its registry defined 49 indicators across ten verticals and
 maps each selected source through its existing source-level release IDs. Fifteen
 indicator source sets are ready in r12; nine indicators explicitly need a
 source selected. These are integration-plan statuses, not claims of complete

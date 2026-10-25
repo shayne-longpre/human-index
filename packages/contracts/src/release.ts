@@ -204,6 +204,62 @@ export interface InstitutionalDatasetReference {
   download_file: string;
 }
 
+export interface ConflictDatasetReference {
+  kind: 'acd' | 'cy';
+  source_release_id: string;
+  source_artifact_id: string;
+  source_artifact_sha256: string;
+  data_file: string;
+  download_file: string;
+  source_row_count: number;
+  available_years: number[];
+}
+
+export interface ConflictAcdRow {
+  conflict_id: number; year: number; location: string; side_a: string; side_b: string;
+  gwno_loc: string; type_of_conflict: number; intensity_level: 1 | 2;
+  original_record_locator: string;
+}
+
+export interface ConflictCountryYearRow {
+  country_id: number; country: string; year: number;
+  sb_exist: 0 | 1; ns_exist: 0 | 1; os_exist: 0 | 1;
+  sb_total_deaths_best: number; ns_total_deaths_best: number; os_total_deaths_best: number;
+  cumulative_total_deaths_in_orgvio_best: number;
+  cumulative_total_deaths_in_orgvio_low: number;
+  cumulative_total_deaths_in_orgvio_high: number;
+  original_record_locator: string;
+}
+
+export interface ConflictEvidenceDataset {
+  schema_version: '0.1.0';
+  source_release_id: string;
+  support: string;
+  years: number[];
+  rows: Array<ConflictAcdRow | ConflictCountryYearRow>;
+  source_row_count: number;
+  nonmonotonic_low_best_high_rows?: number;
+}
+
+export function validateConflictEvidenceDataset(dataset: ConflictEvidenceDataset, reference: ConflictDatasetReference): void {
+  if (dataset.schema_version !== '0.1.0' || dataset.source_release_id !== reference.source_release_id
+    || dataset.source_row_count !== reference.source_row_count || dataset.rows.length !== reference.source_row_count
+    || JSON.stringify(dataset.years) !== JSON.stringify(reference.available_years)) {
+    throw new Error(`Conflict dataset ${reference.source_release_id} does not match its release reference`);
+  }
+  const keys = new Set<string>();
+  for (const row of dataset.rows) {
+    if (!Number.isInteger(row.year) || !reference.available_years.includes(row.year)) {
+      throw new Error('Conflict row has an invalid source year');
+    }
+    const key = reference.kind === 'acd'
+      ? `${(row as ConflictAcdRow).conflict_id}:${row.year}`
+      : `${(row as ConflictCountryYearRow).country_id}:${row.year}`;
+    if (keys.has(key) || !row.original_record_locator) throw new Error('Conflict row has a duplicate key or missing locator');
+    keys.add(key);
+  }
+}
+
 export interface InstitutionalEvidenceDataset extends Omit<InstitutionalDatasetReference, 'data_file' | 'download_file'> {
   schema_version: '0.1.0';
   category_labels: Record<string, string> | null;
@@ -382,6 +438,15 @@ export interface AtlasReleaseManifest {
     interpretation: string;
     reconciliation_decision_set_id: string;
   };
+  historical_city_companions?: Array<{
+    source_release_id: string;
+    data_file: string;
+    download_file: string;
+    source_artifact_sha256: string;
+    city_count: number;
+    observation_count: number;
+    quarantined_zero_cells: number;
+  }>;
   population_surfaces: {
     grid_degrees: 1;
     selection_policy: 'exact_source_year_only_no_splice_or_interpolation';
@@ -398,6 +463,11 @@ export interface AtlasReleaseManifest {
     selection_policy: 'exact_source_year_only_no_geographic_or_release_splice';
     interpretation: string;
     datasets: InstitutionalDatasetReference[];
+  };
+  conflict_evidence?: {
+    selection_policy: 'source_native_exact_year_no_geographic_join';
+    interpretation: string;
+    datasets: ConflictDatasetReference[];
   };
   reconciliation: {
     decision_set_id: string;
@@ -621,6 +691,7 @@ export interface GdpPerCapitaDataset {
 
 export interface HistoricalCity {
   id: string;
+  source_release_id?: string;
   source_record_id: string;
   name: string;
   other_name: string | null;
@@ -651,6 +722,33 @@ export interface HistoricalCityDataset {
   years: number[];
   cities: HistoricalCity[];
   observations: HistoricalCityObservation[];
+  quarantined_cells?: Array<{ source_record_id: string; year: number; status: 'source_zero_unresolved'; original_record_locator: string }>;
+}
+
+export function validateHistoricalCityCompanionDataset(
+  dataset: HistoricalCityDataset,
+  reference: NonNullable<AtlasReleaseManifest['historical_city_companions']>[number],
+): void {
+  if (dataset.schema_version !== '0.5.0' || dataset.source_release_id !== reference.source_release_id
+    || dataset.reconciliation_decision_set_id.length === 0 || dataset.temporal_policy !== 'exact_only'
+    || dataset.cities.length !== reference.city_count || dataset.observations.length !== reference.observation_count
+    || dataset.quarantined_cells?.length !== reference.quarantined_zero_cells) {
+    throw new Error(`Historical city companion ${reference.source_release_id} does not match its release reference`);
+  }
+  const ids = new Set(dataset.cities.map((city) => city.id));
+  if (ids.size !== dataset.cities.length || dataset.cities.some((city) => city.source_release_id !== reference.source_release_id
+    || !Number.isFinite(city.latitude) || !Number.isFinite(city.longitude))) {
+    throw new Error(`Invalid historical city companion identities in ${reference.source_release_id}`);
+  }
+  const keys = new Set<string>();
+  for (const observation of dataset.observations) {
+    const key = `${observation.city_id}:${observation.year}`;
+    if (!ids.has(observation.city_id) || keys.has(key) || !dataset.years.includes(observation.year)
+      || !Number.isInteger(observation.population) || observation.population <= 0) {
+      throw new Error(`Invalid historical city observation in ${reference.source_release_id}`);
+    }
+    keys.add(key);
+  }
 }
 
 export interface ViewRow {
@@ -780,6 +878,7 @@ export function validateAtlasReleaseManifest(manifest: AtlasReleaseManifest): vo
     manifest.deep_time_population.source_release_id,
     manifest.historical_context.source_release_id,
     manifest.historical_cities.source_release_id,
+    ...(manifest.historical_city_companions ?? []).map((item) => item.source_release_id),
   ];
   for (const sourceReleaseId of layerSourceReferences) {
     if (!sourceReleaseIds.has(sourceReleaseId)) {
@@ -856,12 +955,27 @@ export function validateAtlasReleaseManifest(manifest: AtlasReleaseManifest): vo
     }
   }
 
+  if (manifest.conflict_evidence) {
+    if (manifest.conflict_evidence.selection_policy !== 'source_native_exact_year_no_geographic_join') {
+      throw new Error('Unknown conflict evidence selection policy');
+    }
+    uniqueIds('conflict dataset', manifest.conflict_evidence.datasets.map((item) => item.source_release_id));
+    for (const item of manifest.conflict_evidence.datasets) {
+      if (!sourceReleaseIds.has(item.source_release_id) || !manifest.artifacts[item.data_file]
+        || !manifest.artifacts[item.download_file] || !/^[a-f0-9]{64}$/.test(item.source_artifact_sha256)
+        || item.source_row_count <= 0 || item.available_years.length === 0) {
+        throw new Error(`Invalid conflict dataset reference ${item.source_release_id}`);
+      }
+    }
+  }
+
   const requiredArtifacts = [
     manifest.deep_time_population.data_file,
     manifest.deep_time_population.download_file,
     manifest.historical_context.index_file,
     manifest.historical_cities.data_file,
     manifest.historical_cities.download_file,
+    ...(manifest.historical_city_companions ?? []).flatMap((item) => [item.data_file, item.download_file]),
     manifest.reconciliation.data_file,
   ];
   for (const file of requiredArtifacts) {
@@ -872,6 +986,16 @@ export function validateAtlasReleaseManifest(manifest: AtlasReleaseManifest): vo
     || manifest.historical_cities.reconciliation_decision_set_id !== manifest.reconciliation.decision_set_id
   ) {
     throw new Error('Published layers disagree on the reconciliation decision set');
+  }
+  if (manifest.historical_city_companions) {
+    uniqueIds('historical city companion', manifest.historical_city_companions.map((item) => item.source_release_id));
+    for (const companion of manifest.historical_city_companions) {
+      if (!/^[a-f0-9]{64}$/.test(companion.source_artifact_sha256)
+        || companion.city_count <= 0 || companion.observation_count <= 0
+        || companion.quarantined_zero_cells < 0) {
+        throw new Error(`Invalid historical city companion ${companion.source_release_id}`);
+      }
+    }
   }
 
   for (const [file, artifact] of Object.entries(manifest.artifacts)) {

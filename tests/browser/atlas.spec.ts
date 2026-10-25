@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import axe from 'axe-core';
 
-const releaseId = 'atlas-mvp-2026-10-24-r12';
+const releaseId = 'atlas-mvp-2026-10-24-r14';
 
 async function waitForRelease(page: Page): Promise<void> {
   await expect(page.getByText(`Atlas release ${releaseId}`, { exact: true })).toBeVisible();
@@ -138,8 +138,8 @@ test('source roadmap groups indicators with source-level acquisition and release
   await waitForRelease(page);
   const matrix = page.getByRole('region', { name: 'Source ingestion status by data vertical' });
   await expect(matrix.locator('thead th')).toHaveText(['Data vertical', 'Indicators', 'Sources', 'Acquired', 'In release']);
-  await expect(matrix.locator('.matrix-indicator')).toHaveCount(49);
-  await expect(page.getByText(/15 source sets ready · 9 need a source/)).toBeVisible();
+  await expect(matrix.locator('.matrix-indicator')).toHaveCount(50);
+  await expect(page.getByText(/19 source sets ready · 9 need a source/)).toBeVisible();
   await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Access to electricity' })).toContainText('Source set ready');
   await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Income and consumption inequality' })).toContainText('2/3 sources in release');
   await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Child mortality' })).toContainText('Source selection needed');
@@ -154,6 +154,28 @@ test('source roadmap groups indicators with source-level acquisition and release
   const horizontalOverflow = await matrix.evaluate((element) => element.scrollWidth > element.clientWidth);
   expect(horizontalOverflow).toBe(true);
   await expectNoSeriousAccessibilityViolations(page);
+});
+
+test('conflict page keeps two UCDP 26.1 products separate and source-native', async ({ page }) => {
+  await page.goto(`/?page=conflict&release=${releaseId}&product=acd&year=1946`);
+  await expect(page.getByRole('heading', { name: 'Conflict records, with their boundaries intact.' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'UCDP source observations' })).toContainText('UcdpPrioConflict_v26_1.csv:row-');
+  await page.getByLabel('Source product').selectOption('cy');
+  await page.getByLabel('Exact source year').selectOption('2025');
+  await expect(page.getByRole('region', { name: 'UCDP source observations' })).toContainText('OrganizedViolenceCYDataSet26_1.csv:row-');
+  await expect(page.getByText(/four rows are out of numerical order/)).toBeVisible();
+  await expectNoSeriousAccessibilityViolations(page);
+});
+
+test('historical map and fallback table retain both city source series at a shared year', async ({ page }) => {
+  await page.goto(`/?release=${releaseId}&metric=population_total&year=1000`);
+  await waitForRelease(page);
+  await expect(page.getByText('125 source-specific city estimates')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'City estimates' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Open evidence table' }).click();
+  const cities = page.getByRole('region', { name: 'Scrollable historical city evidence' });
+  await expect(cities).toContainText('reba-modelski-ancient-v2');
+  await expect(cities).toContainText('reba-chandler-v2');
 });
 
 test('economic source tables expose exact dates, missing coverage, and original locators', async ({ page }) => {

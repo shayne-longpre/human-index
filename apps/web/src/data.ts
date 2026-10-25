@@ -1,4 +1,4 @@
-import { validateEconomicEvidenceDataset, validateInstitutionalEvidenceDataset, validatePopulationSurfaceDataset } from '@atlas/contracts';
+import { validateConflictEvidenceDataset, validateEconomicEvidenceDataset, validateHistoricalCityCompanionDataset, validateInstitutionalEvidenceDataset, validatePopulationSurfaceDataset } from '@atlas/contracts';
 import type {
   AtlasEntity,
   AtlasReleaseManifest,
@@ -7,6 +7,8 @@ import type {
   EconomicEvidenceDataset,
   InstitutionalDatasetReference,
   InstitutionalEvidenceDataset,
+  ConflictDatasetReference,
+  ConflictEvidenceDataset,
   GdpPerCapitaDataset,
   HistoricalCityDataset,
   HistoricalContextIndex,
@@ -89,6 +91,7 @@ export interface ReleaseBase {
   historicalPopulation: HistoricalPopulationDataset;
   historicalContext: HistoricalContextIndex;
   historicalCities: HistoricalCityDataset;
+  historicalCityCompanions: HistoricalCityDataset[];
 }
 
 export interface ReconciliationDecisionArtifact {
@@ -103,7 +106,7 @@ export interface ReconciliationDecisionArtifact {
   [key: string]: unknown;
 }
 
-export const releaseRoot = '/atlas/releases/atlas-mvp-2026-10-24-r12';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-10-24-r14';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {
@@ -116,13 +119,18 @@ async function getJson<T>(url: string): Promise<T> {
 
 export async function loadReleaseBase(): Promise<ReleaseBase> {
   const manifest = await getJson<AtlasReleaseManifest>(`${releaseRoot}/manifest.json`);
-  const [entityPayload, geometry, population, historicalPopulation, historicalContext, historicalCities] = await Promise.all([
+  const [entityPayload, geometry, population, historicalPopulation, historicalContext, historicalCities, historicalCityCompanions] = await Promise.all([
     getJson<{ entities: AtlasEntity[] }>(`${releaseRoot}/entities.json`),
     getJson<CountryFeatureCollection>(`${releaseRoot}/countries.geojson`),
     getJson<PopulationDataset>(`${releaseRoot}/population.json`),
     getJson<HistoricalPopulationDataset>(`${releaseRoot}/${manifest.deep_time_population.data_file}`),
     getJson<HistoricalContextIndex>(`${releaseRoot}/${manifest.historical_context.index_file}`),
     getJson<HistoricalCityDataset>(`${releaseRoot}/${manifest.historical_cities.data_file}`),
+    Promise.all((manifest.historical_city_companions ?? []).map((item) => getJson<HistoricalCityDataset>(`${releaseRoot}/${item.data_file}`)
+      .then((dataset) => {
+        validateHistoricalCityCompanionDataset(dataset, item);
+        return dataset;
+      }))),
   ]);
   return {
     entities: entityPayload.entities,
@@ -132,6 +140,7 @@ export async function loadReleaseBase(): Promise<ReleaseBase> {
     historicalPopulation,
     historicalContext,
     historicalCities,
+    historicalCityCompanions,
   };
 }
 
@@ -214,6 +223,24 @@ export function loadInstitutionalDataset(reference: InstitutionalDatasetReferenc
       throw error;
     });
   institutionalCache.set(reference.id, pending);
+  return pending;
+}
+
+const conflictCache = new Map<string, Promise<ConflictEvidenceDataset>>();
+
+export function loadConflictDataset(reference: ConflictDatasetReference): Promise<ConflictEvidenceDataset> {
+  const existing = conflictCache.get(reference.source_release_id);
+  if (existing) return existing;
+  const pending = getJson<ConflictEvidenceDataset>(`${releaseRoot}/${reference.data_file}`)
+    .then((dataset) => {
+      validateConflictEvidenceDataset(dataset, reference);
+      return dataset;
+    })
+    .catch((error: unknown) => {
+      conflictCache.delete(reference.source_release_id);
+      throw error;
+    });
+  conflictCache.set(reference.source_release_id, pending);
   return pending;
 }
 

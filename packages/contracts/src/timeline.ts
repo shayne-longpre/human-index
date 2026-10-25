@@ -14,11 +14,13 @@ export function buildEvidenceTimelineYears(
   manifest: AtlasReleaseManifest,
   historicalContext: HistoricalContextIndex,
   historicalCities: HistoricalCityDataset,
+  cityCompanions: readonly HistoricalCityDataset[] = [],
 ): number[] {
   return Array.from(new Set([
     ...manifest.metrics.flatMap((metric) => metric.available_years),
     ...historicalContext.snapshots.map((snapshot) => snapshot.atlas_year),
     ...historicalCities.years,
+    ...cityCompanions.flatMap((item) => item.years),
   ])).sort((left, right) => left - right);
 }
 

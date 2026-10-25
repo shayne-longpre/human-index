@@ -2,9 +2,44 @@
 
 Updated: 2026-10-24
 
+## Current release r14 — source-native conflict evidence
+
+R14 adds two separate, CC BY 4.0 UCDP 26.1 products and a Conflict page:
+2,816 UCDP/PRIO conflict-years (1946–2025) and 7,132 OrganizedViolenceCY
+country-years (1989–2025). The latter has occurrence flags and separate
+best/low/high death estimates; four source triplets are nonmonotonic, so the
+page presents best estimates only and the CSV preserves all three fields.
+These source supports are not joined to modern display polygons or population.
+The acquired GED event archive remains open for location/precision and
+fatality-field review. The Sources ledger now has 50 indicators, 19 source
+sets ready, and nine indicators still lacking a selected source.
+
+Pleiades v4.1 GIS place/name/point exports are additionally acquired and
+content-hashed (33,956,960 bytes total), moving that source to Acquired: Yes.
+Its 41,480 places include 12,084 rough locations and 7,509 without a
+representative point. Name and location date fields are termini rather than
+valid intervals; Pleiades remains out of release pending a truthful temporal
+name and location presentation.
+
+The matching OWID long-run life-expectancy CSV and metadata are also acquired
+and profiled: 21,565 rows, with only three source rows at 1800. They are not
+released because the chart combines HMD, Zijdeman, Riley, and UN WPP inputs
+and their exact reuse and per-row source lineage remain unresolved.
+
+## Previous release r13 — historical city companions
+
+R13 publishes the pinned CC BY 4.0 Chandler v2 and Modelski Modern v2 city
+tables alongside, not concatenated into, Modelski Ancient. It adds 9,729
+positive source estimates (9,436 Chandler; 293 Modelski Modern), their exact
+source dates, row/column locators, reviewed place-link IDs, and separate CSVs
+to the map, inspector, accessible table, and view download. Two Chandler
+literal-zero cells are quarantined and remain visible as unresolved source
+codes in JSON/CSV. The two unresolved coordinate-only place identities remain
+source-only. Readiness is not full temporal or geographic coverage.
+
 ## Indicator-to-source roadmap
 
-The Sources page now groups 49 named indicators under ten verticals and shows
+The Sources page groups 50 named indicators under ten verticals and shows
 the planned source rows beneath each indicator. Acquired and In release remain
 source-level checks. A source set is marked ready only when every planned
 source is in the current release; nine indicators explicitly need a source
@@ -144,10 +179,11 @@ an unavailable release ID fails closed.
   quarantined. Of 28 bounded Mediterranean overlap candidates, eight are
   source-declared hierarchy relations and twenty remain explicitly unresolved.
   The decision layer only changes styling and disclosure.
-- Modelski Ancient remains the only published city series. Across it, Chandler
-  v2, and Modelski Modern v2, 336 candidate pairs are linked as the same place,
-  15 distant homonyms are rejected, and two coordinate-only identities remain
-  unresolved. The two Chandler numeric-zero cells also remain unresolved.
+- Modelski Ancient, Chandler v2, and Modelski Modern v2 are published as
+  separate city series. Across them, 336 candidate pairs are linked as the
+  same place, 15 distant homonyms are rejected, and two coordinate-only
+  identities remain unresolved. The two Chandler numeric-zero cells are
+  quarantined rather than shown as zero residents.
 - CShapes 2.0 is acquired and profiled: 710 dated GeoJSON features spanning
   1886–2019, including 11 invalid geometries. It is not published because its
   CC BY-NC-SA terms need a product-use decision, the download omits codebook
@@ -202,16 +238,17 @@ an unavailable release ID fails closed.
 
 ## Verified state
 
-The r7 release builder and unit/contract suites are passing. The browser
-gate adds downloadable-bundle inspection, history restoration, reduced-motion,
-axe, and desktop/mobile screenshot checks.
+The release builder and unit/contract suites are part of the release gate.
+The browser gate adds downloadable-bundle inspection, history restoration,
+reduced-motion, axe, and desktop/mobile screenshot checks. Report only the
+checks actually run for each subsequent release.
 
 ## Immediate next work
 
-1. Parse V-Dem v16 reproducibly and audit the country-year support for the
-   descriptive de-jure suffrage candidate.
-2. Build the UCDP Gleditsch-Ward crosswalk and decide how to handle the 5,075
-   non-monotonic fatality-bound rows before publishing a conflict measure.
+1. Decide whether GED event locations merit a separate map overlay, and review
+   its 5,075 nonmonotonic low/best/high rows before any event fatality display.
+2. Select direct sources for the nine indicator gaps and record variable-level
+   reuse terms; do not treat a source-wide date span as variable coverage.
 3. Resolve Clio artifact terms and review Maddison's original-paper mapping
    before historical graphical reuse; keep their series source-native.
 4. Resolve HYDE licensing and validate one matched baseline/lower/upper gridded

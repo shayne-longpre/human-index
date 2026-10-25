@@ -4,11 +4,11 @@
 
 The Sources page's five-column ledger is generated from
 `data/registry/sources.json`: data vertical → indicator → planned sources →
-source-level acquisition and release checks. The current registry defines 49
+source-level acquisition and release checks. The current registry defines 50
 indicators in ten verticals. An indicator is **source-set ready** if it has at
 least one planned source and every listed source has all of its declared release
 IDs in the selected manifest. Empty source sets are displayed as **source
-selection needed**, never treated as vacuously complete. As of r12, 15 source
+selection needed**, never treated as vacuously complete. As of r14, 19 source
 sets are ready and nine indicators still need a source selected.
 
 This is an operational integration milestone, **not** a claim that an indicator
@@ -64,8 +64,14 @@ national-survey evidence and PWT/WID gates, see `ECONOMIC_INDICATORS.md`.
   participation, employment, unemployment, hours, and earnings series and a
   bulk-download facility. Source/model, frequency, sex/age dimensions, and
   geography vary by exact table.
-- Candidate only: no exact table release, artifact, and asset-level reuse terms
-  are pinned. The WDI modeled ILO unemployment and PWT labor inputs are
+- The [ILO rights page](https://www.ilo.org/rights-and-permissions) states
+  that datasets and referential metadata published from May 3, 2023 are CC BY
+  4.0, except restricted microdata. The official bulk guide names annual
+  `EMP_DWAP_NOC_RT_A` for employment-to-population ratio. The documented older
+  bulk CSV path returned 404 in this pass; current ILO Rilostat code points to
+  an RDS endpoint, which could not be retrieved here. No exact table artifact
+  or publication-vintage metadata is pinned, so this stays not acquired and
+  not released. The WDI modeled ILO unemployment and PWT labor inputs are
   published separately; they do not stand in for direct ILOSTAT survey data.
 
 ## S25 — Pew Global Religious Composition
@@ -221,8 +227,19 @@ Use as a curated expansion source, preserving original quality classifications a
 
 ## S8 — UCDP: organized violence
 
-- [Official download center](https://ucdp.uu.se/downloads/): **26.1** finalized releases; GED event series and UCDP/PRIO armed-conflict series have different temporal scopes, including modern geocoded data from 1989 and the latter's 1946–2025 coverage. **CC BY 4.0**.
+- [Official download center](https://ucdp.uu.se/downloads/): **26.1** finalized releases; GED event series, UCDP/PRIO armed-conflict-year series, and OrganizedViolenceCY country-year series are distinct products. **CC BY 4.0**.
 - Check the selected archive/codebook rather than assuming every product's scope from the portal's version heading. Keep candidate/preliminary data separate from finalized releases.
+
+R14 publishes 2,816 UCDP/PRIO conflict-year rows (1946–2025) and 7,132
+OrganizedViolenceCY Gleditsch–Ward country-years (1989–2025) in separate
+source-native tables and CSVs. It does not join either to Atlas political
+borders or to population. The country-year product has four low/best/high
+fatality estimate triplets out of numerical order, so they are preserved as
+three source-authored fields rather than rendered as an interval. A source zero
+obeys its event inclusion rules, not proof of peace. The acquired GED archive
+is still not released: its event-location support and 5,075 nonmonotonic
+fatality triplets need separate review. The country-year product is not a
+substitute for event locations or person-level exposure.
 
 Choose a specific definition—events, documented fatalities, or another supported measure. A conflict location is not a person-level exposure survey. Absence of an event record outside a source's scope is not evidence of peace. Do not concatenate UCDP, COW, and older conflict catalogs into a single trend without a separate harmonization study.
 
@@ -231,6 +248,14 @@ Choose a specific definition—events, documented fatalities, or another support
 - [Life-expectancy chart and metadata](https://ourworldindata.org/grapher/life-expectancy) provides source lineage and download links; its long-run series combines historical inputs and modern UN estimates.
 - [CSV](https://ourworldindata.org/grapher/life-expectancy.csv?v=1&csvType=full&useColumnShortNames=false) and [metadata JSON](https://ourworldindata.org/grapher/life-expectancy.metadata.json?v=1&csvType=full&useColumnShortNames=false) should be acquired together and content-hashed.
 - Preserve underlying third-party licensing, not only OWID attribution. The inspected chart page describes Grapher software as custom-licensed; do not assume permission to clone its application code from data-download availability.
+
+The matching chart CSV and metadata JSON were acquired and content-hashed on
+October 24, 2026. The profile finds 21,565 rows in 265 entities, but only
+three rows at 1800 and 43 at 1900. The chart explicitly combines Riley,
+Zijdeman, HMD, and UN WPP with major OWID processing. The underlying HMD and
+Zijdeman reuse terms and per-row source mapping are not yet cleared for an
+Atlas release. The World Bank life-expectancy series remains the separately
+published modern measure; no cross-source splice is made.
 
 Period life expectancy is a synthetic life-table measure, not an observed distribution of ages at death. Preserve this meaning in the UI. Country totals from an OWID population series are not a substitute for HYDE's spatial reconstruction.
 
@@ -292,15 +317,19 @@ ontology of political belonging, and it does not solve ancient geometry.
 
 - [Data descriptor](https://doi.org/10.1038/sdata.2016.34) and pinned
   [Modelski Ancient v2 artifact](https://doi.org/10.6084/m9.figshare.2059497.v2).
-- The implemented table spans 3700 BCE–1000 CE: 154 city points, 41 sparse exact
-  dates, and 621 published population estimates. Figshare metadata declares CC BY
-  4.0; the exact CSV and metadata record are content-hashed in the source lock.
+- Modelski Ancient spans 3700 BCE–1000 CE: 154 city points, 41 sparse exact
+  dates, and 621 published population estimates. Chandler v2 contributes 9,436
+  positive exact-date estimates from 1,597 source city rows; Modelski Modern v2
+  contributes 293 estimates at 2000 CE. The exact CSVs and Figshare metadata
+  are CC BY 4.0 and content-hashed in separate source locks.
 - Intended use: an independently sourced city/urban-population point layer, not
   rural population, a global population denominator, or a polity total.
-- Status: Modelski Ancient v2 is implemented. Source coordinates, modern-country
-  labels, and certainty codes are preserved without reinterpretation. Companion
-  Chandler and Modelski Modern tables remain deferred until city identity and
-  competing-estimate handling are designed explicitly.
+- Status: all three source-native series are published in r13. The map, inspector,
+  table, and CSV identify each source; accepted same-place links never merge or
+  average estimates. Two Chandler cells literally contain numeric zero; r13
+  records them as `source_zero_unresolved` in the JSON and CSV and does not map
+  them as zero residents. Two coordinate-only identity pairs remain unresolved
+  and retain source-only IDs.
 
 ## S15 — World Historical Gazetteer
 
@@ -318,8 +347,14 @@ ontology of political belonging, and it does not solve ancient geometry.
   BY 3.0 by the publisher.
 - Intended use: ancient place names, locations, bibliographic links, and explicit
   uncertain or unlocated states.
-- Status: select and pin a versioned export, then profile temporal and spatial
-  certainty. Pleiades is a place gazetteer, not a polity-border source.
+- Acquired pinned v4.1 GIS exports (`places.csv`, `names.csv`,
+  `location_points.csv`, README) in ignored raw storage, with SHA-256s in
+  `data/registry/pleiades-source-lock.json`. The factual profile records 41,480
+  places, 38,862 names, and 25,038 point locations. It finds 12,084 rough
+  place locations and 7,509 places without a representative point. Source
+  `year_after_which`/`year_before_which` are termini, **not** a continuous
+  valid interval. The name/location join and uncertain label treatment still
+  need review before publication. Pleiades is not a polity-border source.
 
 ## S17 — U.S. Census Bureau historical world-population estimates
 

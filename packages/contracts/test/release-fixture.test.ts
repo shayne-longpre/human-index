@@ -13,6 +13,7 @@ import {
   validatePublishedMetrics,
   type AtlasEntity,
   type AtlasReleaseManifest,
+  type ConflictEvidenceDataset,
   type ElectricityDataset,
   type GdpPerCapitaDataset,
   type HistoricalContextIndex,
@@ -24,7 +25,7 @@ import {
   type LifeExpectancyDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-24-r12');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-24-r14');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -33,6 +34,17 @@ function readJson<T>(name: string): T {
 const manifest = readJson<AtlasReleaseManifest & {
   artifacts: Record<string, { bytes: number; sha256: string }>;
 }>('manifest.json');
+const pleiadesProfile = JSON.parse(
+  readFileSync(resolve('data/review/pleiades-v4.1-profile.json'), 'utf8'),
+) as {
+  status: string;
+  places: { rows: number; with_representative_point: number; location_precision: Record<string, number> };
+  names: { rows: number; orphan_place_ids: number; date_bound_states: Record<string, number> };
+  location_points: { rows: number; orphan_place_ids: number };
+};
+const owidLifeProfile = JSON.parse(
+  readFileSync(resolve('data/review/owid-life-expectancy-profile.json'), 'utf8'),
+) as { status: string; rows: number; entities: number; rows_1800: number; rows_1900: number };
 const population = readJson<PopulationDataset>('population.json');
 const populationOutlook = readJson<PopulationOutlookDataset>('population-outlook.json');
 const electricity = readJson<ElectricityDataset>('electricity.json');
@@ -292,6 +304,61 @@ describe('genuine-data MVP release', () => {
     expect(historicalCities.temporal_policy).toBe('exact_only');
     expect(historicalCities.spatial_support).toBe('source_geocoded_city_point_not_extent');
     expect(historicalCities.observations.every((observation) => observation.population > 0)).toBe(true);
+  });
+
+  it('publishes companion city estimates as separate exact-date sources with unresolved zeros quarantined', () => {
+    const references = manifest.historical_city_companions ?? [];
+    expect(references.map((item) => item.source_release_id)).toEqual([
+      'reba-chandler-v2', 'reba-modelski-modern-v2',
+    ]);
+    const datasets = references.map((item) => readJson<HistoricalCityDataset>(item.data_file));
+    expect(datasets.map((item) => item.observations.length)).toEqual([9436, 293]);
+    expect(datasets[0].quarantined_cells).toHaveLength(2);
+    expect(datasets[1].quarantined_cells).toHaveLength(0);
+    expect(datasets.flatMap((item) => item.observations).every((item) => item.population > 0)).toBe(true);
+    expect(datasets[0].cities.some((city) => city.canonical_place_id !== null)).toBe(true);
+    expect(datasets[0].cities.some((city) => city.canonical_place_id === null)).toBe(true);
+    const timeline = buildEvidenceTimelineYears(manifest, historicalContext, historicalCities, datasets);
+    expect(timeline).toContain(2000);
+    const chandlerCsv = readFileSync(resolve(releaseRoot, references[0].download_file), 'utf8');
+    expect(chandlerCsv).toContain('source_zero_unresolved');
+    expect(chandlerCsv).toContain('chandlerV2.csv / row 32 /');
+  });
+
+  it('keeps UCDP conflict-years and within-border country-years as distinct source products', () => {
+    const references = manifest.conflict_evidence?.datasets ?? [];
+    expect(references.map((item) => item.kind)).toEqual(['acd', 'cy']);
+    const acd = readJson<ConflictEvidenceDataset>(references[0].data_file);
+    const cy = readJson<ConflictEvidenceDataset>(references[1].data_file);
+    expect(acd.rows).toHaveLength(2816);
+    expect(cy.rows).toHaveLength(7132);
+    expect(acd.years).toEqual(Array.from({ length: 80 }, (_, index) => index + 1946));
+    expect(cy.years).toEqual(Array.from({ length: 37 }, (_, index) => index + 1989));
+    expect(cy.nonmonotonic_low_best_high_rows).toBe(4);
+    expect((cy.rows[0] as { original_record_locator: string }).original_record_locator).toContain('OrganizedViolenceCYDataSet26_1.csv:row-');
+    expect(manifest.source_releases.map((item) => item.id)).toContain('ucdp-prio-acd-26.1');
+    expect(manifest.source_releases.map((item) => item.id)).not.toContain('ucdp-ged-26.1');
+  });
+
+  it('records the acquired but unreleased Pleiades place/name/location limitations', () => {
+    expect(pleiadesProfile.status).toBe('acquired_profiled_not_released');
+    expect(pleiadesProfile.places).toMatchObject({ rows: 41480, with_representative_point: 33971 });
+    expect(pleiadesProfile.places.location_precision.rough).toBe(12084);
+    expect(pleiadesProfile.names).toMatchObject({ rows: 38862, orphan_place_ids: 0 });
+    expect(pleiadesProfile.names.date_bound_states.neither).toBe(3271);
+    expect(pleiadesProfile.location_points).toMatchObject({ rows: 25038, orphan_place_ids: 0 });
+    expect(sourceRegistry.sources.find((source) => source.id === 'pleiades')).toMatchObject({
+      downloaded: true, release_ready: false,
+    });
+  });
+
+  it('records OWID long-run life-expectancy acquisition without claiming source rights or dense early coverage', () => {
+    expect(owidLifeProfile).toMatchObject({
+      status: 'acquired_profiled_not_released', rows: 21565, entities: 265, rows_1800: 3, rows_1900: 43,
+    });
+    expect(sourceRegistry.sources.find((source) => source.id === 'owid_life_expectancy')).toMatchObject({
+      downloaded: true, release_ready: false,
+    });
   });
 
   it('publishes exact deep-time world estimates without silently choosing within source ranges', () => {

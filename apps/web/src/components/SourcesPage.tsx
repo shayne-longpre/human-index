@@ -1,6 +1,10 @@
 import { formatAstronomicalYear, type AtlasReleaseManifest } from '@atlas/contracts';
 import sourceRegistry from '../../../../data/registry/sources.json';
 import candidateSourceLock from '../../../../data/registry/candidate-source-lock.json';
+import cityCompanionLock from '../../../../data/registry/city-companion-source-lock.json';
+import ucdpCountryYearLock from '../../../../data/registry/ucdp-country-year-lock.json';
+import pleiadesSourceLock from '../../../../data/registry/pleiades-source-lock.json';
+import owidLifeExpectancyLock from '../../../../data/registry/owid-life-expectancy-lock.json';
 import religionSourceLock from '../../../../data/registry/religion-source-lock.json';
 import ccpSourceLock from '../../../../data/registry/ccp-source-lock.json';
 import { releaseRoot } from '../data';
@@ -59,7 +63,9 @@ function releaseRole(id: string): string {
   if (id.startsWith('world-bank')) return 'Modern population, electricity, and life-expectancy observations';
   if (id.startsWith('us-census')) return 'Deep-time global population estimates and source ranges';
   if (id.startsWith('cliopatria')) return 'Historical political context geometry and names';
-  if (id.startsWith('reba-modelski')) return 'Sparse exact-date ancient city population points';
+  if (id.startsWith('reba-')) return 'Separate exact-date city estimates; no cross-source averaging';
+  if (id === 'ucdp-prio-acd-26.1') return 'Source-native armed conflict-year records, 1946–2025';
+  if (id === 'ucdp-organized-violence-cy-26.1') return 'Source-native within-border country-year violence evidence, 1989–2025';
   if (id.startsWith('un-wpp')) return 'Separate annual population estimates and Medium projections';
   if (id.startsWith('ghsl-')) return 'Five-year source-native modeled population grid, 1975–2020';
   if (id.startsWith('worldpop-')) return 'Separate modeled population grid; never spliced with GHSL';
@@ -111,7 +117,7 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
       <section className="source-section" aria-labelledby="source-matrix-title">
         <div className="section-intro">
           <span className="eyebrow">
-            Coverage ledger · {verticals.length} verticals · {indicatorCount} indicators · {readyIndicatorCount} source sets ready · {sourceSelectionCount} need a source · {candidateLock.artifacts.length + Object.keys(religionSourceLock.files).length + Object.keys(ccpSourceLock.artifacts).length + economicArtifactCount} pinned artifacts
+            Coverage ledger · {verticals.length} verticals · {indicatorCount} indicators · {readyIndicatorCount} source sets ready · {sourceSelectionCount} need a source · {candidateLock.artifacts.length + cityCompanionLock.artifacts.length + ucdpCountryYearLock.artifacts.length + pleiadesSourceLock.artifacts.length + owidLifeExpectancyLock.artifacts.length + Object.keys(religionSourceLock.files).length + Object.keys(ccpSourceLock.artifacts).length + economicArtifactCount} pinned artifacts
           </span>
           <h2 id="source-matrix-title">What is in—and what is still outstanding</h2>
           <p>

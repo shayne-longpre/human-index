@@ -19,6 +19,7 @@ export function HistoricalCityInspector({ city, observation, onClose }: Historic
         <span>estimated city population · {formatAstronomicalYear(observation.year)}</span>
       </div>
       <dl className="inspector-list">
+        <div><dt>Source series</dt><dd>{city.source_release_id ?? 'reba-modelski-ancient-v2'}</dd></div>
         <div><dt>Other name</dt><dd>{city.other_name ?? 'Not supplied'}</dd></div>
         <div><dt>Modern label</dt><dd>{city.modern_country_label} (source metadata only)</dd></div>
         <div><dt>Spatial support</dt><dd>Source geocoded point, not a city extent</dd></div>

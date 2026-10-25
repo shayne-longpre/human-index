@@ -265,14 +265,14 @@
       "label": "ILOSTAT direct labor statistics",
       "dossier": "S24",
       "role": "labor_force_hours_and_earnings_candidate",
-      "candidate_release": "Select a fixed ILOSTAT table and source vintage",
+      "candidate_release": "EMP_DWAP_NOC_RT_A annual employment-to-population ratio proposed; live table/vintage not yet acquired",
       "coverage_start": null,
       "coverage_end": null,
       "license": null,
-      "license_status": "exact_table_and_reuse_terms_not_pinned",
-      "urls": ["https://ilostat.ilo.org/data/", "https://webapps.ilo.org/ilostat-files/Documents/ILOSTAT_BulkDownload_Guidelines.pdf"],
+      "license_status": "provider_post_2023_database_CC_BY_4_confirmed_exact_asset_not_pinned",
+      "urls": ["https://ilostat.ilo.org/data/", "https://www.ilo.org/rights-and-permissions", "https://webapps.ilo.org/ilostat-files/Documents/ILOSTAT_BulkDownload_Guidelines.pdf"],
       "blockers": ["select_exact_indicator_table_release_and_dimensions", "verify_asset_level_reuse_terms", "keep_observed_and_ILO_modeled_series_distinct"],
-      "notes": "The official ILOSTAT portal offers participation, employment, unemployment, hours and earnings data, including bulk CSVs. Atlas currently uses WDI's modeled ILO unemployment and PWT labor inputs; no direct ILOSTAT artifact is acquired or published.",
+      "notes": "Official ILO rights guidance says datasets and referential metadata published since 3 May 2023 are CC BY 4.0, excluding restricted microdata. The official bulk guide identifies annual EMP_DWAP_NOC_RT_A as employment-to-population ratio. The documented older WEB_bulk_download URL returned 404 during this pass, and the current Rilostat code points to an RDS endpoint that could not be retrieved from this environment. No exact direct ILOSTAT artifact is acquired or published. WDI modeled ILO unemployment and PWT labor inputs remain separate.",
       "checked_at": "2026-10-24",
       "verification_level": "official_catalog_and_bulk_route_checked_only",
       "downloaded": false,
@@ -492,11 +492,11 @@
     },
     {
       "id": "ucdp",
-      "label": "UCDP",
+      "label": "UCDP georeferenced events (GED)",
       "dossier": "S8",
       "role": "events",
       "candidate_release": "26.1",
-      "coverage_start": "1946 CE for conflict-years; 1989 CE for georeferenced events",
+      "coverage_start": "1989 CE",
       "coverage_end": "2025 CE",
       "license": "CC-BY-4.0",
       "license_status": "download_center_checked",
@@ -504,13 +504,10 @@
         "https://ucdp.uu.se/downloads/"
       ],
       "blockers": [
-        "choose_event_level_ged_or_conflict_year_acd_per_measure",
-        "crosswalk_gleditsch_ward_location_codes_without_name_only_joins",
-        "define_event_location_versus_conflict_party_support",
-        "keep_best_low_high_fatality_fields_as_source_estimates_not_confidence_intervals",
+        "define_event_location_and_precision_support",
         "review_5075_event_rows_where_low_best_high_are_not_monotonic_before_any_fatality_measure"
       ],
-      "notes": "UCDP GED 26.1 (event records, 1989–2025), UCDP/PRIO Armed Conflict Dataset 26.1 (conflict-years, 1946–2025), and both codebooks are pinned. They remain separate products: event locations, conflict parties, and territorial context are not interchangeable, and no conflict exposure prevalence is inferred.",
+      "notes": "UCDP GED 26.1 event records and codebook are pinned but not published. A separate r14 release publishes ACD conflict-years and OrganizedViolenceCY country-years. Event locations and fatality fields still need their own adapter and review; neither published product is substituted for GED events or population exposure.",
       "checked_at": "2026-09-23",
       "verification_level": "artifacts_and_codebooks_acquired_adapter_pending",
       "downloaded": true,
@@ -519,13 +516,53 @@
       "release_ready": false
     },
     {
+      "id": "ucdp_prio_acd",
+      "label": "UCDP/PRIO Armed Conflict Dataset 26.1",
+      "dossier": "S8",
+      "role": "source_conflict_year_status",
+      "candidate_release": "26.1",
+      "coverage_start": "1946 CE",
+      "coverage_end": "2025 CE",
+      "license": "CC-BY-4.0",
+      "license_status": "official_download_center_and_exact_artifact_checked",
+      "urls": ["https://ucdp.uu.se/downloads/"],
+      "blockers": [],
+      "notes": "Published source-native in r14: 2,816 unique conflict-ID/year rows. Source parties, intensity, location label, Gleditsch-Ward location code and row locator are retained. No name-only modern-border join or inference that absence of a row means peace.",
+      "checked_at": "2026-10-24",
+      "verification_level": "artifact_acquired_profiled_and_source_native_release_published",
+      "downloaded": true,
+      "artifact_sha256": "5f951743222964674a446e32a5a871077b29bd13349588d85fc59953d89c878a",
+      "terms_snapshot_sha256": null,
+      "release_ready": true
+    },
+    {
+      "id": "ucdp_organized_violence_cy",
+      "label": "UCDP OrganizedViolenceCY 26.1",
+      "dossier": "S8",
+      "role": "source_country_year_organized_violence",
+      "candidate_release": "26.1",
+      "coverage_start": "1989 CE",
+      "coverage_end": "2025 CE",
+      "license": "CC-BY-4.0",
+      "license_status": "official_download_center_and_exact_artifact_checked",
+      "urls": ["https://ucdp.uu.se/downloads/"],
+      "blockers": [],
+      "notes": "Published source-native in r14: 7,132 Gleditsch-Ward country-year rows, source occurrence flags, component best fatality estimates and separate low/best/high total estimates. Four source rows have nonmonotonic low/best/high values; no confidence interval is inferred. Source zeros obey UCDP inclusion rules, not a claim of peace.",
+      "checked_at": "2026-10-24",
+      "verification_level": "artifact_acquired_profiled_and_source_native_release_published",
+      "downloaded": true,
+      "artifact_sha256": "66910888f5653af42776d2debc1d72fe527559e7f7fc82e69b7c8771467f2d34",
+      "terms_snapshot_sha256": null,
+      "release_ready": true
+    },
+    {
       "id": "owid_life_expectancy",
       "label": "Our World in Data life expectancy",
       "dossier": "S9",
       "role": "context_distribution",
-      "candidate_release": "retrieval_snapshot_required",
-      "coverage_start": null,
-      "coverage_end": null,
+      "candidate_release": "life-expectancy grapher snapshot with matching metadata, retrieved 2026-10-24",
+      "coverage_start": "1543 CE (source-wide, sparse)",
+      "coverage_end": "2023 CE",
       "license": null,
       "license_status": "underlying_source_terms_require_audit",
       "urls": [
@@ -533,15 +570,15 @@
         "https://ourworldindata.org/grapher/life-expectancy.metadata.json?v=1&csvType=full&useColumnShortNames=false"
       ],
       "blockers": [
-        "fetch_data_and_metadata_together",
-        "verify_underlying_terms",
-        "profile_geography_and_years"
+        "verify_underlying_HMD_and_Zijdeman_reuse_terms",
+        "retain_source_specific_row_lineage_and_source_switch",
+        "separate_country_territory_and_region_support"
       ],
-      "notes": "Do not confuse processed data rights with visualization software rights.",
-      "checked_at": "2026-09-19",
-      "verification_level": "documentation_only",
-      "downloaded": false,
-      "artifact_sha256": null,
+      "notes": "Matching official CSV and metadata are pinned and locally profiled: 21,565 rows, 265 entities, 1543–2023 source-wide, but only 3 rows in 1800 and 43 in 1900. The chart blends Riley, Zijdeman, HMD, and UN WPP with major OWID processing. Underlying reuse terms and per-row source lineage still gate public release; period life expectancy is a synthetic life-table measure, not observed personal age at death.",
+      "checked_at": "2026-10-24",
+      "verification_level": "csv_and_metadata_acquired_profiled_not_published",
+      "downloaded": true,
+      "artifact_sha256": "c304603fb8a7da263619a8ae43b7097f35b648c458855e23f1c4ef8f2ae75c01",
       "terms_snapshot_sha256": null,
       "release_ready": false
     },
@@ -638,19 +675,14 @@
         "https://doi.org/10.6084/m9.figshare.2059494",
         "https://ndownloader.figshare.com/files/5407640"
       ],
-      "blockers": [
-        "review_two_zero_population_cells",
-        "normalize_unicode_whitespace_in_coordinates",
-        "review_two_unresolved_coordinate_only_identity_pairs",
-        "design_source_disagreement_display"
-      ],
-      "notes": "Audited fixture has 1,597 city rows, 806 sparse source-date columns, and 9,438 populated cells. Reconciliation v1 covers all 353 candidates: 336 accepted place links, 15 rejected distant homonyms, and 2 unresolved coordinate-only identities. Links never merge population values. Two Chandler cells and the multiple-source disagreement presentation remain unresolved.",
+      "blockers": [],
+      "notes": "Published source-natively in r13: 1,597 city rows and sparse exact-date estimates. Reconciliation v1 links 336 candidate pairs, rejects 15, and leaves two identities unresolved as source-only records. Links never merge population values. Two literal zero cells are quarantined as unresolved source codes and remain in the published audit, not mapped as zero residents. Same-date source estimates remain separate in the map, inspector, table, and CSV.",
       "checked_at": "2026-09-22",
-      "verification_level": "artifact_acquired_and_profiled_not_published",
+      "verification_level": "artifact_acquired_and_source_native_release_published",
       "downloaded": true,
       "artifact_sha256": "5b8df64e46988b216988eef18b46ebc2cba57ecc1adc8a5c2e1e6d5b78068031",
       "terms_snapshot_sha256": "1136fdfb3e8add5f3f4f9b3f3b1c6d30abe3e21d9706b9b45fbe9ed3014be044",
-      "release_ready": false
+      "release_ready": true
     },
     {
       "id": "reba_modelski_modern_v2",
@@ -666,24 +698,21 @@
         "https://doi.org/10.6084/m9.figshare.2059500",
         "https://ndownloader.figshare.com/files/5407637"
       ],
-      "blockers": [
-        "review_two_unresolved_coordinate_only_identity_pairs",
-        "design_source_disagreement_display"
-      ],
-      "notes": "Audited fixture has 293 city rows and 293 positive estimates at 2000 CE. Reconciliation v1 records 336 accepted place links, 15 rejected distant homonyms, and 2 unresolved coordinate-only identities across all three series. The source observations remain separate until same-date disagreements have a truthful presentation.",
+      "blockers": [],
+      "notes": "Published source-natively in r13: 293 city rows and 293 positive estimates at 2000 CE. Reconciliation v1 records 336 accepted place links, 15 rejected distant homonyms, and two unresolved identities as source-only records across all three series. Source values remain separate in the map, inspector, table, and CSV; same-place links do not average them.",
       "checked_at": "2026-09-22",
-      "verification_level": "artifact_acquired_and_profiled_not_published",
+      "verification_level": "artifact_acquired_and_source_native_release_published",
       "downloaded": true,
       "artifact_sha256": "927ee6a9122be6aded1a2f71ff5bb6f36312aae6a778574af47f4e8c65265726",
       "terms_snapshot_sha256": "b1a2acc1bf0352c54058dbd6e77f2ff87eb34c9fef7bcad58329d4763840bbe3",
-      "release_ready": false
+      "release_ready": true
     },
     {
       "id": "pleiades",
       "label": "Pleiades",
       "dossier": "S16",
       "role": "ancient_place_names_and_locations",
-      "candidate_release": "versioned_dataset_export_to_select",
+      "candidate_release": "Pleiades Datasets v4.1 GIS exports",
       "coverage_start": null,
       "coverage_end": null,
       "license": "CC-BY-3.0",
@@ -692,15 +721,15 @@
         "https://pleiades.stoa.org/downloads"
       ],
       "blockers": [
-        "pin_dataset_export",
-        "profile_temporal_and_location_certainty",
-        "define_label_priority_and_crosswalks"
+        "treat_name_and_location_termini_as_uncertain_bounds_not_continuous_validity",
+        "do_not_map_rough_representative_points_as_precise_sites",
+        "review_name_location_join_and_certainty_presentation_before_release"
       ],
-      "notes": "Authoritative open ancient-place gazetteer for names and locations, including explicitly unlocated places. It is not a polity-border source.",
-      "checked_at": "2026-09-20",
-      "verification_level": "documentation_only",
-      "downloaded": false,
-      "artifact_sha256": null,
+      "notes": "Pinned v4.1 README plus places, names, and location_points GIS CSVs are acquired and profiled: 41,480 places, 38,862 names, 25,038 point locations. Of the places, 12,084 have rough location precision and 7,509 lack a representative point. Name and location date fields are termini, not proof of continuous validity; no temporal labels are published yet. This is not a polity-border source.",
+      "checked_at": "2026-10-24",
+      "verification_level": "versioned_artifacts_acquired_and_profiled_not_published",
+      "downloaded": true,
+      "artifact_sha256": "5dd09b1a92c53e50cb9962bab44df12c5f0b7b683d4f228367d843637cfe5a59",
       "terms_snapshot_sha256": null,
       "release_ready": false
     },
@@ -850,12 +879,12 @@
         {
           "source_id": "reba_chandler_v2",
           "role": "Companion Chandler series",
-          "release_ids": []
+          "release_ids": ["reba-chandler-v2"]
         },
         {
           "source_id": "reba_modelski_modern_v2",
           "role": "Companion Modelski Modern series",
-          "release_ids": []
+          "release_ids": ["reba-modelski-modern-v2"]
         },
         {
           "source_id": "pleiades",
@@ -1033,8 +1062,18 @@
       "sources": [
         {
           "source_id": "ucdp",
-          "role": "Conflict event candidate",
+          "role": "GED event locations and fatality estimates candidate",
           "release_ids": []
+        },
+        {
+          "source_id": "ucdp_prio_acd",
+          "role": "Published armed conflict-year records",
+          "release_ids": ["ucdp-prio-acd-26.1"]
+        },
+        {
+          "source_id": "ucdp_organized_violence_cy",
+          "role": "Published within-border country-year evidence",
+          "release_ids": ["ucdp-organized-violence-cy-26.1"]
         },
         {
           "source_id": "clio_infra",
@@ -1044,7 +1083,8 @@
       ],
       "indicators": [
         {"id": "conflict_events_and_fatalities", "label": "Conflict events and fatalities", "scope": "Event locations and source low/best/high death estimates; not population exposure.", "source_ids": ["ucdp"]},
-        {"id": "conflict_year_status", "label": "Armed-conflict-year status", "scope": "Source-defined conflict thresholds and parties, not individual risk.", "source_ids": ["ucdp"]},
+        {"id": "conflict_year_status", "label": "Armed-conflict-year status", "scope": "Source-defined conflict thresholds and parties, not individual risk.", "source_ids": ["ucdp_prio_acd"]},
+        {"id": "organized_violence_country_year", "label": "Organized violence within country borders", "scope": "Source country-year flags and fatality estimates; not population exposure or an absence-of-violence claim.", "source_ids": ["ucdp_organized_violence_cy"]},
         {"id": "historical_conflict_context", "label": "Earlier historical conflict context", "scope": "Sparse historical codes need support and definition review.", "source_ids": ["clio_infra"]},
         {"id": "displacement_and_civilian_exposure", "label": "Displacement and civilian exposure", "scope": "Conflict occurrence cannot stand in for people displaced or exposed; select direct evidence.", "source_ids": []}
       ]

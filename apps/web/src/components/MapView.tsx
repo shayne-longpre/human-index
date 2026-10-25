@@ -343,7 +343,7 @@ export function MapView({
         if (layer.id.startsWith('historical-cities-')) {
           const point = object as HistoricalCityPoint;
           return {
-            text: `${point.city.name}\n${point.observation.population.toLocaleString()} people · published estimate`,
+            text: `${point.city.name}\n${point.observation.population.toLocaleString()} people · ${point.city.source_release_id ?? 'reba-modelski-ancient-v2'} estimate`,
           };
         }
         if (layer.id.startsWith('historical-polities-')) {

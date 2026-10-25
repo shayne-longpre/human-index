@@ -100,7 +100,7 @@ export function HistoricalPopulationTable({
               .map(({ city, observation: cityObservation }) => (
                 <tr key={city.id}>
                   <th scope="row">{city.name}</th>
-                  <td>{city.modern_country_label} · geocode certainty code {city.geocode_certainty_code}</td>
+                  <td>{city.source_release_id ?? 'reba-modelski-ancient-v2'} · {city.modern_country_label} · geocode certainty code {city.geocode_certainty_code}</td>
                   <td className="numeric">{formatInteger(cityObservation.population)}</td>
                 </tr>
               )) : (
