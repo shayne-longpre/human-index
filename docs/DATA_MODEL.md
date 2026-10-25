@@ -178,6 +178,23 @@ manifest pins both outputs and the raw archive/codebook hashes. Neither point
 nor source country is matched to Atlas borders or populations, and a missing
 event is not coded as peace.
 
+R16 adds two ILOSTAT employment-to-population table references with independent
+ICLS13 and ICLS19 source releases. The full original compressed tables,
+dictionary files, and exact-year source-native JSON slices are checksummed.
+The row locator, source, reference area, sex, age classification, value string,
+status, and source notes remain unaltered. Rows after 2025 remain in the
+complete source file but not the observed-year browser. No demographic total,
+country partition, or definition splice is inferred. The labor-earnings
+indicator stays an explicit source-selection gap.
+
+R16 also adds a Pleiades v4.1 selected-export place-ID join. Places, names,
+and point locations remain separate source records with original locators and
+CSV downloads. Source `year_after_which` and `year_before_which` are signed,
+no-year-zero termini, not a period over which a name is known to have been
+valid. Representative coordinates are not used as date-specific Atlas points
+or sovereignty geometry. The release manifest records each input and output
+checksum and this no-temporal-validity selection policy.
+
 Local research additionally records WRP↔CCP same-COW-code/exact-year candidates
 as unresolved support decisions, not observations or geography crosswalks.
 CCP written-provision categories, WRP estimated affiliation, V-Dem expert

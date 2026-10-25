@@ -39,7 +39,7 @@ def profile(lock_path: Path, output: Path) -> dict:
 
     report = {
         "version": lock["version"], "source_lock_sha256": hashlib.sha256(lock_path.read_bytes()).hexdigest(),
-        "status": "acquired_profiled_not_released",
+        "status": "acquired_profiled",
         "places": {"rows": len(places), "with_representative_point": sum(bool(row["representative_latitude"] and row["representative_longitude"]) for row in places),
                    "location_precision": dict(Counter(row["location_precision"] or "unspecified" for row in places))},
         "names": {"rows": len(names), "unique_place_ids": len({row["place_id"] for row in names}),

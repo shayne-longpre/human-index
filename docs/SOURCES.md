@@ -4,12 +4,14 @@
 
 The Sources page's five-column ledger is generated from
 `data/registry/sources.json`: data vertical → indicator → planned sources →
-source-level acquisition and release checks. The current registry defines 50
+source-level acquisition and release checks. The current registry defines 51
 indicators in ten verticals. An indicator is **source-set ready** if it has at
 least one planned source and every listed source has all of its declared release
 IDs in the selected manifest. Empty source sets are displayed as **source
-selection needed**, never treated as vacuously complete. As of r15, 20 source
-sets are ready and nine indicators still need a source selected.
+selection needed**, never treated as vacuously complete. As of r16, 23 source
+sets are ready and ten indicators still need a source selected. The new labor
+earnings row is intentionally unselected: the published ILOSTAT tables measure
+employment-to-population, not wages.
 
 This is an operational integration milestone, **not** a claim that an indicator
 has every place, year, subgroup, or desired historical range. A source release
@@ -21,7 +23,7 @@ coverage remain in the release manifest and the individual source tables.
 No competing source series is silently spliced when an indicator lists both.
 
 The indicator taxonomy also corrects the previous source ledger: PIP, Penn
-World Table, and direct ILOSTAT labor work belong under economics, not
+World Table, and ILOSTAT labor work belong under economics, not
 population. Registry tests require unique indicator IDs, valid source links,
 and at least one indicator mapping for every source listed in a vertical.
 
@@ -58,7 +60,7 @@ national-survey evidence and PWT/WID gates, see `ECONOMIC_INDICATORS.md`.
   and quality flags survive in downloads. TFP is not output per hour. No
   country value is assigned to an ancient polity.
 
-## S24 — ILOSTAT direct labor statistics
+## S24 — ILOSTAT employment-to-population evidence
 
 - The [official data portal](https://ilostat.ilo.org/data/) lists labor-force
   participation, employment, unemployment, hours, and earnings series and a
@@ -77,10 +79,16 @@ national-survey evidence and PWT/WID gates, see `ECONOMIC_INDICATORS.md`.
   values. Its metadata says **previous ICLS13 definition**. The separate
   current-ICLS19 table has 7,679 rows in 132 reference areas, 2014–2025,
   including two blanks. The ILO-modelled `EMP_2WAP_SEX_AGE_RT_A` is a third
-  distinct table, not silently substituted or merged. This source is now acquired but remains
-  out of release until source/sex/age support, future dates, and survey-year
-  duplicates are reviewed. WDI modeled ILO unemployment and PWT labor inputs
-  remain separate.
+  distinct table, not silently substituted or merged. R16 publishes the two
+  acquired tables in separate exact-source-year slices through 2025, plus
+  their complete original CSV.gz files and dictionaries. All source/sex/age,
+  status, note, and duplicate source rows remain distinct. The previous-ICLS13
+  table's 783 rows dated 2026 and 783 dated 2027 are retained in its complete
+  download but withheld from the observed-year browser pending a method check.
+  There is no selected total-population denominator, cross-source trend,
+  territorial map join, or global rate. Hours, earnings, and participation
+  require their own exact source tables. WDI modeled ILO unemployment and PWT
+  labor inputs remain separate.
 
 ## S25 — Pew Global Religious Composition
 
@@ -370,8 +378,15 @@ ontology of political belonging, and it does not solve ancient geometry.
   places, 38,862 names, and 25,038 point locations. It finds 12,084 rough
   place locations and 7,509 places without a representative point. Source
   `year_after_which`/`year_before_which` are termini, **not** a continuous
-  valid interval. The name/location join and uncertain label treatment still
-  need review before publication. Pleiades is not a polity-border source.
+  valid interval. The selected exports are now presented in r16 as separate
+  source-native place, name, and point
+  records, joined only by the Pleiades place ID. The signed no-year-zero termini
+  are shown as such and never converted to a continuous validity interval.
+  Rough or missing representative coordinates remain explicit, not exact map
+  pins. The web release holds all-row selected-field CSV.gz downloads, not the
+  large original CSVs, which remain in ignored raw storage. Other geometry
+  exports and a date-specific map overlay need further
+  review. Pleiades is not a polity-border source.
 
 ## S17 — U.S. Census Bureau historical world-population estimates
 

@@ -1,5 +1,44 @@
 # Build report: evidence-aware temporal-map MVP
 
+## R16 addendum — verified October 24, 2026
+
+R16 publishes both pinned ILOSTAT employment-to-population tables without
+splicing their definitions. The previous-ICLS13 source has 321,631 total rows:
+320,065 are browseable in exact years 1947–2025; 783 rows each dated 2026 and
+2027 remain in the complete original CSV.gz but are held from the observed-year
+browser. The current-ICLS19 source has 7,679 rows, all browseable in its
+2014–2025 exact years. Source area, source/survey code, sex, age, blank values,
+status, notes, duplicates, original row locators, and dictionaries are retained.
+No source rows are mapped to Atlas population or averaged into a global rate.
+These files do not supply participation, hours, or earnings observations.
+
+R16 separately publishes the pinned Pleiades v4.1 selected GIS exports:
+41,480 places, 38,862 names, and 25,038 point locations. The exact Pleiades
+place ID joins records with zero orphan names or points. The page preserves
+source association certainty, signed no-year-zero termini, rough point
+precision (12,084 place representatives), and unlocated places (7,509).
+Termini are not converted into time-valid map labels; no representative point
+is rendered as an exact ancient settlement or polity border. All-row,
+selected-field CSV.gz downloads accompany the compact browser JSON. The full
+upstream CSVs stay in ignored raw storage and out of Git.
+
+The ledger advances to 27/32 acquired sources, 19/32 in release, and 23/51
+indicator source sets ready; ten indicators need a selected source. The newly
+explicit labor-earnings gap prevents these employment-ratio tables from
+closing an unrelated measure. The thirteen remaining unreleased sources each
+retain at least one specific access, reuse, or scientific review issue in the
+registry. This is not a claim of complete historical coverage.
+
+Checks actually run: `pnpm typecheck` (pass via `pnpm build`), `pnpm test`
+(53 pass), Python unittest discovery (30 pass, with existing rasterio/NumPy
+deprecation warnings), `pnpm build` (pass, existing MapView chunk-size warning),
+and `pnpm test:browser` (16 pass, including new desktop/mobile page and
+accessibility checks). An independent R16 build matched the published manifest
+SHA-256 `be6c01b0498e266b4cdfaaa467e445bf2be439d0d92fe445bf50a195abad4115`
+and sampled 2025 labor and Pleiades-name artifacts byte-for-byte. The initial
+browser run had two ambiguous test selectors; they were corrected and the
+full rerun passed.
+
 ## R15 addendum — verified October 24, 2026
 
 The pinned UCDP GED 26.1 archive and codebook passed a full source-row audit:

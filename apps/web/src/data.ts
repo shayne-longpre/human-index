@@ -1,5 +1,7 @@
-import { decodeConflictEventRow, validateConflictEventYearDataset, validateConflictEvidenceDataset, validateEconomicEvidenceDataset, validateHistoricalCityCompanionDataset, validateInstitutionalEvidenceDataset, validatePopulationSurfaceDataset } from '@atlas/contracts';
+import { decodeConflictEventRow, validateAncientPlaceDataset, validateConflictEventYearDataset, validateConflictEvidenceDataset, validateEconomicEvidenceDataset, validateHistoricalCityCompanionDataset, validateInstitutionalEvidenceDataset, validateLaborYearDataset, validatePopulationSurfaceDataset } from '@atlas/contracts';
 import type {
+  AncientPlaceDataset,
+  AncientPlaceEvidenceReference,
   AtlasEntity,
   AtlasReleaseManifest,
   ElectricityDataset,
@@ -20,6 +22,10 @@ import type {
   HistoricalSnapshotQuality,
   HistoricalPopulationDataset,
   LifeExpectancyDataset,
+  LaborDictionary,
+  LaborTableReference,
+  LaborYearDataset,
+  LaborYearReference,
   MvpMetricId,
   PopulationOutlookDataset,
   PopulationDataset,
@@ -110,7 +116,7 @@ export interface ReconciliationDecisionArtifact {
   [key: string]: unknown;
 }
 
-export const releaseRoot = '/atlas/releases/atlas-mvp-2026-10-24-r15';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-10-24-r16';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {
@@ -146,6 +152,44 @@ export async function loadReleaseBase(): Promise<ReleaseBase> {
     historicalCities,
     historicalCityCompanions,
   };
+}
+
+const laborCache = new Map<string, Promise<{ dictionary: LaborDictionary; dataset: LaborYearDataset }>>();
+
+export function loadLaborYear(table: LaborTableReference, slice: LaborYearReference): Promise<{
+  dictionary: LaborDictionary; dataset: LaborYearDataset;
+}> {
+  const key = `${table.source_release_id}:${slice.year}`;
+  const existing = laborCache.get(key);
+  if (existing) return existing;
+  const pending = Promise.all([
+    getJson<LaborDictionary>(`${releaseRoot}/${table.dictionary_file}`),
+    getJson<LaborYearDataset>(`${releaseRoot}/${slice.data_file}`),
+  ]).then(([dictionary, dataset]) => {
+    validateLaborYearDataset(dataset, table, slice);
+    return { dictionary, dataset };
+  }).catch((error: unknown) => { laborCache.delete(key); throw error; });
+  laborCache.set(key, pending);
+  return pending;
+}
+
+const placeCache = new Map<string, Promise<Record<AncientPlaceDataset['kind'], AncientPlaceDataset>>>();
+
+export function loadAncientPlaces(reference: AncientPlaceEvidenceReference): Promise<
+  Record<AncientPlaceDataset['kind'], AncientPlaceDataset>
+> {
+  const existing = placeCache.get(reference.source_release_id);
+  if (existing) return existing;
+  const kinds = ['places', 'names', 'location_points'] as const;
+  const pending = Promise.all(kinds.map((kind) =>
+    getJson<AncientPlaceDataset>(`${releaseRoot}/${reference.files[kind].data_file}`).then((dataset) => {
+      validateAncientPlaceDataset(dataset, reference, kind);
+      return dataset;
+    }),
+  )).then(([places, names, location_points]) => ({ places, names, location_points }))
+    .catch((error: unknown) => { placeCache.delete(reference.source_release_id); throw error; });
+  placeCache.set(reference.source_release_id, pending);
+  return pending;
 }
 
 const metricCache = new Map<MvpMetricId, Promise<MetricDataset>>();

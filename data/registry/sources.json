@@ -262,23 +262,23 @@
     },
     {
       "id": "ilostat_direct_labor",
-      "label": "ILOSTAT direct labor statistics",
+      "label": "ILOSTAT employment-to-population tables",
       "dossier": "S24",
-      "role": "labor_force_hours_and_earnings_candidate",
+      "role": "source_native_employment_to_population_by_source_sex_age",
       "candidate_release": "EMP_DWAP_SEX_AGE_RT_A (ICLS13) and EMP_5WAP_SEX_AGE_RT_A (ICLS19), annual tables updated 2026-10-23",
       "coverage_start": "1947 CE for some source supports",
       "coverage_end": "2027 CE in the source table; future rows need classification",
       "license": "CC-BY-4.0 for post-2023 ILO datasets and referential metadata, excluding restricted microdata",
       "license_status": "official_post_2023_dataset_policy_and_current_table_vintage_checked",
       "urls": ["https://ilostat.ilo.org/data/bulk/", "https://www.ilo.org/rights-and-permissions", "https://rplumber.ilo.org/files/website/bulk/indicator.html"],
-      "blockers": ["compare_dated_support_of_acquired_ICLS13_and_ICLS19_tables_before_publication", "select_total_sex_and_age_universe_without_discarding_source_dimensions_or_duplicating_survey_years", "separate_country_territory_aggregate_and_future_date_support", "keep_direct_and_ILO_modeled_series_distinct"],
-      "notes": "The current official directory and public CSV endpoint were verified. Two distinct 2026-10-23 annual tables plus their table-of-contents metadata and five code dictionaries each are acquired and SHA-256 pinned. ICLS13 has 321,631 rows across 312 reference areas and 1947–2027, with 220 blank values; current ICLS19 has 7,679 rows across 132 reference areas and 2014–2025, with two blanks. Source, sex, age, status, and duplicate survey-year dimensions remain separate. Neither table is silently spliced with ILO modelled estimates. No rows are yet in the public release.",
+      "blockers": ["review_source_support_and_duplicate_survey_years_before_any_global_labor_summary_or_map_join", "acquire_separate_hours_earnings_and_participation_tables_before_claiming_those_indicators"],
+      "notes": "R16 publishes the two pinned 2026-10-23 employment-to-population tables as separate source-native year slices through 2025 plus their complete original CSV.gz files and code dictionaries. ICLS13 has 321,631 rows; its 1,566 rows dated 2026–2027 remain downloadable but withheld from the observed-year browser. ICLS19 has 7,679 rows from 2014–2025. Source, sex, age, status, notes, and duplicate survey-year dimensions remain separate. No labor mean, territory join, or definition splice is published.",
       "checked_at": "2026-10-24",
-      "verification_level": "official_catalog_current_table_metadata_artifacts_and_dimensions_profiled",
+      "verification_level": "source_native_tables_published_without_definition_or_geography_splice",
       "downloaded": true,
       "artifact_sha256": "f68f502ef99d38c15a9e08dcae006243a68f5a97fcffbfcffe029e283104e7b3",
       "terms_snapshot_sha256": null,
-      "release_ready": false
+      "release_ready": true
     },
     {
       "id": "wid_distributional_economics",
@@ -717,18 +717,14 @@
       "urls": [
         "https://pleiades.stoa.org/downloads"
       ],
-      "blockers": [
-        "treat_name_and_location_termini_as_uncertain_bounds_not_continuous_validity",
-        "do_not_map_rough_representative_points_as_precise_sites",
-        "review_name_location_join_and_certainty_presentation_before_release"
-      ],
-      "notes": "Pinned v4.1 README plus places, names, and location_points GIS CSVs are acquired and profiled: 41,480 places, 38,862 names, 25,038 point locations. Of the places, 12,084 have rough location precision and 7,509 lack a representative point. Name and location date fields are termini, not proof of continuous validity; no temporal labels are published yet. This is not a polity-border source.",
+      "blockers": ["date_specific_place_label_validity_requires_source_review_before_atlas_timeline_or_map_overlay", "other_pleiades_geometry_exports_not_yet_selected"],
+      "notes": "R16 publishes the pinned v4.1 places, names, and location_points GIS CSVs with a source-ID join in a separate gazetteer view: 41,480 places, 38,862 names, 25,038 point locations. Of the places, 12,084 have rough location precision and 7,509 lack a representative point. Name and location date fields are shown as source termini, not continuous validity. No rough representative is mapped as an exact site, and this is not a polity-border source.",
       "checked_at": "2026-10-24",
-      "verification_level": "versioned_artifacts_acquired_and_profiled_not_published",
+      "verification_level": "versioned_selected_gis_exports_source_native_published",
       "downloaded": true,
       "artifact_sha256": "5dd09b1a92c53e50cb9962bab44df12c5f0b7b683d4f228367d843637cfe5a59",
       "terms_snapshot_sha256": null,
-      "release_ready": false
+      "release_ready": true
     },
     {
       "id": "us_census_historical_world_population",
@@ -886,7 +882,7 @@
         {
           "source_id": "pleiades",
           "role": "Ancient-place names and locations",
-          "release_ids": []
+          "release_ids": ["pleiades-gis-v4.1-selected-exports"]
         }
       ],
       "indicators": [
@@ -922,8 +918,8 @@
         },
         {
           "source_id": "ilostat_direct_labor",
-          "role": "Direct participation, employment, hours, and earnings series after table and terms selection",
-          "release_ids": []
+          "role": "Separate ICLS13 and ICLS19 employment-to-population source records; no global labor mean",
+          "release_ids": ["ilostat-emp_dwap_sex_age_rt_a-2026-10-23", "ilostat-emp_5wap_sex_age_rt_a-2026-10-23"]
         },
         {
           "source_id": "clio_infra",
@@ -944,7 +940,8 @@
         {"id": "income_consumption_inequality", "label": "Income and consumption inequality", "scope": "Gini and decile shares keep survey and welfare basis; WID is a separate candidate.", "source_ids": ["world_bank_pip", "world_bank_economics", "wid_distributional_economics"]},
         {"id": "wealth_distribution", "label": "Wealth levels and concentration", "scope": "Personal wealth and percentile universe, never substituted with GDP.", "source_ids": ["wid_distributional_economics"]},
         {"id": "productivity_and_inputs", "label": "Productivity and productive inputs", "scope": "TFP, hours, employment, and capital are separate; output/hour is not yet derived.", "source_ids": ["penn_world_table", "ilostat_direct_labor"]},
-        {"id": "employment_conditions", "label": "Employment conditions", "scope": "Unemployment, participation, earnings, and persons engaged use different denominators.", "source_ids": ["world_bank_economics", "penn_world_table", "ilostat_direct_labor"]},
+        {"id": "employment_conditions", "label": "Employment conditions", "scope": "Unemployment, employment-to-population, and persons engaged use different denominators; no earnings series is claimed.", "source_ids": ["world_bank_economics", "penn_world_table", "ilostat_direct_labor"]},
+        {"id": "labor_earnings", "label": "Labor earnings", "scope": "Wages and earnings by worker and occupation still need an exact source table.", "source_ids": []},
         {"id": "inflation_and_prices", "label": "Inflation and prices", "scope": "CPI change is source-basket-specific; historical real wages remain a gap.", "source_ids": ["world_bank_economics"]},
         {"id": "economic_sector_composition", "label": "Economic sector composition", "scope": "Agriculture, industry, and service value-added shares, not employment shares.", "source_ids": ["world_bank_economics"]},
         {"id": "investment_and_public_demand", "label": "Investment and public demand", "scope": "Capital formation and government final consumption are not wealth or state capacity.", "source_ids": ["world_bank_economics"]},

@@ -316,6 +316,89 @@ export interface ConflictEventYearDataset {
   rows: ConflictEventTuple[];
 }
 
+export interface LaborYearReference { year: number; data_file: string; source_row_count: number }
+export interface LaborTableReference {
+  source_release_id: string;
+  source_table: string;
+  source_artifact_id: string;
+  source_artifact_sha256: string;
+  source_lock_sha256: string;
+  definition: 'previous_ICLS13' | 'current_ICLS19';
+  dictionary_file: string;
+  download_file: string;
+  source_row_count: number;
+  published_row_count: number;
+  blank_value_count: number;
+  withheld_year_rows: Record<string, number>;
+  source_kind_rows: Record<string, number>;
+  year_slices: LaborYearReference[];
+}
+export interface LaborDictionary {
+  ref_area: Record<string, string>;
+  source: Record<string, string>;
+  sex: Record<string, string>;
+  classif1: Record<string, string>;
+  obs_status: Record<string, string>;
+}
+export type LaborTuple = [area: string, source: string, indicator: string, sex: string,
+  age: string, time: string, value: string, status: string, noteClassif: string,
+  noteIndicator: string, noteSource: string, sourceRow: number];
+export interface LaborYearDataset {
+  schema_version: '0.1.0'; source_release_id: string; source_table: string;
+  year: number; columns: string[]; rows: LaborTuple[];
+}
+const laborColumns = ['ref_area', 'source', 'indicator', 'sex', 'classif1', 'time', 'obs_value',
+  'obs_status', 'note_classif', 'note_indicator', 'note_source', 'source_row'];
+export function validateLaborYearDataset(dataset: LaborYearDataset, table: LaborTableReference,
+  slice: LaborYearReference): void {
+  if (dataset.schema_version !== '0.1.0' || dataset.source_release_id !== table.source_release_id
+    || dataset.source_table !== table.source_table || dataset.year !== slice.year
+    || JSON.stringify(dataset.columns) !== JSON.stringify(laborColumns)
+    || dataset.rows.length !== slice.source_row_count) throw new Error('Labor year slice disagrees with release');
+  for (const row of dataset.rows) {
+    if (row.length !== laborColumns.length || row[2] !== table.source_table.replace(/_A$/, '')
+      || row[5] !== String(slice.year) || !Number.isInteger(row[11]) || row[11] < 2
+      || (row[6] !== '' && (!Number.isFinite(Number(row[6])) || Number(row[6]) < 0 || Number(row[6]) > 100))) {
+      throw new Error(`Invalid labor source row in ${table.source_table}:${slice.year}`);
+    }
+  }
+}
+
+export interface AncientPlaceEvidenceReference {
+  source_release_id: string;
+  source_lock_sha256: string;
+  source_artifacts: Record<string, string>;
+  selection_policy: 'source_native_place_id_join_no_temporal_validity_or_polity_join';
+  row_counts: { places: number; names: number; location_points: number };
+  rough_representative_points: number;
+  unlocated_places: number;
+  files: Record<'places' | 'names' | 'location_points', { data_file: string; download_file: string }>;
+}
+export interface AncientPlaceDataset {
+  schema_version: '0.1.0'; source_release_id: string;
+  kind: 'places' | 'names' | 'location_points'; columns: string[];
+  rows: Array<Array<string | number>>;
+}
+const ancientPlaceColumns: Record<AncientPlaceDataset['kind'], string[]> = {
+  places: ['id', 'title', 'uri', 'representative_latitude', 'representative_longitude', 'location_precision', 'source_row'],
+  names: ['place_id', 'id', 'title', 'uri', 'association_certainty', 'name_type',
+    'attested_form', 'language_tag', 'year_after_which', 'year_before_which', 'source_row'],
+  location_points: ['place_id', 'id', 'title', 'uri', 'association_certainty', 'location_precision',
+    'accuracy_radius', 'year_after_which', 'year_before_which', 'geometry_wkt', 'source_row'],
+};
+export function validateAncientPlaceDataset(dataset: AncientPlaceDataset,
+  reference: AncientPlaceEvidenceReference, kind: AncientPlaceDataset['kind']): void {
+  if (dataset.schema_version !== '0.1.0' || dataset.source_release_id !== reference.source_release_id
+    || dataset.kind !== kind || JSON.stringify(dataset.columns) !== JSON.stringify(ancientPlaceColumns[kind])
+    || dataset.rows.length !== reference.row_counts[kind]) throw new Error(`Invalid Pleiades ${kind} dataset`);
+  for (const row of dataset.rows) {
+    if (row.length !== ancientPlaceColumns[kind].length || typeof row.at(-1) !== 'number'
+      || !Number.isInteger(row.at(-1)) || Number(row.at(-1)) < 2) {
+      throw new Error(`Invalid Pleiades ${kind} source locator`);
+    }
+  }
+}
+
 export function validateConflictEventYearDataset(
   dataset: ConflictEventYearDataset,
   reference: ConflictEventEvidenceReference,
@@ -577,6 +660,12 @@ export interface AtlasReleaseManifest {
     datasets: ConflictDatasetReference[];
   };
   conflict_event_evidence?: ConflictEventEvidenceReference;
+  labor_evidence?: {
+    selection_policy: 'source_native_exact_year_no_definition_or_geography_splice';
+    interpretation: string;
+    tables: LaborTableReference[];
+  };
+  ancient_place_evidence?: AncientPlaceEvidenceReference;
   reconciliation: {
     decision_set_id: string;
     data_file: string;
@@ -1094,6 +1183,40 @@ export function validateAtlasReleaseManifest(manifest: AtlasReleaseManifest): vo
         || !manifest.artifacts[slice.data_file] || !manifest.artifacts[slice.download_file]) {
         throw new Error(`Invalid GED year slice ${slice.year}`);
       }
+    }
+  }
+
+  if (manifest.labor_evidence) {
+    const labor = manifest.labor_evidence;
+    if (labor.selection_policy !== 'source_native_exact_year_no_definition_or_geography_splice'
+      || labor.tables.length !== 2) throw new Error('Invalid labor evidence selection');
+    uniqueIds('labor source release', labor.tables.map((table) => table.source_release_id));
+    for (const table of labor.tables) {
+      if (!sourceReleaseIds.has(table.source_release_id) || !manifest.artifacts[table.dictionary_file]
+        || !manifest.artifacts[table.download_file] || !/^[a-f0-9]{64}$/.test(table.source_artifact_sha256)
+        || !/^[a-f0-9]{64}$/.test(table.source_lock_sha256)
+        || table.year_slices.length === 0 || table.published_row_count <= 0
+        || table.year_slices.reduce((sum, slice) => sum + slice.source_row_count, 0) !== table.published_row_count
+        || table.published_row_count + Object.values(table.withheld_year_rows).reduce((sum, count) => sum + count, 0) !== table.source_row_count) {
+        throw new Error(`Invalid labor source reference ${table.source_table}`);
+      }
+      for (const slice of table.year_slices) {
+        if (slice.year > 2025 || slice.source_row_count <= 0 || !manifest.artifacts[slice.data_file]) {
+          throw new Error(`Invalid labor year slice ${table.source_table}:${slice.year}`);
+        }
+      }
+    }
+  }
+
+  if (manifest.ancient_place_evidence) {
+    const places = manifest.ancient_place_evidence;
+    if (places.selection_policy !== 'source_native_place_id_join_no_temporal_validity_or_polity_join'
+      || !sourceReleaseIds.has(places.source_release_id) || !/^[a-f0-9]{64}$/.test(places.source_lock_sha256)) {
+      throw new Error('Invalid ancient place evidence');
+    }
+    for (const kind of ['places', 'names', 'location_points'] as const) {
+      if (places.row_counts[kind] <= 0 || !manifest.artifacts[places.files[kind].data_file]
+        || !manifest.artifacts[places.files[kind].download_file]) throw new Error(`Invalid ancient place ${kind} artifact`);
     }
   }
 

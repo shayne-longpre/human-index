@@ -68,6 +68,8 @@ function releaseRole(id: string): string {
   if (id.startsWith('reba-')) return 'Separate exact-date city estimates; no cross-source averaging';
   if (id === 'ucdp-prio-acd-26.1') return 'Source-native armed conflict-year records, 1946–2025';
   if (id === 'ucdp-organized-violence-cy-26.1') return 'Source-native within-border country-year violence evidence, 1989–2025';
+  if (id.startsWith('ilostat-')) return 'Separate ICLS13 or ICLS19 employment-to-population source rows';
+  if (id.startsWith('pleiades-')) return 'Source-native ancient places, names, and point-location evidence';
   if (id.startsWith('un-wpp')) return 'Separate annual population estimates and Medium projections';
   if (id.startsWith('ghsl-')) return 'Five-year source-native modeled population grid, 1975–2020';
   if (id.startsWith('worldpop-')) return 'Separate modeled population grid; never spliced with GHSL';

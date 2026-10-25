@@ -2,7 +2,32 @@
 
 Updated: 2026-10-24
 
-## Current release r15 — source-native event evidence
+## Current release r16 — source-native labor and ancient places
+
+R16 publishes two pinned ILOSTAT employment-to-population tables separately:
+320,065 browseable previous-ICLS13 rows (1947–2025) and 7,679
+current-ICLS19 rows (2014–2025). The complete original ICLS13 download also
+retains 1,566 rows dated 2026–2027, withheld from the observed-year browser
+pending source-method review. Source area, survey/model code, sex, age band,
+status, notes, blank value, duplicate source rows, and original row locator
+remain intact. There is no national/global labor mean, date fill, map join, or
+definition splice. Employment-to-population is the only ILOSTAT variable now
+published; earnings, hours, and participation still require exact tables.
+
+Pleiades v4.1 selected GIS exports are published in a separate place-evidence
+view: 41,480 places, 38,862 names, and 25,038 point-location records. The
+exact Pleiades place ID joins names and points. The source's signed years are
+displayed as termini, never continuous validity. Rough representative points
+and 7,509 unlocated places remain explicit; no Pleiades point has been used as
+an exact Atlas map site or polity border.
+
+The Sources ledger has 27/32 sources acquired, 19/32 in release, 23/51
+indicator source sets ready, and ten indicators without a selected source.
+The remaining thirteen unreleased sources have recorded access, terms,
+underlying-input, temporal-source, or geometry/lineage review gates. Source-set
+readiness still does not imply universal date, place, or subgroup coverage.
+
+## Previous release r15 — source-native event evidence
 
 R15 adds all 417,968 finalized UCDP GED 26.1 events across 37 source years
 (1989–2025) on a separate Events page. Each year is loaded on demand and its
@@ -22,9 +47,9 @@ Acquired: Yes. The 321,631-row long series uses the previous ICLS13 definition;
 the separate 7,679-row current-ICLS19 series begins only in 2014. Both mix
 source and demographic dimensions, and the older table includes future dates.
 Neither series is merged with the other or ILO modelled estimates.
-ILOSTAT remains In release: No pending that review.
+ILOSTAT remained In release: No in r15 pending that review.
 
-## Remaining ledger gap after r15
+## Remaining ledger gap after r15 (historical snapshot)
 
 Across 32 distinct planned sources, 27 are acquired and 17 occur in the
 selected release. Five remain unacquired: World Historical Gazetteer source

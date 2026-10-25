@@ -8,6 +8,8 @@ import {
   assertSupportedYear,
   buildEvidenceTimelineYears,
   decodeConflictEventRow,
+  validateAncientPlaceDataset,
+  validateLaborYearDataset,
   nearestTimelineIndex,
   resolveHistoricalSnapshot,
   validateAtlasReleaseManifest,
@@ -15,6 +17,7 @@ import {
   validatePopulationSurfaceDataset,
   validatePublishedMetrics,
   type AtlasEntity,
+  type AncientPlaceDataset,
   type AtlasReleaseManifest,
   type ConflictEvidenceDataset,
   type ConflictEventYearDataset,
@@ -27,9 +30,10 @@ import {
   type PopulationSurfaceDataset,
   type PopulationOutlookDataset,
   type LifeExpectancyDataset,
+  type LaborYearDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-24-r15');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-24-r16');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -380,16 +384,34 @@ describe('genuine-data MVP release', () => {
     });
   });
 
-  it('records the acquired but unreleased Pleiades place/name/location limitations', () => {
-    expect(pleiadesProfile.status).toBe('acquired_profiled_not_released');
+  it('publishes Pleiades place/name/location evidence by source ID without inferred date validity', () => {
+    expect(pleiadesProfile.status).toBe('acquired_profiled');
     expect(pleiadesProfile.places).toMatchObject({ rows: 41480, with_representative_point: 33971 });
     expect(pleiadesProfile.places.location_precision.rough).toBe(12084);
     expect(pleiadesProfile.names).toMatchObject({ rows: 38862, orphan_place_ids: 0 });
     expect(pleiadesProfile.names.date_bound_states.neither).toBe(3271);
     expect(pleiadesProfile.location_points).toMatchObject({ rows: 25038, orphan_place_ids: 0 });
     expect(sourceRegistry.sources.find((source) => source.id === 'pleiades')).toMatchObject({
-      downloaded: true, release_ready: false,
+      downloaded: true, release_ready: true,
     });
+    const reference = manifest.ancient_place_evidence;
+    if (!reference) throw new Error('Missing Pleiades release reference');
+    expect(reference).toMatchObject({ rough_representative_points: 12084, unlocated_places: 7509,
+      selection_policy: 'source_native_place_id_join_no_temporal_validity_or_polity_join' });
+    const datasets = (['places', 'names', 'location_points'] as const).map((kind) => {
+      const dataset = readJson<AncientPlaceDataset>(reference.files[kind].data_file);
+      expect(() => validateAncientPlaceDataset(dataset, reference, kind)).not.toThrow();
+      const download = gunzipSync(readFileSync(resolve(releaseRoot, reference.files[kind].download_file)))
+        .toString('utf8');
+      expect(download.split('\n')).toHaveLength(reference.row_counts[kind] + 2);
+      expect(download.split('\n')[0]).toBe(dataset.columns.join(','));
+      return dataset;
+    });
+    const placeIds = new Set(datasets[0].rows.map((row) => row[0]));
+    expect(datasets[1].rows.every((row) => placeIds.has(row[0]))).toBe(true);
+    expect(datasets[2].rows.every((row) => placeIds.has(row[0]))).toBe(true);
+    expect(datasets[0].rows.filter((row) => row[3] === '' && row[4] === '')).toHaveLength(7509);
+    expect(datasets[1].rows.every((row) => row[8] !== '0' && row[9] !== '0')).toBe(true);
   });
 
   it('records OWID long-run life-expectancy acquisition without claiming source rights or dense early coverage', () => {
@@ -401,14 +423,14 @@ describe('genuine-data MVP release', () => {
     });
   });
 
-  it('pins direct ILOSTAT labor evidence without conflating earlier and current definitions', () => {
+  it('publishes separate ILOSTAT definitions with every source dimension and holds later-dated rows', () => {
     expect(ilostatProfile).toMatchObject({
-      status: 'acquired_profiled_not_released', rows: 321631, ref_areas: 312,
+      status: 'acquired_profiled', rows: 321631, ref_areas: 312,
       year_range: [1947, 2027], blank_values: 220,
     });
     expect(ilostatProfile.table_metadata['rep_var.label']).toContain('previous ILO definition - ICLS13');
     expect(ilostatCurrentProfile).toMatchObject({
-      status: 'acquired_profiled_not_released', rows: 7679, ref_areas: 132,
+      status: 'acquired_profiled', rows: 7679, ref_areas: 132,
       year_range: [2014, 2025], blank_values: 2,
     });
     expect(ilostatCurrentProfile.table_metadata['rep_var.label']).toContain('current ILO definition - ICLS19');
@@ -417,9 +439,24 @@ describe('genuine-data MVP release', () => {
         .update(readFileSync(resolve('data/registry', lock))).digest('hex'));
     }
     expect(sourceRegistry.sources.find((source) => source.id === 'ilostat_direct_labor')).toMatchObject({
-      downloaded: true, release_ready: false,
+      downloaded: true, release_ready: true,
     });
-    expect(manifest.source_releases.some((source) => source.id.startsWith('ilostat-'))).toBe(false);
+    const tables = manifest.labor_evidence?.tables;
+    if (!tables) throw new Error('Missing ILOSTAT release reference');
+    expect(tables.map((table) => table.definition)).toEqual(['previous_ICLS13', 'current_ICLS19']);
+    expect(tables.map((table) => table.source_row_count)).toEqual([321631, 7679]);
+    expect(tables[0].withheld_year_rows).toEqual({ 2026: 783, 2027: 783 });
+    expect(tables[0].published_row_count).toBe(320065);
+    for (const table of tables) {
+      expect(createHash('sha256').update(readFileSync(resolve(releaseRoot, table.download_file))).digest('hex'))
+        .toBe(table.source_artifact_sha256);
+      for (const slice of [table.year_slices[0], table.year_slices.at(-1)!]) {
+        const dataset = readJson<LaborYearDataset>(slice.data_file);
+        expect(() => validateLaborYearDataset(dataset, table, slice)).not.toThrow();
+        expect(dataset.rows[0]).toHaveLength(12);
+        expect(dataset.rows[0][11]).toBeGreaterThanOrEqual(2);
+      }
+    }
   });
 
   it('publishes exact deep-time world estimates without silently choosing within source ranges', () => {

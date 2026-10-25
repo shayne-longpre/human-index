@@ -62,7 +62,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   color: var(--gold);
   font: 500 17px/1 "Newsreader", Georgia, serif;
 }
-.site-header nav { display: flex; gap: 26px; color: var(--muted); font-size: 13px; }
+.site-header nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 14px 20px; color: var(--muted); font-size: 13px; }
 .site-header nav a { text-decoration: none; }
 .site-header nav a:hover { color: var(--ink); }
 .site-tabs a[aria-current="page"] { color: var(--gold); }
@@ -113,7 +113,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .economics-inspector p, .economics-inspector li { color: var(--muted); line-height: 1.6; }
 .economics-inspector ul { max-height: 280px; overflow: auto; }
 .economics-footer { max-width: 940px; margin-top: 32px; font-size: 13px; }
-@media (max-width: 760px) { .economics-context { grid-template-columns: 1fr; gap: 10px; } .economics-table-heading { display: block; } .site-header nav { gap: 12px; flex-wrap: wrap; justify-content: end; } }
+@media (max-width: 760px) { .economics-context { grid-template-columns: 1fr; gap: 10px; } .economics-table-heading { display: block; } }
 
 .hero-copy {
   display: grid;
@@ -697,8 +697,8 @@ footer { min-height: 90px; display: flex; align-items: center; justify-content: 
 
 @media (max-width: 640px) {
   .app-shell { padding: 0 10px; }
-  .site-header { min-height: 68px; }
-  .site-header nav { gap: 14px; font-size: 11px; }
+  .site-header { min-height: 68px; display: block; padding: 12px 0; }
+  .site-header nav { justify-content: flex-start; flex-wrap: nowrap; gap: 18px; margin-top: 12px; padding-bottom: 6px; overflow-x: auto; white-space: nowrap; font-size: 11px; }
   .wordmark > span:last-child { display: none; }
   .hero-copy { padding: 38px 4px 29px; }
   .hero-copy h1 { font-size: clamp(44px, 14vw, 68px); }

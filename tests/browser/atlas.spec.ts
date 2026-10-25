@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import axe from 'axe-core';
 
-const releaseId = 'atlas-mvp-2026-10-24-r15';
+const releaseId = 'atlas-mvp-2026-10-24-r16';
 
 async function waitForRelease(page: Page): Promise<void> {
   await expect(page.getByText(`Atlas release ${releaseId}`, { exact: true })).toBeVisible();
@@ -138,17 +138,19 @@ test('source roadmap groups indicators with source-level acquisition and release
   await waitForRelease(page);
   const matrix = page.getByRole('region', { name: 'Source ingestion status by data vertical' });
   await expect(matrix.locator('thead th')).toHaveText(['Data vertical', 'Indicators', 'Sources', 'Acquired', 'In release']);
-  await expect(matrix.locator('.matrix-indicator')).toHaveCount(50);
-  await expect(page.getByText(/20 source sets ready · 9 need a source/)).toBeVisible();
+  await expect(matrix.locator('.matrix-indicator')).toHaveCount(51);
+  await expect(page.getByText(/23 source sets ready · 10 need a source/)).toBeVisible();
   await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Access to electricity' })).toContainText('Source set ready');
   await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Income and consumption inequality' })).toContainText('2/3 sources in release');
   await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Child mortality' })).toContainText('Source selection needed');
-  await expect(matrix.locator('.matrix-source-gap')).toHaveCount(9);
+  await expect(matrix.locator('.matrix-source-gap')).toHaveCount(10);
   const economics = matrix.locator('tbody').filter({ hasText: 'Economics over time' });
   await expect(economics).toContainText('World Bank Poverty and Inequality Platform');
   await expect(economics).toContainText('Penn World Table');
   await expect(economics.getByLabel('ilostat_direct_labor acquired: yes')).toHaveCount(2);
-  await expect(economics.getByLabel('ilostat_direct_labor in release: no')).toHaveCount(2);
+  await expect(economics.getByLabel('ilostat_direct_labor in release: yes')).toHaveCount(2);
+  const places = matrix.locator('tbody').filter({ hasText: 'Historical cities' });
+  await expect(places.getByLabel('pleiades in release: yes')).toHaveCount(1);
   const population = matrix.locator('tbody').filter({ hasText: 'Population over time' });
   await expect(population).not.toContainText('Penn World Table');
   await expectNoSeriousAccessibilityViolations(page);
@@ -184,6 +186,38 @@ test('GED event page preserves source location and date precision without a popu
   await expectNoSeriousAccessibilityViolations(page);
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await table.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+  await expectNoSeriousAccessibilityViolations(page);
+});
+
+test('ILOSTAT page keeps both definitions, source support and later-dated rows distinct', async ({ page }) => {
+  await page.goto(`/?page=labor&release=${releaseId}&table=EMP_5WAP_SEX_AGE_RT_A&year=2025`);
+  await expect(page.getByRole('heading', { name: 'Employment, without a forced global average.' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Labor source scope' }).getByText('7,679').first()).toBeVisible();
+  const table = page.getByRole('region', { name: 'ILOSTAT employment source observations' });
+  await expect(table).toContainText('EMP_5WAP_SEX_AGE_RT_A.csv.gz:row-');
+  await page.getByLabel('Source definition').selectOption('EMP_DWAP_SEX_AGE_RT_A');
+  await expect(page.getByText(/1,566 later-dated rows held/)).toBeVisible();
+  await expect(table).toContainText('previous_ICLS13');
+  await expect(page.getByRole('link', { name: 'Download complete source table · CSV.gz ↓' })).toHaveAttribute('href', /source\.csv\.gz$/);
+  await expectNoSeriousAccessibilityViolations(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(table).toBeVisible();
+  await expectNoSeriousAccessibilityViolations(page);
+});
+
+test('Pleiades page joins names to IDs without presenting a time-valid map', async ({ page }) => {
+  await page.goto(`/?page=places&release=${releaseId}`);
+  await expect(page.getByRole('heading', { name: 'Names and places, not a dated border map.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '41,480' })).toBeVisible();
+  await page.getByLabel('Find place ID, title, or recorded name').fill('Gallia');
+  const places = page.getByRole('region', { name: 'Pleiades place records' });
+  await places.getByRole('button', { name: 'Gallia', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Gallia · 993' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Pleiades names for selected place' })).toContainText('names.csv:row-');
+  await expect(page.getByText(/terminus does not establish validity/)).toBeVisible();
+  await expectNoSeriousAccessibilityViolations(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole('heading', { name: 'Gallia · 993' })).toBeVisible();
   await expectNoSeriousAccessibilityViolations(page);
 });
 

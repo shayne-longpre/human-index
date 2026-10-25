@@ -66,7 +66,7 @@ def profile(lock_path: Path, output: Path) -> dict:
     if counts["rows"] != int(toc["n.records"]):
         raise ValidationError("ILOSTAT row count differs from matching table of contents")
     report = {
-        "status": "acquired_profiled_not_released",
+        "status": "acquired_profiled",
         "source_table": table,
         "source_lock_sha256": hashlib.sha256(lock_path.read_bytes()).hexdigest(),
         "table_metadata": {key: toc[key] for key in ("indicator.label", "rep_var.label", "last.update", "n.records", "n.ref_area", "database.label")},

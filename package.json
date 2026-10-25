@@ -31,6 +31,7 @@
     "data:publish:conflict": "uv run python -m pipelines.atlas_etl.publish_conflict_evidence",
     "data:review:ucdp-ged": "uv run python -m pipelines.atlas_etl.profile_ucdp_ged",
     "data:publish:ucdp-ged": "uv run python -m pipelines.atlas_etl.publish_ucdp_ged",
+    "data:publish:labor-places": "uv run python -m pipelines.atlas_etl.publish_labor_places",
     "data:acquire:ilostat-labor": "uv run python -m pipelines.atlas_etl.acquire_ilostat_labor",
     "data:review:ilostat-labor": "uv run python -m pipelines.atlas_etl.profile_ilostat_labor",
     "data:acquire:ilostat-current": "uv run python -m pipelines.atlas_etl.acquire_ilostat_labor --table EMP_5WAP_SEX_AGE_RT_A --output data/raw/ilostat/2026-10-24-icls19 --lock data/registry/ilostat-current-lock.json",
