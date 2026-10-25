@@ -8,7 +8,7 @@ source-level acquisition and release checks. The current registry defines 50
 indicators in ten verticals. An indicator is **source-set ready** if it has at
 least one planned source and every listed source has all of its declared release
 IDs in the selected manifest. Empty source sets are displayed as **source
-selection needed**, never treated as vacuously complete. As of r14, 19 source
+selection needed**, never treated as vacuously complete. As of r15, 20 source
 sets are ready and nine indicators still need a source selected.
 
 This is an operational integration milestone, **not** a claim that an indicator
@@ -66,13 +66,21 @@ national-survey evidence and PWT/WID gates, see `ECONOMIC_INDICATORS.md`.
   geography vary by exact table.
 - The [ILO rights page](https://www.ilo.org/rights-and-permissions) states
   that datasets and referential metadata published from May 3, 2023 are CC BY
-  4.0, except restricted microdata. The official bulk guide names annual
-  `EMP_DWAP_NOC_RT_A` for employment-to-population ratio. The documented older
-  bulk CSV path returned 404 in this pass; current ILO Rilostat code points to
-  an RDS endpoint, which could not be retrieved here. No exact table artifact
-  or publication-vintage metadata is pinned, so this stays not acquired and
-  not released. The WDI modeled ILO unemployment and PWT labor inputs are
-  published separately; they do not stand in for direct ILOSTAT survey data.
+  4.0, except restricted microdata. The older guide's `EMP_DWAP_NOC_RT_A` path
+  is not the current listing. The [live official directory](https://rplumber.ilo.org/files/website/bulk/indicator.html)
+  supplies `EMP_DWAP_SEX_AGE_RT_A` and `EMP_5WAP_SEX_AGE_RT_A`, both last
+  updated 2026-10-23, with matching table-of-contents metadata. Their CSV.gz
+  files and source/dimension/status dictionaries are acquired, ignored in Git,
+  and SHA-256 pinned in separate `ilostat-labor-lock.json` and
+  `ilostat-current-lock.json` records. The first profile finds 321,631 rows,
+  312 source reference areas, and 1947–2027 source years, including 220 blank
+  values. Its metadata says **previous ICLS13 definition**. The separate
+  current-ICLS19 table has 7,679 rows in 132 reference areas, 2014–2025,
+  including two blanks. The ILO-modelled `EMP_2WAP_SEX_AGE_RT_A` is a third
+  distinct table, not silently substituted or merged. This source is now acquired but remains
+  out of release until source/sex/age support, future dates, and survey-year
+  duplicates are reviewed. WDI modeled ILO unemployment and PWT labor inputs
+  remain separate.
 
 ## S25 — Pew Global Religious Composition
 
@@ -236,10 +244,19 @@ source-native tables and CSVs. It does not join either to Atlas political
 borders or to population. The country-year product has four low/best/high
 fatality estimate triplets out of numerical order, so they are preserved as
 three source-authored fields rather than rendered as an interval. A source zero
-obeys its event inclusion rules, not proof of peace. The acquired GED archive
-is still not released: its event-location support and 5,075 nonmonotonic
-fatality triplets need separate review. The country-year product is not a
-substitute for event locations or person-level exposure.
+obeys its event inclusion rules, not proof of peace. R15 additionally publishes
+all 417,968 finalized GED events from 1989–2025 as 37 lazily loaded source-year
+partitions, with compressed CSV downloads containing every event for the year
+and the selected fields below. The source event ID,
+row locator, date span and precision, representative coordinates and location
+precision, and separate low/best/high death estimates survive. The 5,075
+nonmonotonic triplets remain separate source estimates rather than confidence
+intervals. Of the locations, 122,188 have precision codes 3–7, so their points
+must not be read as exact attack sites. Another 30,561 source records have
+`event_clarity=2`, meaning their underlying reports already aggregate multiple
+activities. No GED event is joined to Atlas
+political borders or population. The country-year product is not a substitute
+for event locations or person-level exposure.
 
 Choose a specific definition—events, documented fatalities, or another supported measure. A conflict location is not a person-level exposure survey. Absence of an event record outside a source's scope is not evidence of peace. Do not concatenate UCDP, COW, and older conflict catalogs into a single trend without a separate harmonization study.
 

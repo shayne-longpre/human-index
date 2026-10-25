@@ -165,6 +165,19 @@ estimates, not a confidence interval, including four nonmonotonic triplets.
 Neither product is joined to historical polity geometry or current-country
 population by name. Missing ACD rows are not converted to zero violence.
 
+R15 adds the separate GED event product, partitioned by source event year.
+Each record retains its immutable UCDP `id`, original CSV row locator, exact
+`date_start`/`date_end`, `date_prec`, `where_prec`, representative coordinate,
+and low/best/high fatality estimates. A year slice is not an assertion that
+every event occurred on a known day. Precision 3–6 coordinates stand for an
+administrative area, fuzzy feature, or country rather than the event site.
+The 5,075 source triplets that are not numerically ordered remain separate
+estimates, never a displayed interval. Compact JSON tuples and compressed
+CSV are delivery encodings of the same source-native rows; the transformation
+manifest pins both outputs and the raw archive/codebook hashes. Neither point
+nor source country is matched to Atlas borders or populations, and a missing
+event is not coded as peace.
+
 Local research additionally records WRP↔CCP same-COW-code/exact-year candidates
 as unresolved support decisions, not observations or geography crosswalks.
 CCP written-provision categories, WRP estimated affiliation, V-Dem expert

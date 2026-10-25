@@ -33,6 +33,7 @@ import { ReviewPage } from './components/ReviewPage';
 import { EconomicsPage } from './components/EconomicsPage';
 import { InstitutionsPage } from './components/InstitutionsPage';
 import { ConflictPage } from './components/ConflictPage';
+import { ConflictEventsPage } from './components/ConflictEventsPage';
 import {
   downloadUrl,
   historicalPopulationDownloadUrl,
@@ -65,10 +66,10 @@ const ResearchPage = import.meta.env.DEV
   : null;
 
 export function App() {
-  const [page] = useState<'atlas' | 'sources' | 'review' | 'economics' | 'institutions' | 'conflict' | 'research'>(() => {
+  const [page] = useState<'atlas' | 'sources' | 'review' | 'economics' | 'institutions' | 'conflict' | 'events' | 'research'>(() => {
     const requested = new URLSearchParams(window.location.search).get('page');
     if (requested === 'research' && import.meta.env.DEV) return 'research';
-    return requested === 'sources' || requested === 'review' || requested === 'economics' || requested === 'institutions' || requested === 'conflict' ? requested : 'atlas';
+    return requested === 'sources' || requested === 'review' || requested === 'economics' || requested === 'institutions' || requested === 'conflict' || requested === 'events' ? requested : 'atlas';
   });
   const [release, setRelease] = useState<ReleaseBase | null>(null);
   const [metricDatasets, setMetricDatasets] = useState<Partial<Record<MvpMetricId, MetricDataset>>>({});
@@ -544,6 +545,7 @@ export function App() {
   const economicsUrl = `?page=economics&release=${encodeURIComponent(release.manifest.release_id)}`;
   const institutionsUrl = `?page=institutions&release=${encodeURIComponent(release.manifest.release_id)}`;
   const conflictUrl = `?page=conflict&release=${encodeURIComponent(release.manifest.release_id)}`;
+  const eventsUrl = `?page=events&release=${encodeURIComponent(release.manifest.release_id)}`;
   const reviewUrl = `?page=review&release=${encodeURIComponent(release.manifest.release_id)}`;
   const researchUrl = `?page=research&release=${encodeURIComponent(release.manifest.release_id)}`;
   const dateMagnitude = year <= 0 ? 1 - year : year;
@@ -561,6 +563,7 @@ export function App() {
           <a href={economicsUrl} aria-current={page === 'economics' ? 'page' : undefined}>Economics</a>
           <a href={institutionsUrl} aria-current={page === 'institutions' ? 'page' : undefined}>Institutions & religion</a>
           <a href={conflictUrl} aria-current={page === 'conflict' ? 'page' : undefined}>Conflict</a>
+          <a href={eventsUrl} aria-current={page === 'events' ? 'page' : undefined}>Events</a>
           <a href={sourcesUrl} aria-current={page === 'sources' ? 'page' : undefined}>Sources</a>
           <a href={reviewUrl} aria-current={page === 'review' ? 'page' : undefined}>Review</a>
           {import.meta.env.DEV ? <a href={researchUrl} aria-current={page === 'research' ? 'page' : undefined}>Local research</a> : null}
@@ -568,7 +571,7 @@ export function App() {
         </nav>
       </header>
 
-      {page === 'sources' ? <SourcesPage manifest={release.manifest} /> : page === 'review' ? <ReviewPage /> : page === 'economics' ? <EconomicsPage manifest={release.manifest} /> : page === 'institutions' ? <InstitutionsPage manifest={release.manifest} /> : page === 'conflict' ? <ConflictPage manifest={release.manifest} /> : page === 'research' && ResearchPage ? <Suspense fallback={<main id="main-content"><p role="status">Opening local research view…</p></main>}><ResearchPage /></Suspense> : (
+      {page === 'sources' ? <SourcesPage manifest={release.manifest} /> : page === 'review' ? <ReviewPage /> : page === 'economics' ? <EconomicsPage manifest={release.manifest} /> : page === 'institutions' ? <InstitutionsPage manifest={release.manifest} /> : page === 'conflict' ? <ConflictPage manifest={release.manifest} /> : page === 'events' ? <ConflictEventsPage manifest={release.manifest} /> : page === 'research' && ResearchPage ? <Suspense fallback={<main id="main-content"><p role="status">Opening local research view…</p></main>}><ResearchPage /></Suspense> : (
       <main id="main-content">
         <section className="hero-copy">
           <div>

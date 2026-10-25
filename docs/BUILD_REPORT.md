@@ -1,5 +1,43 @@
 # Build report: evidence-aware temporal-map MVP
 
+## R15 addendum — verified October 24, 2026
+
+The pinned UCDP GED 26.1 archive and codebook passed a full source-row audit:
+417,968 unique events in 37 years (1989–2025), no missing or out-of-range
+coordinates, no invalid date ranges, and 5,075 low/best/high fatality triplets
+out of numerical order. Of the source coordinates, 122,188 have location
+precision 3–7 (administrative area, fuzzy feature, whole country, or sea/air
+estimate); 30,561 source rows have `event_clarity=2`, where reporting already
+aggregates multiple activities. R15 publishes every event in compact per-year JSON and complete
+selected-field per-year CSV.gz downloads, totaling approximately 94 MB for the
+new event slices. The Events page displays date span, precision, representative
+point, source parties, and separate fatality estimates; it does not pin those
+points to the Atlas political map or estimate person exposure. The source
+ledger advances to 20 of 50 indicator source sets ready, with nine still
+needing a selected source.
+
+Checks actually run: `pnpm typecheck` (pass), `pnpm test` (53 pass), Python
+unittest discovery (30 pass), `pnpm build` (pass with the existing MapView
+chunk-size warning), `pnpm test:browser` (14 pass), and a targeted GED desktop
+and mobile browser/accessibility check (pass). An independent second R15 build
+produced the same manifest SHA-256
+`6a51b7bb9dff5c26406bce834f5a50d68535b661d6a7c659ea3f1b0b3e028867`
+and the same 2025 compressed CSV SHA-256
+`28f6211aaaccda88c42860cba4606357b8f87d9c0a96442f3805362f455ca344`.
+These are build reproducibility checks, not claims of complete event capture
+outside UCDP's definitions or its covered years.
+
+The official ILOSTAT bulk directory was rechecked after the older documented
+path failed. The current `EMP_DWAP_SEX_AGE_RT_A` and
+`EMP_5WAP_SEX_AGE_RT_A` CSV.gz files, matching table-of-contents records, and
+code dictionaries were acquired and pinned (4,276,084 bytes across fourteen
+artifacts). Their separate profiles find 321,631 rows over 1947–2027 for the
+previous ICLS13 definition and 7,679 rows over 2014–2025 for current ICLS19.
+The former has 220 blank values and the latter two. This moves ILOSTAT to
+Acquired: Yes, **not** In release: survey-year duplication,
+source/demographic dimensions, future rows, and the definition split remain
+publication gates.
+
 ## R14 addendum — verified October 24, 2026
 
 The current Sources ledger has 50 indicators across ten verticals: 19 planned

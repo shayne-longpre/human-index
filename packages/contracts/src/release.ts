@@ -241,6 +241,113 @@ export interface ConflictEvidenceDataset {
   nonmonotonic_low_best_high_rows?: number;
 }
 
+export interface ConflictEventYearReference {
+  year: number;
+  data_file: string;
+  download_file: string;
+  source_row_count: number;
+}
+
+export interface ConflictEventEvidenceReference {
+  selection_policy: 'source_native_year_slices_no_geographic_or_population_join';
+  source_release_id: string;
+  source_artifact_id: string;
+  source_artifact_sha256: string;
+  codebook_artifact_id: string;
+  codebook_artifact_sha256: string;
+  source_row_count: number;
+  nonmonotonic_low_best_high_rows: number;
+  year_slices: ConflictEventYearReference[];
+  interpretation: string;
+}
+
+export interface ConflictEventRow {
+  id: number;
+  year: number;
+  date_start: string;
+  date_end: string;
+  date_prec: 1 | 2 | 3 | 4 | 5;
+  event_clarity: 1 | 2;
+  type_of_violence: 1 | 2 | 3;
+  side_a: string;
+  side_b: string;
+  country: string;
+  where_coordinates: string;
+  where_prec: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  latitude: number;
+  longitude: number;
+  low: number;
+  best: number;
+  high: number;
+  original_record_locator: string;
+}
+
+export type ConflictEventTuple = [
+  id: number, dateStart: string, dateEnd: string, datePrecision: 1 | 2 | 3 | 4 | 5,
+  eventClarity: 1 | 2, violenceType: 1 | 2 | 3, sideA: string, sideB: string,
+  country: string, whereCoordinates: string, wherePrecision: 1 | 2 | 3 | 4 | 5 | 6 | 7,
+  latitude: number, longitude: number, low: number, best: number, high: number,
+  sourceRow: number,
+];
+
+const conflictEventColumns = [
+  'id', 'date_start', 'date_end', 'date_prec', 'event_clarity', 'type_of_violence',
+  'side_a', 'side_b', 'country', 'where_coordinates', 'where_prec', 'latitude',
+  'longitude', 'low', 'best', 'high', 'source_row',
+];
+
+export function decodeConflictEventRow(row: ConflictEventTuple, year: number): ConflictEventRow {
+  return {
+    id: row[0], year, date_start: row[1], date_end: row[2], date_prec: row[3],
+    event_clarity: row[4], type_of_violence: row[5], side_a: row[6], side_b: row[7],
+    country: row[8], where_coordinates: row[9], where_prec: row[10],
+    latitude: row[11], longitude: row[12], low: row[13], best: row[14], high: row[15],
+    original_record_locator: `GEDEvent_v26_1.csv:row-${row[16]}`,
+  };
+}
+
+export interface ConflictEventYearDataset {
+  schema_version: '0.1.0';
+  source_release_id: string;
+  support: 'source_event_representative_point';
+  source_row_count: number;
+  year: number;
+  columns: string[];
+  rows: ConflictEventTuple[];
+}
+
+export function validateConflictEventYearDataset(
+  dataset: ConflictEventYearDataset,
+  reference: ConflictEventEvidenceReference,
+  slice: ConflictEventYearReference,
+): void {
+  if (dataset.schema_version !== '0.1.0' || dataset.source_release_id !== reference.source_release_id
+    || dataset.support !== 'source_event_representative_point' || dataset.year !== slice.year
+    || dataset.source_row_count !== slice.source_row_count || dataset.rows.length !== slice.source_row_count
+    || JSON.stringify(dataset.columns) !== JSON.stringify(conflictEventColumns)) {
+    throw new Error(`Conflict event slice ${slice.year} does not match its release reference`);
+  }
+  const ids = new Set<number>();
+  for (const tuple of dataset.rows) {
+    if (tuple.length !== conflictEventColumns.length || !Number.isInteger(tuple[16]) || tuple[16] < 2) {
+      throw new Error(`Invalid source row locator in GED slice ${slice.year}`);
+    }
+    const row = decodeConflictEventRow(tuple, slice.year);
+    if (!Number.isInteger(row.id) || ids.has(row.id) || row.year !== slice.year
+      || row.date_start > row.date_end || !row.date_start.startsWith(String(slice.year))
+      || row.date_end.slice(0, 4) !== row.date_start.slice(0, 4)
+      || ![1, 2, 3, 4, 5].includes(row.date_prec) || ![1, 2].includes(row.event_clarity)
+      || ![1, 2, 3].includes(row.type_of_violence) || ![1, 2, 3, 4, 5, 6, 7].includes(row.where_prec)
+      || !Number.isFinite(row.latitude) || row.latitude < -90 || row.latitude > 90
+      || !Number.isFinite(row.longitude) || row.longitude < -180 || row.longitude > 180
+      || [row.low, row.best, row.high].some((value) => !Number.isInteger(value) || value < 0)
+      || !row.original_record_locator) {
+      throw new Error(`Invalid source event in GED slice ${slice.year}`);
+    }
+    ids.add(row.id);
+  }
+}
+
 export function validateConflictEvidenceDataset(dataset: ConflictEvidenceDataset, reference: ConflictDatasetReference): void {
   if (dataset.schema_version !== '0.1.0' || dataset.source_release_id !== reference.source_release_id
     || dataset.source_row_count !== reference.source_row_count || dataset.rows.length !== reference.source_row_count
@@ -469,6 +576,7 @@ export interface AtlasReleaseManifest {
     interpretation: string;
     datasets: ConflictDatasetReference[];
   };
+  conflict_event_evidence?: ConflictEventEvidenceReference;
   reconciliation: {
     decision_set_id: string;
     data_file: string;
@@ -965,6 +1073,26 @@ export function validateAtlasReleaseManifest(manifest: AtlasReleaseManifest): vo
         || !manifest.artifacts[item.download_file] || !/^[a-f0-9]{64}$/.test(item.source_artifact_sha256)
         || item.source_row_count <= 0 || item.available_years.length === 0) {
         throw new Error(`Invalid conflict dataset reference ${item.source_release_id}`);
+      }
+    }
+  }
+
+  if (manifest.conflict_event_evidence) {
+    const ged = manifest.conflict_event_evidence;
+    if (ged.selection_policy !== 'source_native_year_slices_no_geographic_or_population_join'
+      || !sourceReleaseIds.has(ged.source_release_id)
+      || !/^[a-f0-9]{64}$/.test(ged.source_artifact_sha256)
+      || !/^[a-f0-9]{64}$/.test(ged.codebook_artifact_sha256)
+      || ged.source_row_count <= 0 || ged.nonmonotonic_low_best_high_rows < 0
+      || ged.year_slices.length === 0
+      || ged.year_slices.reduce((sum, slice) => sum + slice.source_row_count, 0) !== ged.source_row_count) {
+      throw new Error('Invalid GED release reference');
+    }
+    for (const [index, slice] of ged.year_slices.entries()) {
+      if (!Number.isInteger(slice.year) || slice.source_row_count <= 0
+        || (index > 0 && slice.year <= ged.year_slices[index - 1].year)
+        || !manifest.artifacts[slice.data_file] || !manifest.artifacts[slice.download_file]) {
+        throw new Error(`Invalid GED year slice ${slice.year}`);
       }
     }
   }

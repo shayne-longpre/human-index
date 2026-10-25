@@ -1,4 +1,4 @@
-import { validateConflictEvidenceDataset, validateEconomicEvidenceDataset, validateHistoricalCityCompanionDataset, validateInstitutionalEvidenceDataset, validatePopulationSurfaceDataset } from '@atlas/contracts';
+import { decodeConflictEventRow, validateConflictEventYearDataset, validateConflictEvidenceDataset, validateEconomicEvidenceDataset, validateHistoricalCityCompanionDataset, validateInstitutionalEvidenceDataset, validatePopulationSurfaceDataset } from '@atlas/contracts';
 import type {
   AtlasEntity,
   AtlasReleaseManifest,
@@ -9,6 +9,10 @@ import type {
   InstitutionalEvidenceDataset,
   ConflictDatasetReference,
   ConflictEvidenceDataset,
+  ConflictEventEvidenceReference,
+  ConflictEventYearDataset,
+  ConflictEventYearReference,
+  ConflictEventRow,
   GdpPerCapitaDataset,
   HistoricalCityDataset,
   HistoricalContextIndex,
@@ -106,7 +110,7 @@ export interface ReconciliationDecisionArtifact {
   [key: string]: unknown;
 }
 
-export const releaseRoot = '/atlas/releases/atlas-mvp-2026-10-24-r14';
+export const releaseRoot = '/atlas/releases/atlas-mvp-2026-10-24-r15';
 export const manifestUrl = `${releaseRoot}/manifest.json`;
 
 async function getJson<T>(url: string): Promise<T> {
@@ -241,6 +245,28 @@ export function loadConflictDataset(reference: ConflictDatasetReference): Promis
       throw error;
     });
   conflictCache.set(reference.source_release_id, pending);
+  return pending;
+}
+
+const conflictEventCache = new Map<string, Promise<ConflictEventRow[]>>();
+
+export function loadConflictEventYear(
+  reference: ConflictEventEvidenceReference,
+  slice: ConflictEventYearReference,
+): Promise<ConflictEventRow[]> {
+  const cacheKey = `${reference.source_release_id}:${slice.year}`;
+  const existing = conflictEventCache.get(cacheKey);
+  if (existing) return existing;
+  const pending = getJson<ConflictEventYearDataset>(`${releaseRoot}/${slice.data_file}`)
+    .then((dataset) => {
+      validateConflictEventYearDataset(dataset, reference, slice);
+      return dataset.rows.map((row) => decodeConflictEventRow(row, slice.year));
+    })
+    .catch((error: unknown) => {
+      conflictEventCache.delete(cacheKey);
+      throw error;
+    });
+  conflictEventCache.set(cacheKey, pending);
   return pending;
 }
 

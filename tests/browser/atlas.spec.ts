@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import axe from 'axe-core';
 
-const releaseId = 'atlas-mvp-2026-10-24-r14';
+const releaseId = 'atlas-mvp-2026-10-24-r15';
 
 async function waitForRelease(page: Page): Promise<void> {
   await expect(page.getByText(`Atlas release ${releaseId}`, { exact: true })).toBeVisible();
@@ -139,7 +139,7 @@ test('source roadmap groups indicators with source-level acquisition and release
   const matrix = page.getByRole('region', { name: 'Source ingestion status by data vertical' });
   await expect(matrix.locator('thead th')).toHaveText(['Data vertical', 'Indicators', 'Sources', 'Acquired', 'In release']);
   await expect(matrix.locator('.matrix-indicator')).toHaveCount(50);
-  await expect(page.getByText(/19 source sets ready · 9 need a source/)).toBeVisible();
+  await expect(page.getByText(/20 source sets ready · 9 need a source/)).toBeVisible();
   await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Access to electricity' })).toContainText('Source set ready');
   await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Income and consumption inequality' })).toContainText('2/3 sources in release');
   await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Child mortality' })).toContainText('Source selection needed');
@@ -147,6 +147,8 @@ test('source roadmap groups indicators with source-level acquisition and release
   const economics = matrix.locator('tbody').filter({ hasText: 'Economics over time' });
   await expect(economics).toContainText('World Bank Poverty and Inequality Platform');
   await expect(economics).toContainText('Penn World Table');
+  await expect(economics.getByLabel('ilostat_direct_labor acquired: yes')).toHaveCount(2);
+  await expect(economics.getByLabel('ilostat_direct_labor in release: no')).toHaveCount(2);
   const population = matrix.locator('tbody').filter({ hasText: 'Population over time' });
   await expect(population).not.toContainText('Penn World Table');
   await expectNoSeriousAccessibilityViolations(page);
@@ -164,6 +166,24 @@ test('conflict page keeps two UCDP 26.1 products separate and source-native', as
   await page.getByLabel('Exact source year').selectOption('2025');
   await expect(page.getByRole('region', { name: 'UCDP source observations' })).toContainText('OrganizedViolenceCYDataSet26_1.csv:row-');
   await expect(page.getByText(/four rows are out of numerical order/)).toBeVisible();
+  await expectNoSeriousAccessibilityViolations(page);
+});
+
+test('GED event page preserves source location and date precision without a population join', async ({ page }) => {
+  await page.goto(`/?page=events&release=${releaseId}&year=1989`);
+  await expect(page.getByRole('heading', { name: 'Events, not a map of everyone at risk.' })).toBeVisible();
+  await expect(page.getByText(/2,659 source records/)).toBeVisible();
+  const table = page.getByRole('region', { name: 'UCDP GED event observations' });
+  await expect(table).toContainText('GEDEvent_v26_1.csv:row-');
+  await expect(table).toContainText('representative coordinate');
+  await expect(page.getByText(/5,075 event triplets are not even numerically ordered/)).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Download all 1989 records · CSV.gz ↓' })).toHaveAttribute('href', /1989\.csv\.gz$/);
+  await page.getByLabel('Source event year').selectOption('2025');
+  await expect(page.getByText(/25,770 source records/)).toBeVisible();
+  await expect(table).toContainText('GEDEvent_v26_1.csv:row-');
+  await expectNoSeriousAccessibilityViolations(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await table.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
   await expectNoSeriousAccessibilityViolations(page);
 });
 

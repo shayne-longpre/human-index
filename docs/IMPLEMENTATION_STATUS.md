@@ -2,7 +2,45 @@
 
 Updated: 2026-10-24
 
-## Current release r14 — source-native conflict evidence
+## Current release r15 — source-native event evidence
+
+R15 adds all 417,968 finalized UCDP GED 26.1 events across 37 source years
+(1989–2025) on a separate Events page. Each year is loaded on demand and its
+complete selected-field records are downloadable as compressed CSV. Event IDs,
+original CSV row locators, date ranges and precision codes, representative
+coordinates and location precision, source violence type/parties, and separate
+low/best/high fatality estimates survive. The audit found 122,188 locations
+with precision 3–7 and 5,075 nonmonotonic fatality triplets. These are visible
+source limitations, not reasons to invent an exact point or a confidence
+interval. No GED record is joined to Atlas borders or population. The Sources
+ledger now has 50 indicators, 20 source sets ready, and nine indicators still
+without a selected source.
+
+Two current official ILOSTAT annual employment-to-population tables and their
+matching metadata/dictionaries are acquired and pinned, advancing ILOSTAT to
+Acquired: Yes. The 321,631-row long series uses the previous ICLS13 definition;
+the separate 7,679-row current-ICLS19 series begins only in 2014. Both mix
+source and demographic dimensions, and the older table includes future dates.
+Neither series is merged with the other or ILO modelled estimates.
+ILOSTAT remains In release: No pending that review.
+
+## Remaining ledger gap after r15
+
+Across 32 distinct planned sources, 27 are acquired and 17 occur in the
+selected release. Five remain unacquired: World Historical Gazetteer source
+datasets, WID, Pew religious composition, ARDA RCS-Dem, and Religion and State.
+Fifteen planned sources are not yet in release; 23 source records still disclose
+at least one open issue, including some already-published sources whose
+remaining geography or coverage audits are not finished. Nine indicators still
+need a source selected. These are not all engineering tasks: Pew, ARDA, and RAS
+require account/agreement decisions; HYDE and Seshat have conflicting or
+restrictive notices; CShapes, WRP, CCP, Clio, WorldPop, OWID, and WID need
+source-specific reuse or underlying-input review. Pleiades temporal termini,
+CShapes geometry and precedence, ILOSTAT definitions/support, and historical
+population partitioning are independent scientific gates. A checkmark cannot
+substitute for those decisions.
+
+## Previous release r14 — source-native conflict evidence
 
 R14 adds two separate, CC BY 4.0 UCDP 26.1 products and a Conflict page:
 2,816 UCDP/PRIO conflict-years (1946–2025) and 7,132 OrganizedViolenceCY
@@ -10,9 +48,8 @@ country-years (1989–2025). The latter has occurrence flags and separate
 best/low/high death estimates; four source triplets are nonmonotonic, so the
 page presents best estimates only and the CSV preserves all three fields.
 These source supports are not joined to modern display polygons or population.
-The acquired GED event archive remains open for location/precision and
-fatality-field review. The Sources ledger now has 50 indicators, 19 source
-sets ready, and nine indicators still lacking a selected source.
+GED was separately audited and added in r15; ACD and CY remain distinct
+products rather than stand-ins for event locations or exposure.
 
 Pleiades v4.1 GIS place/name/point exports are additionally acquired and
 content-hashed (33,956,960 bytes total), moving that source to Acquired: Yes.

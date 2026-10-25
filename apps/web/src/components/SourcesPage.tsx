@@ -5,6 +5,8 @@ import cityCompanionLock from '../../../../data/registry/city-companion-source-l
 import ucdpCountryYearLock from '../../../../data/registry/ucdp-country-year-lock.json';
 import pleiadesSourceLock from '../../../../data/registry/pleiades-source-lock.json';
 import owidLifeExpectancyLock from '../../../../data/registry/owid-life-expectancy-lock.json';
+import ilostatLaborLock from '../../../../data/registry/ilostat-labor-lock.json';
+import ilostatCurrentLock from '../../../../data/registry/ilostat-current-lock.json';
 import religionSourceLock from '../../../../data/registry/religion-source-lock.json';
 import ccpSourceLock from '../../../../data/registry/ccp-source-lock.json';
 import { releaseRoot } from '../data';
@@ -117,7 +119,7 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
       <section className="source-section" aria-labelledby="source-matrix-title">
         <div className="section-intro">
           <span className="eyebrow">
-            Coverage ledger · {verticals.length} verticals · {indicatorCount} indicators · {readyIndicatorCount} source sets ready · {sourceSelectionCount} need a source · {candidateLock.artifacts.length + cityCompanionLock.artifacts.length + ucdpCountryYearLock.artifacts.length + pleiadesSourceLock.artifacts.length + owidLifeExpectancyLock.artifacts.length + Object.keys(religionSourceLock.files).length + Object.keys(ccpSourceLock.artifacts).length + economicArtifactCount} pinned artifacts
+            Coverage ledger · {verticals.length} verticals · {indicatorCount} indicators · {readyIndicatorCount} source sets ready · {sourceSelectionCount} need a source · {candidateLock.artifacts.length + cityCompanionLock.artifacts.length + ucdpCountryYearLock.artifacts.length + pleiadesSourceLock.artifacts.length + owidLifeExpectancyLock.artifacts.length + ilostatLaborLock.artifacts.length + ilostatCurrentLock.artifacts.length + Object.keys(religionSourceLock.files).length + Object.keys(ccpSourceLock.artifacts).length + economicArtifactCount} pinned artifacts
           </span>
           <h2 id="source-matrix-title">What is in—and what is still outstanding</h2>
           <p>

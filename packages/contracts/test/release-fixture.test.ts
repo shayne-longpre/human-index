@@ -1,19 +1,23 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { gunzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import {
   aggregatePrevalence,
   assertSupportedYear,
   buildEvidenceTimelineYears,
+  decodeConflictEventRow,
   nearestTimelineIndex,
   resolveHistoricalSnapshot,
   validateAtlasReleaseManifest,
+  validateConflictEventYearDataset,
   validatePopulationSurfaceDataset,
   validatePublishedMetrics,
   type AtlasEntity,
   type AtlasReleaseManifest,
   type ConflictEvidenceDataset,
+  type ConflictEventYearDataset,
   type ElectricityDataset,
   type GdpPerCapitaDataset,
   type HistoricalContextIndex,
@@ -25,7 +29,7 @@ import {
   type LifeExpectancyDataset,
 } from '../src';
 
-const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-24-r14');
+const releaseRoot = resolve('apps/web/public/atlas/releases/atlas-mvp-2026-10-24-r15');
 
 function readJson<T>(name: string): T {
   return JSON.parse(readFileSync(resolve(releaseRoot, name), 'utf8')) as T;
@@ -45,6 +49,18 @@ const pleiadesProfile = JSON.parse(
 const owidLifeProfile = JSON.parse(
   readFileSync(resolve('data/review/owid-life-expectancy-profile.json'), 'utf8'),
 ) as { status: string; rows: number; entities: number; rows_1800: number; rows_1900: number };
+const gedProfile = JSON.parse(
+  readFileSync(resolve('data/review/ucdp-ged-26.1-profile.json'), 'utf8'),
+) as { source_rows: number; unique_event_ids: number; year_range: number[];
+  audits: { nonmonotonic_fatality_triplets: number; invalid_coordinates: number; invalid_date_range: number } };
+const ilostatProfile = JSON.parse(
+  readFileSync(resolve('data/review/ilostat-labor-profile.json'), 'utf8'),
+) as { status: string; source_lock_sha256: string; rows: number; ref_areas: number; year_range: number[]; blank_values: number;
+  table_metadata: { 'rep_var.label': string; 'last.update': string } };
+const ilostatCurrentProfile = JSON.parse(
+  readFileSync(resolve('data/review/ilostat-current-profile.json'), 'utf8'),
+) as { status: string; source_lock_sha256: string; rows: number; ref_areas: number; year_range: number[]; blank_values: number;
+  table_metadata: { 'rep_var.label': string; 'last.update': string } };
 const population = readJson<PopulationDataset>('population.json');
 const populationOutlook = readJson<PopulationOutlookDataset>('population-outlook.json');
 const electricity = readJson<ElectricityDataset>('electricity.json');
@@ -337,7 +353,31 @@ describe('genuine-data MVP release', () => {
     expect(cy.nonmonotonic_low_best_high_rows).toBe(4);
     expect((cy.rows[0] as { original_record_locator: string }).original_record_locator).toContain('OrganizedViolenceCYDataSet26_1.csv:row-');
     expect(manifest.source_releases.map((item) => item.id)).toContain('ucdp-prio-acd-26.1');
-    expect(manifest.source_releases.map((item) => item.id)).not.toContain('ucdp-ged-26.1');
+    expect(manifest.source_releases.map((item) => item.id)).toContain('ucdp-ged-26.1');
+  });
+
+  it('publishes every GED event in precise source-year slices without turning representative points into exact sites', () => {
+    const reference = manifest.conflict_event_evidence;
+    if (!reference) throw new Error('Missing GED release reference');
+    expect(gedProfile).toMatchObject({ source_rows: 417968, unique_event_ids: 417968, year_range: [1989, 2025] });
+    expect(gedProfile.audits).toMatchObject({ invalid_coordinates: 0, invalid_date_range: 0, nonmonotonic_fatality_triplets: 5075 });
+    expect(reference.year_slices).toHaveLength(37);
+    expect(reference.year_slices.reduce((sum, slice) => sum + slice.source_row_count, 0)).toBe(417968);
+    expect(reference.nonmonotonic_low_best_high_rows).toBe(5075);
+    for (const slice of [reference.year_slices[0], reference.year_slices.at(-1)!]) {
+      const dataset = readJson<ConflictEventYearDataset>(slice.data_file);
+      expect(() => validateConflictEventYearDataset(dataset, reference, slice)).not.toThrow();
+      expect(dataset.rows).toHaveLength(slice.source_row_count);
+      const row = decodeConflictEventRow(dataset.rows[0], slice.year);
+      expect(row.original_record_locator).toMatch(/^GEDEvent_v26_1\.csv:row-\d+$/);
+      expect(row.where_prec).toBeGreaterThanOrEqual(1);
+      const download = gunzipSync(readFileSync(resolve(releaseRoot, slice.download_file))).toString('utf8');
+      expect(download.split('\n')).toHaveLength(slice.source_row_count + 2);
+      expect(download).toContain(row.original_record_locator);
+    }
+    expect(sourceRegistry.sources.find((source) => source.id === 'ucdp')).toMatchObject({
+      downloaded: true, release_ready: true, blockers: [],
+    });
   });
 
   it('records the acquired but unreleased Pleiades place/name/location limitations', () => {
@@ -359,6 +399,27 @@ describe('genuine-data MVP release', () => {
     expect(sourceRegistry.sources.find((source) => source.id === 'owid_life_expectancy')).toMatchObject({
       downloaded: true, release_ready: false,
     });
+  });
+
+  it('pins direct ILOSTAT labor evidence without conflating earlier and current definitions', () => {
+    expect(ilostatProfile).toMatchObject({
+      status: 'acquired_profiled_not_released', rows: 321631, ref_areas: 312,
+      year_range: [1947, 2027], blank_values: 220,
+    });
+    expect(ilostatProfile.table_metadata['rep_var.label']).toContain('previous ILO definition - ICLS13');
+    expect(ilostatCurrentProfile).toMatchObject({
+      status: 'acquired_profiled_not_released', rows: 7679, ref_areas: 132,
+      year_range: [2014, 2025], blank_values: 2,
+    });
+    expect(ilostatCurrentProfile.table_metadata['rep_var.label']).toContain('current ILO definition - ICLS19');
+    for (const [profile, lock] of [[ilostatProfile, 'ilostat-labor-lock.json'], [ilostatCurrentProfile, 'ilostat-current-lock.json']] as const) {
+      expect(profile.source_lock_sha256).toBe(createHash('sha256')
+        .update(readFileSync(resolve('data/registry', lock))).digest('hex'));
+    }
+    expect(sourceRegistry.sources.find((source) => source.id === 'ilostat_direct_labor')).toMatchObject({
+      downloaded: true, release_ready: false,
+    });
+    expect(manifest.source_releases.some((source) => source.id.startsWith('ilostat-'))).toBe(false);
   });
 
   it('publishes exact deep-time world estimates without silently choosing within source ranges', () => {

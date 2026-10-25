@@ -45,6 +45,7 @@ export function ConflictPage({ manifest }: { manifest: AtlasReleaseManifest }) {
       <span className="eyebrow">Organized violence · source-native evidence</span>
       <h1>Conflict records, with their boundaries intact.</h1>
       <p>Two UCDP 26.1 products answer different questions. Armed-conflict rows are conflict-years with source-defined thresholds and parties. Country-year rows summarize GED-coded violence within Gleditsch–Ward state borders. Neither estimates the number of people exposed.</p>
+      {manifest.conflict_event_evidence ? <p><a href={`?page=events&release=${manifest.release_id}`}>Explore the separate georeferenced event records →</a></p> : null}
     </header>
     <section className="economics-controls" aria-label="Conflict evidence controls">
       <label>Source product

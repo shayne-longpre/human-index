@@ -265,18 +265,18 @@
       "label": "ILOSTAT direct labor statistics",
       "dossier": "S24",
       "role": "labor_force_hours_and_earnings_candidate",
-      "candidate_release": "EMP_DWAP_NOC_RT_A annual employment-to-population ratio proposed; live table/vintage not yet acquired",
-      "coverage_start": null,
-      "coverage_end": null,
-      "license": null,
-      "license_status": "provider_post_2023_database_CC_BY_4_confirmed_exact_asset_not_pinned",
-      "urls": ["https://ilostat.ilo.org/data/", "https://www.ilo.org/rights-and-permissions", "https://webapps.ilo.org/ilostat-files/Documents/ILOSTAT_BulkDownload_Guidelines.pdf"],
-      "blockers": ["select_exact_indicator_table_release_and_dimensions", "verify_asset_level_reuse_terms", "keep_observed_and_ILO_modeled_series_distinct"],
-      "notes": "Official ILO rights guidance says datasets and referential metadata published since 3 May 2023 are CC BY 4.0, excluding restricted microdata. The official bulk guide identifies annual EMP_DWAP_NOC_RT_A as employment-to-population ratio. The documented older WEB_bulk_download URL returned 404 during this pass, and the current Rilostat code points to an RDS endpoint that could not be retrieved from this environment. No exact direct ILOSTAT artifact is acquired or published. WDI modeled ILO unemployment and PWT labor inputs remain separate.",
+      "candidate_release": "EMP_DWAP_SEX_AGE_RT_A (ICLS13) and EMP_5WAP_SEX_AGE_RT_A (ICLS19), annual tables updated 2026-10-23",
+      "coverage_start": "1947 CE for some source supports",
+      "coverage_end": "2027 CE in the source table; future rows need classification",
+      "license": "CC-BY-4.0 for post-2023 ILO datasets and referential metadata, excluding restricted microdata",
+      "license_status": "official_post_2023_dataset_policy_and_current_table_vintage_checked",
+      "urls": ["https://ilostat.ilo.org/data/bulk/", "https://www.ilo.org/rights-and-permissions", "https://rplumber.ilo.org/files/website/bulk/indicator.html"],
+      "blockers": ["compare_dated_support_of_acquired_ICLS13_and_ICLS19_tables_before_publication", "select_total_sex_and_age_universe_without_discarding_source_dimensions_or_duplicating_survey_years", "separate_country_territory_aggregate_and_future_date_support", "keep_direct_and_ILO_modeled_series_distinct"],
+      "notes": "The current official directory and public CSV endpoint were verified. Two distinct 2026-10-23 annual tables plus their table-of-contents metadata and five code dictionaries each are acquired and SHA-256 pinned. ICLS13 has 321,631 rows across 312 reference areas and 1947–2027, with 220 blank values; current ICLS19 has 7,679 rows across 132 reference areas and 2014–2025, with two blanks. Source, sex, age, status, and duplicate survey-year dimensions remain separate. Neither table is silently spliced with ILO modelled estimates. No rows are yet in the public release.",
       "checked_at": "2026-10-24",
-      "verification_level": "official_catalog_and_bulk_route_checked_only",
-      "downloaded": false,
-      "artifact_sha256": null,
+      "verification_level": "official_catalog_current_table_metadata_artifacts_and_dimensions_profiled",
+      "downloaded": true,
+      "artifact_sha256": "f68f502ef99d38c15a9e08dcae006243a68f5a97fcffbfcffe029e283104e7b3",
       "terms_snapshot_sha256": null,
       "release_ready": false
     },
@@ -503,17 +503,14 @@
       "urls": [
         "https://ucdp.uu.se/downloads/"
       ],
-      "blockers": [
-        "define_event_location_and_precision_support",
-        "review_5075_event_rows_where_low_best_high_are_not_monotonic_before_any_fatality_measure"
-      ],
-      "notes": "UCDP GED 26.1 event records and codebook are pinned but not published. A separate r14 release publishes ACD conflict-years and OrganizedViolenceCY country-years. Event locations and fatality fields still need their own adapter and review; neither published product is substituted for GED events or population exposure.",
-      "checked_at": "2026-09-23",
-      "verification_level": "artifacts_and_codebooks_acquired_adapter_pending",
+      "blockers": [],
+      "notes": "R15 publishes all 417,968 finalized GED 26.1 event records in source-year partitions, with source event IDs, date and location precision, representative coordinates, source row locators, and separate low/best/high fatality estimates. The 5,075 nonmonotonic triplets remain raw source estimates, not Atlas intervals. No point is joined to Atlas political borders or population; event presence/absence is not a person-exposure or peace measure.",
+      "checked_at": "2026-10-24",
+      "verification_level": "artifact_codebook_profile_adapter_and_release_validated",
       "downloaded": true,
       "artifact_sha256": "8c941d84954e555ee2e54f40fa04d9203bf1e2f962203d0a9930966c4947c667",
       "terms_snapshot_sha256": null,
-      "release_ready": false
+      "release_ready": true
     },
     {
       "id": "ucdp_prio_acd",
@@ -1062,8 +1059,8 @@
       "sources": [
         {
           "source_id": "ucdp",
-          "role": "GED event locations and fatality estimates candidate",
-          "release_ids": []
+          "role": "Source-native GED event records with date, location, and fatality-estimate fields",
+          "release_ids": ["ucdp-ged-26.1"]
         },
         {
           "source_id": "ucdp_prio_acd",
