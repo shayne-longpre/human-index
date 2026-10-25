@@ -781,21 +781,6 @@
           "release_ids": []
         },
         {
-          "source_id": "world_bank_pip",
-          "role": "Published source-native national survey poverty, poverty gap, Gini, and decile welfare shares; income and consumption remain distinct",
-          "release_ids": ["world-bank-pip-20260922-2021-surveys"]
-        },
-        {
-          "source_id": "penn_world_table",
-          "role": "Published source-native GDP, employment, hours, TFP, capital-stock, and labor-share inputs",
-          "release_ids": ["penn-world-table-11.0"]
-        },
-        {
-          "source_id": "ilostat_direct_labor",
-          "role": "Direct participation, employment, hours, and earnings series after table and terms selection",
-          "release_ids": []
-        },
-        {
           "source_id": "clio_infra",
           "role": "Sparse historical estimates on modern 2012 country boundaries; candidate only",
           "release_ids": []
@@ -810,6 +795,14 @@
           "role": "Gridded population scenarios",
           "release_ids": []
         }
+      ],
+      "indicators": [
+        {"id": "global_population_estimates", "label": "Global population estimates", "scope": "Separate world-total source series; no interpolated regional allocation.", "source_ids": ["us_census_historical_world_population", "un_wpp_2024"]},
+        {"id": "modern_territorial_population", "label": "Modern territorial population", "scope": "Country/economy estimates remain source-native and geographically distinct.", "source_ids": ["world_bank_electricity", "un_wpp_2024"]},
+        {"id": "historical_polity_population", "label": "Historical polity population", "scope": "Sparse historical supports require dated crosswalks; not a world partition.", "source_ids": ["clio_infra", "seshat"]},
+        {"id": "modern_population_grids", "label": "Modern modeled population grids", "scope": "Alternative models remain separate; population counts need conservation checks.", "source_ids": ["ghsl_ghs_pop", "worldpop_global2"]},
+        {"id": "deep_time_population_grids", "label": "Deep-time modeled population grids", "scope": "Source scenarios are not observed ancient settlements or confidence bounds.", "source_ids": ["hyde"]},
+        {"id": "migration_flows", "label": "Migration flows", "scope": "Origin/destination, period, and population universe need a selected source and method.", "source_ids": []}
       ]
     },
     {
@@ -837,6 +830,11 @@
           "role": "Temporal place names and reconciliation candidate",
           "release_ids": []
         }
+      ],
+      "indicators": [
+        {"id": "historical_polity_boundaries", "label": "Historical polity boundaries", "scope": "Contestable political context, not an exclusive statistical partition.", "source_ids": ["cliopatria", "cshapes_2_0"]},
+        {"id": "modern_display_basemap", "label": "Modern display basemap", "scope": "Modern geometry is display context, not a deep-time coastline claim.", "source_ids": ["natural_earth"]},
+        {"id": "dated_political_place_names", "label": "Dated polity and place names", "scope": "Named entities require reviewed identity and time support.", "source_ids": ["cliopatria", "world_historical_gazetteer"]}
       ]
     },
     {
@@ -864,6 +862,11 @@
           "role": "Ancient-place names and locations",
           "release_ids": []
         }
+      ],
+      "indicators": [
+        {"id": "ancient_city_population", "label": "Ancient city population estimates", "scope": "Sparse exact source dates; overlapping series remain separate.", "source_ids": ["reba_historical_urban_population", "reba_chandler_v2"]},
+        {"id": "modern_city_population_points", "label": "Modern city population points", "scope": "Source-authored points, not a complete urban denominator.", "source_ids": ["reba_modelski_modern_v2"]},
+        {"id": "ancient_place_identification", "label": "Ancient place identification", "scope": "Name and location evidence for crosswalks, not population estimates.", "source_ids": ["pleiades"]}
       ]
     },
     {
@@ -882,6 +885,21 @@
           "release_ids": ["maddison-project-database-2023-v1"]
         },
         {
+          "source_id": "world_bank_pip",
+          "role": "Published source-native national survey poverty, poverty gap, Gini, and decile welfare shares; income and consumption remain distinct",
+          "release_ids": ["world-bank-pip-20260922-2021-surveys"]
+        },
+        {
+          "source_id": "penn_world_table",
+          "role": "Published source-native GDP, employment, hours, TFP, capital-stock, and labor-share inputs",
+          "release_ids": ["penn-world-table-11.0"]
+        },
+        {
+          "source_id": "ilostat_direct_labor",
+          "role": "Direct participation, employment, hours, and earnings series after table and terms selection",
+          "release_ids": []
+        },
+        {
           "source_id": "clio_infra",
           "role": "Historical economic and social indicator candidates",
           "release_ids": []
@@ -891,6 +909,22 @@
           "role": "Income and wealth distributions pending exact release and terms",
           "release_ids": []
         }
+      ],
+      "indicators": [
+        {"id": "real_output_per_person", "label": "Real output per person", "scope": "Separate PPP/base-year territorial GDP-per-person series, not personal income.", "source_ids": ["maddison", "world_bank_economics"]},
+        {"id": "total_real_output", "label": "Total real output", "scope": "Source-native GDP levels with distinct price bases and definitions.", "source_ids": ["world_bank_economics", "penn_world_table"]},
+        {"id": "household_consumption_per_person", "label": "Household consumption per person", "scope": "National-accounts mean, not a distribution of household living standards.", "source_ids": ["world_bank_economics"]},
+        {"id": "poverty_incidence_and_gap", "label": "Poverty incidence and depth", "scope": "Named poverty line, PPP base, survey welfare concept, and year.", "source_ids": ["world_bank_pip", "world_bank_economics"]},
+        {"id": "income_consumption_inequality", "label": "Income and consumption inequality", "scope": "Gini and decile shares keep survey and welfare basis; WID is a separate candidate.", "source_ids": ["world_bank_pip", "world_bank_economics", "wid_distributional_economics"]},
+        {"id": "wealth_distribution", "label": "Wealth levels and concentration", "scope": "Personal wealth and percentile universe, never substituted with GDP.", "source_ids": ["wid_distributional_economics"]},
+        {"id": "productivity_and_inputs", "label": "Productivity and productive inputs", "scope": "TFP, hours, employment, and capital are separate; output/hour is not yet derived.", "source_ids": ["penn_world_table", "ilostat_direct_labor"]},
+        {"id": "employment_conditions", "label": "Employment conditions", "scope": "Unemployment, participation, earnings, and persons engaged use different denominators.", "source_ids": ["world_bank_economics", "penn_world_table", "ilostat_direct_labor"]},
+        {"id": "inflation_and_prices", "label": "Inflation and prices", "scope": "CPI change is source-basket-specific; historical real wages remain a gap.", "source_ids": ["world_bank_economics"]},
+        {"id": "economic_sector_composition", "label": "Economic sector composition", "scope": "Agriculture, industry, and service value-added shares, not employment shares.", "source_ids": ["world_bank_economics"]},
+        {"id": "investment_and_public_demand", "label": "Investment and public demand", "scope": "Capital formation and government final consumption are not wealth or state capacity.", "source_ids": ["world_bank_economics"]},
+        {"id": "external_trade", "label": "External trade", "scope": "Goods and services trade as share of GDP, not a quality judgment.", "source_ids": ["world_bank_economics"]},
+        {"id": "historical_economic_context", "label": "Earlier historical economic context", "scope": "Sparse historical workbook evidence on fixed modern boundaries.", "source_ids": ["clio_infra"]},
+        {"id": "historical_real_wages", "label": "Historical real wages", "scope": "Occupation, basket, currency, and local price context need a selected source.", "source_ids": []}
       ]
     },
     {
@@ -913,6 +947,13 @@
           "role": "Historical life-expectancy candidate",
           "release_ids": []
         }
+      ],
+      "indicators": [
+        {"id": "modern_life_expectancy", "label": "Modern life expectancy at birth", "scope": "Territorial context; not a population-weighted global life-table estimate.", "source_ids": ["world_bank_electricity"]},
+        {"id": "historical_life_expectancy", "label": "Historical life-expectancy context", "scope": "Alternative series need definition, territorial, and underlying-source review.", "source_ids": ["owid_life_expectancy", "clio_infra"]},
+        {"id": "child_mortality", "label": "Child mortality", "scope": "Birth-cohort denominator and age threshold require a selected source.", "source_ids": []},
+        {"id": "maternal_mortality", "label": "Maternal mortality", "scope": "Live-birth denominator, model status, and period require a selected source.", "source_ids": []},
+        {"id": "disease_burden", "label": "Disease burden", "scope": "Condition, disability, mortality, and age standardization must remain distinct.", "source_ids": []}
       ]
     },
     {
@@ -925,6 +966,11 @@
           "role": "Published electricity-access prevalence",
           "release_ids": ["world-bank-wdi-2026-07-13"]
         }
+      ],
+      "indicators": [
+        {"id": "electricity_access", "label": "Access to electricity", "scope": "Person prevalence with compatible population weights and explicit unknown coverage.", "source_ids": ["world_bank_electricity"]},
+        {"id": "drinking_water_access", "label": "Safe drinking-water access", "scope": "Service ladder, household/person denominator, and rural/urban support need a selected source.", "source_ids": []},
+        {"id": "sanitation_access", "label": "Sanitation access", "scope": "Managed/basic service categories and denominator need a selected source.", "source_ids": []}
       ]
     },
     {
@@ -952,6 +998,13 @@
           "role": "Constitutional event and written-provision candidates",
           "release_ids": []
         }
+      ],
+      "indicators": [
+        {"id": "adult_voting_eligibility", "label": "Statutory adult voting eligibility", "scope": "Legal eligibility, not actual participation or turnout.", "source_ids": ["vdem"]},
+        {"id": "legislature_structure", "label": "Legislature structure", "scope": "Source-coded chamber structure, not a government ranking.", "source_ids": ["vdem"]},
+        {"id": "written_constitutional_provisions", "label": "Written constitutional provisions", "scope": "Legal text/coding only; enforcement remains distinct.", "source_ids": ["comparative_constitutions_project"]},
+        {"id": "historical_institutional_features", "label": "Historical polity institutions", "scope": "Sampled facts and recruitment codes need dated support and codebook review.", "source_ids": ["seshat", "clio_infra"]},
+        {"id": "legal_status_and_civic_protections", "label": "Legal status and civic protections", "scope": "Group-specific law and lived practice require separate measures and selected sources.", "source_ids": []}
       ]
     },
     {
@@ -965,6 +1018,12 @@
         {"source_id": "arda_rcs_dem", "role": "Longer-run denomination estimates candidate", "release_ids": []},
         {"source_id": "religion_and_state_project", "role": "1990–2014 state religion policy candidate", "release_ids": []},
         {"source_id": "seshat", "role": "Ancient polity religion-practice codes, blocked by license conflict", "release_ids": []}
+      ],
+      "indicators": [
+        {"id": "religious_affiliation", "label": "Religious affiliation composition", "scope": "Source-specific categories and overlapping adherence remain separate.", "source_ids": ["pew_global_religious_composition", "world_religion_project"]},
+        {"id": "religious_denominations", "label": "Historical denominations", "scope": "Source interpolation, hierarchy, and overlapping dependencies require review.", "source_ids": ["arda_rcs_dem"]},
+        {"id": "government_religion_policy", "label": "Government religion policy", "scope": "Expert-coded practice and state-law measures are distinct, not an Atlas score.", "source_ids": ["vdem", "religion_and_state_project"]},
+        {"id": "ancient_religious_practices", "label": "Ancient polity religious practices", "scope": "Sampled normative/ritual claims, not a belief assignment to every person.", "source_ids": ["seshat"]}
       ]
     },
     {
@@ -982,6 +1041,12 @@
           "role": "Historical internal and international conflict candidates",
           "release_ids": []
         }
+      ],
+      "indicators": [
+        {"id": "conflict_events_and_fatalities", "label": "Conflict events and fatalities", "scope": "Event locations and source low/best/high death estimates; not population exposure.", "source_ids": ["ucdp"]},
+        {"id": "conflict_year_status", "label": "Armed-conflict-year status", "scope": "Source-defined conflict thresholds and parties, not individual risk.", "source_ids": ["ucdp"]},
+        {"id": "historical_conflict_context", "label": "Earlier historical conflict context", "scope": "Sparse historical codes need support and definition review.", "source_ids": ["clio_infra"]},
+        {"id": "displacement_and_civilian_exposure", "label": "Displacement and civilian exposure", "scope": "Conflict occurrence cannot stand in for people displaced or exposed; select direct evidence.", "source_ids": []}
       ]
     },
     {
@@ -994,6 +1059,10 @@
           "role": "Gridded land-use and settlement scenarios",
           "release_ids": []
         }
+      ],
+      "indicators": [
+        {"id": "gridded_land_use", "label": "Gridded land-use categories", "scope": "Modeled cropland, pasture, and other land-use scenarios remain distinct from observations.", "source_ids": ["hyde"]},
+        {"id": "gridded_settlement", "label": "Gridded settlement and urbanization", "scope": "Modeled rural/urban populations and area variables need source-specific units and masks.", "source_ids": ["hyde"]}
       ]
     }
   ]

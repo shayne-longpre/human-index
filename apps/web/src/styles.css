@@ -604,27 +604,33 @@ footer { min-height: 90px; display: flex; align-items: center; justify-content: 
 .source-matrix-scroll { overflow-x: auto; border: 1px solid var(--line); background: var(--panel); }
 .source-matrix { min-width: 1060px; table-layout: fixed; }
 .source-matrix th, .source-matrix td { padding: 14px 15px; vertical-align: top; }
-.source-matrix thead th:nth-child(1) { width: 20%; }
-.source-matrix thead th:nth-child(2) { width: 16%; }
-.source-matrix thead th:nth-child(3) { width: 17%; }
-.source-matrix thead th:nth-child(4), .source-matrix thead th:nth-child(5) { width: 8%; }
-.source-matrix thead th:nth-child(6) { width: 31%; }
+.sources-page .source-matrix thead th:nth-child(1) { width: 18%; }
+.sources-page .source-matrix thead th:nth-child(2) { width: 27%; }
+.sources-page .source-matrix thead th:nth-child(3) { width: 35%; }
+.sources-page .source-matrix thead th:nth-child(4), .sources-page .source-matrix thead th:nth-child(5) { width: 10%; }
 .source-matrix tbody + tbody tr:first-child > * { border-top: 1px solid rgba(241,207,124,.3); }
 .matrix-vertical { background: rgba(241,207,124,.025); }
-.matrix-vertical strong, .matrix-vertical span, .matrix-source a, .matrix-source small { display: block; }
+.matrix-vertical strong, .matrix-vertical span, .matrix-indicator strong, .matrix-indicator span, .matrix-indicator small, .matrix-source a, .matrix-source small { display: block; }
 .matrix-vertical strong { color: var(--ink); font: 400 18px/1.1 "Newsreader", Georgia, serif; }
 .matrix-vertical span { margin-top: 8px; color: var(--muted); font-size: 9px; font-weight: 400; line-height: 1.55; }
+.matrix-indicator { background: rgba(255,255,255,.015); }
+.matrix-indicator strong { color: var(--ink); font-size: 11px; font-weight: 600; line-height: 1.4; }
+.matrix-indicator span { margin-top: 6px; color: var(--muted); font-size: 9px; font-weight: 400; line-height: 1.5; }
+.matrix-indicator small { margin-top: 9px; font: 500 8px/1.3 "DM Mono", monospace; text-transform: uppercase; letter-spacing: .04em; }
+.matrix-indicator .indicator-ready { color: #bbd8bc; }
+.matrix-indicator .indicator-open { color: #d0bd8d; }
 .matrix-source a { color: var(--ink); font-size: 10px; font-weight: 500; line-height: 1.35; text-decoration: none; }
 .matrix-source a:hover { color: var(--gold); }
 .matrix-source small { margin-top: 5px; color: var(--faint); font: 400 8px/1.4 "DM Mono", monospace; overflow-wrap: anywhere; }
-.matrix-role { color: var(--muted); font-size: 9px; line-height: 1.5; }
+.matrix-source-gap, .matrix-not-selected { color: var(--faint); font-size: 10px; font-weight: 400; }
+.matrix-blockers { margin-top: 8px; color: #c8ba89; font-size: 9px; font-weight: 400; line-height: 1.5; }
+.matrix-blockers summary { cursor: pointer; }
+.matrix-blockers ul { margin: 5px 0 0; padding-left: 16px; }
 .matrix-status { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .matrix-status > span { display: grid; width: 20px; height: 20px; place-items: center; border: 1px solid var(--line); border-radius: 50%; font-size: 11px; }
 .matrix-status small { color: var(--faint); font: 400 8px/1 "DM Mono", monospace; text-transform: uppercase; }
 .matrix-status-complete > span { color: #bbd8bc; border-color: rgba(141,187,142,.35); background: rgba(141,187,142,.08); }
 .matrix-status-open > span { color: var(--faint); }
-.matrix-outstanding ul { margin: 0; padding-left: 14px; color: #c8ba89; font-size: 8px; line-height: 1.55; }
-.matrix-clear { color: #9fc5a1; font-size: 9px; }
 .metric-source-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); }
 .metric-source-list article { display: grid; grid-template-columns: 1fr .8fr; gap: 32px; padding: 28px; background: var(--panel); }
 .metric-source-list h3 { margin-top: 8px; }

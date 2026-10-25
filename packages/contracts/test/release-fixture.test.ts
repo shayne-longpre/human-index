@@ -56,6 +56,7 @@ const sourceRegistry = JSON.parse(
   verticals: Array<{
     id: string;
     sources: Array<{ source_id: string; release_ids: string[] }>;
+    indicators: Array<{ id: string; label: string; scope: string; source_ids: string[] }>;
   }>;
 };
 const wppProfile = JSON.parse(
@@ -414,9 +415,25 @@ describe('genuine-data MVP release', () => {
     );
     const referencedRegistryIds = new Set<string>();
     const referencedReleaseIds = new Set<string>();
+    const indicatorIds = new Set<string>();
     for (const vertical of sourceRegistry.verticals) {
       const verticalSourceIds = vertical.sources.map((source) => source.source_id);
       expect(new Set(verticalSourceIds).size).toBe(verticalSourceIds.length);
+      expect(vertical.indicators.length).toBeGreaterThan(0);
+      const mappedSourceIds = new Set<string>();
+      for (const indicator of vertical.indicators) {
+        expect(indicatorIds.has(indicator.id)).toBe(false);
+        indicatorIds.add(indicator.id);
+        expect(indicator.label.trim()).not.toBe('');
+        expect(indicator.scope.trim()).not.toBe('');
+        // An empty source set is an explicit roadmap gap, never a ready indicator.
+        expect(new Set(indicator.source_ids).size).toBe(indicator.source_ids.length);
+        for (const id of indicator.source_ids) {
+          expect(verticalSourceIds).toContain(id);
+          mappedSourceIds.add(id);
+        }
+      }
+      expect(mappedSourceIds).toEqual(new Set(verticalSourceIds));
       for (const source of vertical.sources) {
         expect(registryIds.has(source.source_id)).toBe(true);
         referencedRegistryIds.add(source.source_id);
@@ -431,6 +448,7 @@ describe('genuine-data MVP release', () => {
     }
     expect(referencedRegistryIds).toEqual(registryIds);
     expect(referencedReleaseIds).toEqual(releaseIds);
+    expect(indicatorIds.size).toBeGreaterThanOrEqual(40);
   });
 
   it('covers every candidate with a versioned decision without inventing unresolved history', () => {

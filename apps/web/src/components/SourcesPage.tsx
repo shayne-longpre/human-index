@@ -4,6 +4,7 @@ import candidateSourceLock from '../../../../data/registry/candidate-source-lock
 import religionSourceLock from '../../../../data/registry/religion-source-lock.json';
 import ccpSourceLock from '../../../../data/registry/ccp-source-lock.json';
 import { releaseRoot } from '../data';
+import { indicatorProgress, sourceInRelease, type RoadmapIndicator, type RoadmapSourceLink } from '../sourceRoadmap';
 
 interface RegistrySource {
   id: string;
@@ -24,17 +25,12 @@ interface RegistrySource {
   release_ready: boolean;
 }
 
-interface VerticalSource {
-  source_id: string;
-  role: string;
-  release_ids: string[];
-}
-
 interface DataVertical {
   id: string;
   label: string;
   description: string;
-  sources: VerticalSource[];
+  sources: RoadmapSourceLink[];
+  indicators: RoadmapIndicator[];
 }
 
 const registry = sourceRegistry as {
@@ -83,6 +79,14 @@ function SourceStatus({ complete, label }: { complete: boolean; label: string })
 }
 
 export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
+  const publishedReleaseIds = new Set(manifest.source_releases.map((source) => source.id));
+  const indicatorCount = verticals.reduce((total, vertical) => total + vertical.indicators.length, 0);
+  const sourceSelectionCount = verticals.reduce((total, vertical) => total + vertical.indicators.filter(
+    (indicator) => indicator.source_ids.length === 0,
+  ).length, 0);
+  const readyIndicatorCount = verticals.reduce((total, vertical) => total + vertical.indicators.filter(
+    (indicator) => indicatorProgress(indicator, vertical.sources, publishedReleaseIds).ready,
+  ).length, 0);
   const economicArtifactCount = manifest.transformations
     .filter((item) => ['economic-source-native-table-v1', 'pip-source-native-survey-table-v1', 'pwt-source-native-table-v1'].includes(item.id))
     .reduce((count, item) => count + item.input_artifact_ids.length, 0);
@@ -107,14 +111,15 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
       <section className="source-section" aria-labelledby="source-matrix-title">
         <div className="section-intro">
           <span className="eyebrow">
-            Coverage ledger · {verticals.length} data verticals · {candidateLock.artifacts.length + Object.keys(religionSourceLock.files).length + Object.keys(ccpSourceLock.artifacts).length + economicArtifactCount} pinned source artifacts
+            Coverage ledger · {verticals.length} verticals · {indicatorCount} indicators · {readyIndicatorCount} source sets ready · {sourceSelectionCount} need a source · {candidateLock.artifacts.length + Object.keys(religionSourceLock.files).length + Object.keys(ccpSourceLock.artifacts).length + economicArtifactCount} pinned artifacts
           </span>
           <h2 id="source-matrix-title">What is in—and what is still outstanding</h2>
           <p>
-            Acquired means an exact source artifact is locally pinned. In release means at least one
-            reviewed slice is published in {manifest.release_id}. A published slice can still have
-            explicit blockers before the wider source is safe to use. {candidateLock.blocked_sources.length}
-            {' '}candidate sources currently have access or licensing blockers recorded in the acquisition lock.
+            Each indicator lists its planned sources—or an explicit source-selection gap. Its source set is ready when every listed source
+            has its declared release IDs in {manifest.release_id}; the checks remain at the source level.
+            This is an integration milestone, not a claim of complete years, places, or variable coverage.
+            Acquired means a source artifact is locally pinned. {candidateLock.blocked_sources.length}
+            {' '}candidate sources have access or licensing blockers in the acquisition lock.
           </p>
         </div>
         <div className="source-matrix-scroll" role="region" aria-label="Source ingestion status by data vertical" tabIndex={0}>
@@ -122,44 +127,44 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
             <thead>
               <tr>
                 <th scope="col">Data vertical</th>
-                <th scope="col">Source</th>
-                <th scope="col">Atlas role</th>
+                <th scope="col">Indicators</th>
+                <th scope="col">Sources</th>
                 <th scope="col">Acquired</th>
                 <th scope="col">In release</th>
-                <th scope="col">Outstanding and why</th>
               </tr>
             </thead>
             {verticals.map((vertical) => (
               <tbody key={vertical.id}>
-                {vertical.sources.map((link, index) => {
-                  const source = catalogById.get(link.source_id);
-                  if (!source) throw new Error(`Unknown source registry ID: ${link.source_id}`);
-                  const published = link.release_ids.length > 0
-                    && link.release_ids.every((releaseId) => manifest.source_releases.some((item) => item.id === releaseId));
-                  return (
-                    <tr key={`${vertical.id}-${link.source_id}`}>
-                      {index === 0 ? (
-                        <th className="matrix-vertical" scope="rowgroup" rowSpan={vertical.sources.length}>
-                          <strong>{vertical.label}</strong>
-                          <span>{vertical.description}</span>
-                        </th>
-                      ) : null}
+                {vertical.indicators.flatMap((indicator, indicatorIndex) => {
+                  const progress = indicatorProgress(indicator, vertical.sources, publishedReleaseIds);
+                  const sourceIds: Array<string | null> = indicator.source_ids.length ? indicator.source_ids : [null];
+                  return sourceIds.map((sourceId, sourceIndex) => {
+                    const link = sourceId ? vertical.sources.find((item) => item.source_id === sourceId) : null;
+                    const source = sourceId ? catalogById.get(sourceId) : null;
+                    if (sourceId && (!link || !source)) throw new Error(`Unknown source registry ID: ${sourceId}`);
+                    const published = link ? sourceInRelease(link, publishedReleaseIds) : false;
+                    return <tr key={`${vertical.id}-${indicator.id}-${sourceId ?? 'unselected'}`}>
+                      {indicatorIndex === 0 && sourceIndex === 0 ? <th className="matrix-vertical" scope="rowgroup" rowSpan={vertical.indicators.reduce((total, item) => total + Math.max(1, item.source_ids.length), 0)}>
+                        <strong>{vertical.label}</strong><span>{vertical.description}</span>
+                      </th> : null}
+                      {sourceIndex === 0 ? <th className="matrix-indicator" scope="row" rowSpan={sourceIds.length}>
+                        <strong>{indicator.label}</strong>
+                        <span>{indicator.scope}</span>
+                        <small className={progress.ready ? 'indicator-ready' : 'indicator-open'}>
+                          {progress.ready ? '✓ Source set ready' : progress.required === 0 ? 'Source selection needed' : `${progress.inRelease}/${progress.required} sources in release`}
+                        </small>
+                      </th> : null}
                       <th className="matrix-source" scope="row">
-                        <a href={`#source-${source.id}`}>{source.label}</a>
-                        <small>{source.dossier} · {source.candidate_release}</small>
-                      </th>
-                      <td className="matrix-role">{link.role}</td>
-                      <td><SourceStatus complete={source.downloaded} label={`${source.id} acquired`} /></td>
-                      <td><SourceStatus complete={published} label={`${source.id} published`} /></td>
-                      <td className="matrix-outstanding">
-                        {source.blockers.length ? (
+                        {source && link ? <><a href={`#source-${source.id}`}>{source.label}</a>
+                        <small>{source.dossier} · {link.role}</small>
+                        {source.blockers.length ? <details className="matrix-blockers"><summary>{source.blockers.length} open {source.blockers.length === 1 ? 'issue' : 'issues'}</summary>
                           <ul>{source.blockers.map((blocker) => <li key={blocker}>{humanize(blocker)}</li>)}</ul>
-                        ) : (
-                          <span className="matrix-clear">None for the published scope.</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
+                        </details> : null}</> : <span className="matrix-source-gap">No source selected yet</span>}
+                      </th>
+                      <td>{source ? <SourceStatus complete={source.downloaded} label={`${source.id} acquired`} /> : <span className="matrix-not-selected">—</span>}</td>
+                      <td>{source ? <SourceStatus complete={published} label={`${source.id} in release`} /> : <span className="matrix-not-selected">—</span>}</td>
+                    </tr>;
+                  });
                 })}
               </tbody>
             ))}
@@ -234,8 +239,7 @@ export function SourcesPage({ manifest }: { manifest: AtlasReleaseManifest }) {
         <div className="source-catalog">
           {catalog.map((source) => {
             const published = verticals.some((vertical) => vertical.sources.some(
-              (link) => link.source_id === source.id
-                && link.release_ids.some((releaseId) => manifest.source_releases.some((item) => item.id === releaseId)),
+              (link) => link.source_id === source.id && sourceInRelease(link, publishedReleaseIds),
             ));
             const status = published
               ? source.blockers.length ? 'Published / limited' : 'Published'

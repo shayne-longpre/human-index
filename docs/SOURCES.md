@@ -1,5 +1,30 @@
 # Source dossier
 
+## Indicator-to-source roadmap
+
+The Sources page's five-column ledger is generated from
+`data/registry/sources.json`: data vertical → indicator → planned sources →
+source-level acquisition and release checks. The current registry defines 49
+indicators in ten verticals. An indicator is **source-set ready** if it has at
+least one planned source and every listed source has all of its declared release
+IDs in the selected manifest. Empty source sets are displayed as **source
+selection needed**, never treated as vacuously complete. As of r12, 15 source
+sets are ready and nine indicators still need a source selected.
+
+This is an operational integration milestone, **not** a claim that an indicator
+has every place, year, subgroup, or desired historical range. A source release
+can contain only some variables and sparse exact years. The registry maps only
+source roles already represented by the selected released slices; proposed
+measures without an integrated variable remain explicit source-selection gaps.
+Published metric contracts, downloadable evidence, and variable-specific
+coverage remain in the release manifest and the individual source tables.
+No competing source series is silently spliced when an indicator lists both.
+
+The indicator taxonomy also corrects the previous source ledger: PIP, Penn
+World Table, and direct ILOSTAT labor work belong under economics, not
+population. Registry tests require unique indicator IDs, valid source links,
+and at least one indicator mapping for every source listed in a vertical.
+
 **Checked: October 24, 2026.** This dossier mixes implemented release inputs
 with documentation-level candidates. Each section states its acquisition status.
 “Checked license” means the cited publisher page states that license;

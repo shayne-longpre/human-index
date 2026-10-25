@@ -1,5 +1,25 @@
 # Build report: evidence-aware temporal-map MVP
 
+## Sources indicator roadmap — verified October 24, 2026
+
+The Sources matrix now shows Data vertical, Indicators, Sources, Acquired,
+and In release. The registry defines 49 indicators across ten verticals and
+maps each selected source through its existing source-level release IDs. Fifteen
+indicator source sets are ready in r12; nine indicators explicitly need a
+source selected. These are integration-plan statuses, not claims of complete
+time/place coverage or composite measures. PIP, PWT, and ILOSTAT source roles
+were moved from the Population ledger to Economics. Unresolved blockers remain
+inspectable within each source cell.
+
+Checks actually run for this change: `pnpm test` (47 pass), `pnpm build`
+(pass; existing large MapView chunk warning), Python unittest discovery
+(30 pass), and `pnpm exec playwright test` (11 pass). The new browser test
+checks indicator/source grouping, one ready and one incomplete source set,
+an unselected-source gap, mobile horizontal scrolling, and serious/critical
+accessibility findings. A 1440×900 desktop screenshot of the matrix was
+captured and visually inspected; no screenshot benchmark or performance
+measurement was claimed.
+
 ## Local cross-source research view — verified October 24, 2026
 
 The pinned CCP ZIPs produced a 3,396,553-byte ignored local slice

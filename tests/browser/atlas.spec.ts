@@ -133,6 +133,29 @@ test('respects reduced motion and exposes core pages without serious accessibili
   await expectNoSeriousAccessibilityViolations(page);
 });
 
+test('source roadmap groups indicators with source-level acquisition and release states', async ({ page }) => {
+  await page.goto(`/?page=sources&release=${releaseId}`);
+  await waitForRelease(page);
+  const matrix = page.getByRole('region', { name: 'Source ingestion status by data vertical' });
+  await expect(matrix.locator('thead th')).toHaveText(['Data vertical', 'Indicators', 'Sources', 'Acquired', 'In release']);
+  await expect(matrix.locator('.matrix-indicator')).toHaveCount(49);
+  await expect(page.getByText(/15 source sets ready · 9 need a source/)).toBeVisible();
+  await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Access to electricity' })).toContainText('Source set ready');
+  await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Income and consumption inequality' })).toContainText('2/3 sources in release');
+  await expect(matrix.locator('.matrix-indicator').filter({ hasText: 'Child mortality' })).toContainText('Source selection needed');
+  await expect(matrix.locator('.matrix-source-gap')).toHaveCount(9);
+  const economics = matrix.locator('tbody').filter({ hasText: 'Economics over time' });
+  await expect(economics).toContainText('World Bank Poverty and Inequality Platform');
+  await expect(economics).toContainText('Penn World Table');
+  const population = matrix.locator('tbody').filter({ hasText: 'Population over time' });
+  await expect(population).not.toContainText('Penn World Table');
+  await expectNoSeriousAccessibilityViolations(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const horizontalOverflow = await matrix.evaluate((element) => element.scrollWidth > element.clientWidth);
+  expect(horizontalOverflow).toBe(true);
+  await expectNoSeriousAccessibilityViolations(page);
+});
+
 test('economic source tables expose exact dates, missing coverage, and original locators', async ({ page }) => {
   await page.goto(`/?page=economics&release=${releaseId}&indicator=maddison-gdppc-2011-international-dollars&year=1820`);
   await expect(page.getByRole('heading', { name: 'What we know about material life.' })).toBeVisible();

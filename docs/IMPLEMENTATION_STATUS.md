@@ -2,6 +2,17 @@
 
 Updated: 2026-10-24
 
+## Indicator-to-source roadmap
+
+The Sources page now groups 49 named indicators under ten verticals and shows
+the planned source rows beneath each indicator. Acquired and In release remain
+source-level checks. A source set is marked ready only when every planned
+source is in the current release; nine indicators explicitly need a source
+selected. This status is not a claim of complete temporal or geographic
+coverage. PIP, PWT, and ILOSTAT source plans are now correctly grouped under
+economics rather than population. The mapping and semantics are documented in
+`SOURCES.md` and guarded by registry and browser tests.
+
 ## Current release r12 — institutional first slice
 
 Release r12 adds an Institutions & religion page with four pinned V-Dem v16

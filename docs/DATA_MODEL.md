@@ -21,6 +21,15 @@ Maintain these logical tables, even if several are initially stored in one small
 - `transformations`: input IDs, versioned algorithm, parameters, outputs, and validation report.
 - `published_views`: immutable manifests connecting UI state, display artifacts, summaries, and downloadable data.
 
+The Sources-page roadmap adds a deliberately lighter **indicator plan**:
+stable indicator ID, label, measurement-scope warning, and required source IDs
+within one data vertical. It is not an `Observation` or a published
+`MetricDefinition`. Its computed source-set-ready flag means the listed source
+releases are present, not that their variables, geography, or dates constitute
+complete historical coverage. A plan with no selected source is explicitly
+unready. Scientific publication still requires the metric and observation
+contracts below.
+
 The r9 `economic_evidence` manifest is a deliberately source-native branch of
 this model: each dataset reference pins a source release and artifact checksum,
 unit, support type, exact available years, known/source-row counts, and JSON/CSV
